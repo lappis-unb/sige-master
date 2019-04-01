@@ -5,8 +5,9 @@ services:
         container_name: master
         build: .
         env_file: dev-env
+        command: ["sh", "scripts/start.sh"]
         ports:
-            - 5000:5000
+            - 8001:8001
         volumes:
             - .:/smi-master
         depends_on:
