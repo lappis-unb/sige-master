@@ -1,0 +1,25 @@
+version: '3.5'
+
+services:
+    master:
+        container_name: master
+        build: .
+        env_file: dev-env
+        ports:
+            - 5000:5000
+        volumes:
+            - .:/smi-master
+        depends_on:
+            - db
+
+    db:
+        container_name: postgres_master
+        image: postgres:9.6
+        ports:
+            - 8008:8008
+        env_file: dev-env
+        volumes:
+            - master-pg-data:/var/lib/postgresql/data
+
+volumes:
+    master-pg-data: {}
