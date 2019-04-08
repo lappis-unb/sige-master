@@ -1,0 +1,360 @@
+Looking for git in: git
+Using git 2.17.1 from git
+> git rev-parse --show-toplevel
+> git config --get commit.template
+Open repository: /home/thalisson/Documentos/trabalho/smi-master
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse crud-campi
+> git rev-parse --symbolic-full-name crud-campi@{u}
+> git rev-list --left-right crud-campi...refs/remotes/origin/crud-campi
+> git for-each-ref --format %(refname) %(objectname) --sort -committerdate
+> git remote --verbose
+> git check-ignore -z --stdin
+> git check-ignore -z --stdin
+> git check-ignore -z --stdin
+> git show :campi/urls.py
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git ls-files --stage -- campi/
+> git rev-parse crud-campi
+> git rev-parse --symbolic-full-name crud-campi@{u}
+> git rev-list --left-right crud-campi...refs/remotes/origin/crud-campi
+> git for-each-ref --format %(refname) %(objectname) --sort -committerdate
+> git remote --verbose
+> git show :campi/serializers.py
+> git ls-files --stage -- campi/
+> git check-ignore -z --stdin
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse crud-campi
+> git rev-parse --symbolic-full-name crud-campi@{u}
+> git rev-list --left-right crud-campi...refs/remotes/origin/crud-campi
+> git for-each-ref --format %(refname) %(objectname) --sort -committerdate
+> git remote --verbose
+> git show :campi/views.py
+> git ls-files --stage -- campi/
+> git show :campi/urls.py
+> git ls-files --stage -- campi/
+> git show :campi/views.py
+> git ls-files --stage -- campi/
+> git show :campi/serializers.py
+> git ls-files --stage -- campi/
+> git show :campi/urls.py
+> git ls-files --stage -- campi/
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse crud-campi
+> git rev-parse --symbolic-full-name crud-campi@{u}
+> git rev-list --left-right crud-campi...refs/remotes/origin/crud-campi
+> git for-each-ref --format %(refname) %(objectname) --sort -committerdate
+> git remote --verbose
+> git show :campi/views.py
+> git ls-files --stage -- campi/
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse crud-campi
+> git rev-parse --symbolic-full-name crud-campi@{u}
+> git rev-list --left-right crud-campi...refs/remotes/origin/crud-campi
+> git for-each-ref --format %(refname) %(objectname) --sort -committerdate
+> git remote --verbose
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse crud-campi
+> git rev-parse --symbolic-full-name crud-campi@{u}
+> git rev-list --left-right crud-campi...refs/remotes/origin/crud-campi
+> git for-each-ref --format %(refname) %(objectname) --sort -committerdate
+> git remote --verbose
+> git show :campi/serializers.py
+> git ls-files --stage -- campi/
+> git show :campi/views.py
+> git ls-files --stage -- campi/
+> git show :campi/serializers.py
+> git ls-files --stage -- campi/
+> git show :campi/models.py
+> git ls-files --stage -- campi/
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse crud-campi
+> git rev-parse --symbolic-full-name crud-campi@{u}
+> git rev-list --left-right crud-campi...refs/remotes/origin/crud-campi
+> git for-each-ref --format %(refname) %(objectname) --sort -committerdate
+> git remote --verbose
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse crud-campi
+> git rev-parse --symbolic-full-name crud-campi@{u}
+> git rev-list --left-right crud-campi...refs/remotes/origin/crud-campi
+> git for-each-ref --format %(refname) %(objectname) --sort -committerdate
+> git remote --verbose
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse crud-campi
+> git rev-parse --symbolic-full-name crud-campi@{u}
+> git rev-list --left-right crud-campi...refs/remotes/origin/crud-campi
+> git for-each-ref --format %(refname) %(objectname) --sort -committerdate
+> git remote --verbose
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse crud-campi
+> git rev-parse --symbolic-full-name crud-campi@{u}
+> git rev-list --left-right crud-campi...refs/remotes/origin/crud-campi
+> git for-each-ref --format %(refname) %(objectname) --sort -committerdate
+> git remote --verbose
+> git show :campi/serializers.py
+> git ls-files --stage -- campi/
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse crud-campi
+> git rev-parse --symbolic-full-name crud-campi@{u}
+> git rev-list --left-right crud-campi...refs/remotes/origin/crud-campi
+> git for-each-ref --format %(refname) %(objectname) --sort -committerdate
+> git remote --verbose
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse crud-campi
+> git rev-parse --symbolic-full-name crud-campi@{u}
+> git rev-list --left-right crud-campi...refs/remotes/origin/crud-campi
+> git for-each-ref --format %(refname) %(objectname) --sort -committerdate
+> git remote --verbose
+> git show :campi/models.py
+> git ls-files --stage -- campi/
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse crud-campi
+> git rev-parse --symbolic-full-name crud-campi@{u}
+> git rev-list --left-right crud-campi...refs/remotes/origin/crud-campi
+> git for-each-ref --format %(refname) %(objectname) --sort -committerdate
+> git remote --verbose
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse crud-campi
+> git rev-parse --symbolic-full-name crud-campi@{u}
+> git rev-list --left-right crud-campi...refs/remotes/origin/crud-campi
+> git for-each-ref --format %(refname) %(objectname) --sort -committerdate
+> git remote --verbose
+> git show :campi/serializers.py
+> git ls-files --stage -- campi/
+> git show :campi/tests.py
+> git ls-files --stage -- campi/
+> git show :campi/urls.py
+> git ls-files --stage -- campi/
+> git show :campi/views.py
+> git ls-files --stage -- campi/
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse crud-campi
+> git rev-parse --symbolic-full-name crud-campi@{u}
+> git rev-list --left-right crud-campi...refs/remotes/origin/crud-campi
+> git for-each-ref --format %(refname) %(objectname) --sort -committerdate
+> git remote --verbose
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse crud-campi
+> git rev-parse --symbolic-full-name crud-campi@{u}
+> git rev-list --left-right crud-campi...refs/remotes/origin/crud-campi
+> git for-each-ref --format %(refname) %(objectname) --sort -committerdate
+> git remote --verbose
+> git check-ignore -z --stdin
+> git show :smi_master/urls.py
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse crud-campi
+> git rev-parse --symbolic-full-name crud-campi@{u}
+> git rev-list --left-right crud-campi...refs/remotes/origin/crud-campi
+> git for-each-ref --format %(refname) %(objectname) --sort -committerdate
+> git remote --verbose
+> git check-ignore -z --stdin
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse crud-campi
+> git rev-parse --symbolic-full-name crud-campi@{u}
+> git rev-list --left-right crud-campi...refs/remotes/origin/crud-campi
+> git for-each-ref --format %(refname) %(objectname) --sort -committerdate
+> git remote --verbose
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse crud-campi
+> git rev-parse --symbolic-full-name crud-campi@{u}
+> git rev-list --left-right crud-campi...refs/remotes/origin/crud-campi
+> git for-each-ref --format %(refname) %(objectname) --sort -committerdate
+> git remote --verbose
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse crud-campi
+> git rev-parse --symbolic-full-name crud-campi@{u}
+> git rev-list --left-right crud-campi...refs/remotes/origin/crud-campi
+> git for-each-ref --format %(refname) %(objectname) --sort -committerdate
+> git remote --verbose
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse crud-campi
+> git rev-parse --symbolic-full-name crud-campi@{u}
+> git rev-list --left-right crud-campi...refs/remotes/origin/crud-campi
+> git for-each-ref --format %(refname) %(objectname) --sort -committerdate
+> git remote --verbose
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse crud-campi
+> git rev-parse --symbolic-full-name crud-campi@{u}
+> git rev-list --left-right crud-campi...refs/remotes/origin/crud-campi
+> git for-each-ref --format %(refname) %(objectname) --sort -committerdate
+> git remote --verbose
+> git show :smi_master/settings.py
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse crud-campi
+> git rev-parse --symbolic-full-name crud-campi@{u}
+> git rev-list --left-right crud-campi...refs/remotes/origin/crud-campi
+> git for-each-ref --format %(refname) %(objectname) --sort -committerdate
+> git remote --verbose
+> git show :campi/serializers.py
+> git ls-files --stage -- campi/
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse crud-campi
+> git rev-parse --symbolic-full-name crud-campi@{u}
+> git rev-list --left-right crud-campi...refs/remotes/origin/crud-campi
+> git for-each-ref --format %(refname) %(objectname) --sort -committerdate
+> git remote --verbose
+> git show :campi/views.py
+> git ls-files --stage -- campi/
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse crud-campi
+> git rev-parse --symbolic-full-name crud-campi@{u}
+> git rev-list --left-right crud-campi...refs/remotes/origin/crud-campi
+> git for-each-ref --format %(refname) %(objectname) --sort -committerdate
+> git remote --verbose
+> git show :smi_master/urls.py
+> git show :campi/views.py
+> git ls-files --stage -- campi/
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse crud-campi
+> git rev-parse --symbolic-full-name crud-campi@{u}
+> git rev-list --left-right crud-campi...refs/remotes/origin/crud-campi
+> git for-each-ref --format %(refname) %(objectname) --sort -committerdate
+> git remote --verbose
+> git show :campi/urls.py
+> git ls-files --stage -- campi/
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse crud-campi
+> git rev-parse --symbolic-full-name crud-campi@{u}
+> git rev-list --left-right crud-campi...refs/remotes/origin/crud-campi
+> git for-each-ref --format %(refname) %(objectname) --sort -committerdate
+> git remote --verbose
+> git show :campi/tests.py
+> git ls-files --stage -- campi/
+> git show :campi/models.py
+> git ls-files --stage -- campi/
+> git show :campi/serializers.py
+> git ls-files --stage -- campi/
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse crud-campi
+> git rev-parse --symbolic-full-name crud-campi@{u}
+> git rev-list --left-right crud-campi...refs/remotes/origin/crud-campi
+> git for-each-ref --format %(refname) %(objectname) --sort -committerdate
+> git remote --verbose
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse crud-campi
+> git rev-parse --symbolic-full-name crud-campi@{u}
+> git rev-list --left-right crud-campi...refs/remotes/origin/crud-campi
+> git for-each-ref --format %(refname) %(objectname) --sort -committerdate
+> git remote --verbose
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse crud-campi
+> git rev-parse --symbolic-full-name crud-campi@{u}
+> git rev-list --left-right crud-campi...refs/remotes/origin/crud-campi
+> git for-each-ref --format %(refname) %(objectname) --sort -committerdate
+> git remote --verbose
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse crud-campi
+> git rev-parse --symbolic-full-name crud-campi@{u}
+> git rev-list --left-right crud-campi...refs/remotes/origin/crud-campi
+> git for-each-ref --format %(refname) %(objectname) --sort -committerdate
+> git remote --verbose
+> git show :campi/serializers.py
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse crud-campi
+> git rev-parse --symbolic-full-name crud-campi@{u}
+> git rev-list --left-right crud-campi...refs/remotes/origin/crud-campi
+> git for-each-ref --format %(refname) %(objectname) --sort -committerdate
+> git remote --verbose
+> git show :campi/serializers.py
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse crud-campi
+> git rev-parse --symbolic-full-name crud-campi@{u}
+> git rev-list --left-right crud-campi...refs/remotes/origin/crud-campi
+> git for-each-ref --format %(refname) %(objectname) --sort -committerdate
+> git remote --verbose
+> git show :smi_master/urls.py
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse crud-campi
+> git rev-parse --symbolic-full-name crud-campi@{u}
+> git rev-list --left-right crud-campi...refs/remotes/origin/crud-campi
+> git for-each-ref --format %(refname) %(objectname) --sort -committerdate
+> git remote --verbose
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse crud-campi
+> git rev-parse --symbolic-full-name crud-campi@{u}
+> git rev-list --left-right crud-campi...refs/remotes/origin/crud-campi
+> git for-each-ref --format %(refname) %(objectname) --sort -committerdate
+> git remote --verbose
+> git show :smi_master/settings.py
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse crud-campi
+> git rev-parse --symbolic-full-name crud-campi@{u}
+> git rev-list --left-right crud-campi...refs/remotes/origin/crud-campi
+> git for-each-ref --format %(refname) %(objectname) --sort -committerdate
+> git remote --verbose
+> git show :smi_master/settings.py
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse crud-campi
+> git rev-parse --symbolic-full-name crud-campi@{u}
+> git rev-list --left-right crud-campi...refs/remotes/origin/crud-campi
+> git for-each-ref --format %(refname) %(objectname) --sort -committerdate
+> git remote --verbose
+> git check-ignore -z --stdin
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse crud-campi
+> git rev-parse --symbolic-full-name crud-campi@{u}
+> git rev-list --left-right crud-campi...refs/remotes/origin/crud-campi
+> git for-each-ref --format %(refname) %(objectname) --sort -committerdate
+> git remote --verbose
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse crud-campi
+> git rev-parse --symbolic-full-name crud-campi@{u}
+> git rev-list --left-right crud-campi...refs/remotes/origin/crud-campi
+> git for-each-ref --format %(refname) %(objectname) --sort -committerdate
+> git remote --verbose
+> git show :smi_master/settings.py
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse crud-campi
+> git rev-parse --symbolic-full-name crud-campi@{u}
+> git rev-list --left-right crud-campi...refs/remotes/origin/crud-campi
+> git for-each-ref --format %(refname) %(objectname) --sort -committerdate
+> git remote --verbose
+> git show :smi_master/settings.py
+> git status -z -u
+> git symbolic-ref --short HEAD
+> git rev-parse crud-campi
+> git rev-parse --symbolic-full-name crud-campi@{u}
+> git rev-list --left-right crud-campi...refs/remotes/origin/crud-campi
+> git for-each-ref --format %(refname) %(objectname) --sort -committerdate
+> git remote --verbose
+> git check-ignore -z --stdin
