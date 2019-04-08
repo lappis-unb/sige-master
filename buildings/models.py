@@ -1,6 +1,9 @@
 from django.db import models
 
-class Buildings(models.Model):
-
+class Building(models.Model):
+    name = models.CharField(max_length=120)
+    phone = models.CharField(max_length=11)
+    acronym = models.CharField(max_length=30)
+    
     def __str__(self):
-        pass 
+        return self.name
