@@ -10,5 +10,5 @@ class CampusSerializer(serializers.HyperlinkedModelSerializer):
                   'acronym',
                   'phone',
                   'address',
-                  'website_addres',
+                  'website_address',
                   'url')

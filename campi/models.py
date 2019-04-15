@@ -7,7 +7,7 @@ class Campus(models.Model):
     acronym = models.CharField(max_length=50)
     phone = models.CharField(max_length=50)
     address = models.CharField(max_length=50)
-    website_addres = models.CharField(max_length=50)
+    website_address = models.CharField(max_length=50)
 
     def __str__():
         return self.name
