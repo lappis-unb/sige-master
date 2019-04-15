@@ -4,13 +4,15 @@ from django.test import TestCase
 from django.conf import settings
 from django.db import IntegrityError
 from django.db.utils import DataError
+from django.core.exceptions import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
 
 from buildings.models import Building
 
-class BuildingsTestCase(object):
+
+class BuildingsTestCase(TestCase):
     def setUp(self):
-        building_01 = Building.objets.create(
+        building_01 = Building.objects.create(
             name='pantheon',
             phone='55555555555',
             acronym='Pan'
@@ -18,44 +20,28 @@ class BuildingsTestCase(object):
 
     def test_create_building(self):
         size = len(Building.objects.all())
-
         building = Building()
         building.name = 'ultimate building of chaos'
         building.phone = '00000000000'
         building.acronym = 'UBC'
-
         self.assertIsNone(building.save())
         self.assertEqual(size + 1, len(Building.objects.all()))
 
     def test_not_create_building_without_name(self):
         size = len(Building.objects.all())
-
         building = Building()
         building.phone = '00000000000'
         building.acronym = 'UBC'
-
-        with self.assertRaises(DataError):
-            building.save()
-
-    def test_not_create_building_without_phone(self):
-        size = len(Building.objects.all())
-
-        building = Building()
-        building.name = '00000000000'
-        building.acronym = 'UBC'
-
-        with self.assertRaises(DataError):
-            building.save()
+        with self.assertRaises(ValidationError):
+            a = building.save()
 
     def test_not_create_building_without_acronym(self):
         size = len(Building.objects.all())
-
         building = Building()
         building.phone = '00000000000'
         building.name = 'UBC'
-
-        with self.assertRaises(DataError):
-            building.save()
+        with self.assertRaises(ValidationError):
+            a = building.save()
 
     # for when making relationships with other models
     # def test_not_create_building_without_rel(self):
