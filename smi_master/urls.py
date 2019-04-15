@@ -22,7 +22,9 @@ from campi.urls import *
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('campi.urls')),
-
-    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    url(
+        r'^api-auth/',
+        include('rest_framework.urls', namespace='rest_framework')
+    ),
     url(r'^', include(router.urls)),
 ]

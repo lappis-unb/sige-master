@@ -3,6 +3,7 @@ from campi.models import Campus
 from django.db import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
 
+
 class TestCampiModels(TestCase):
 
     def setUp(self):
@@ -33,10 +34,10 @@ class TestCampiModels(TestCase):
         )
         campi_after = len(Campus.objects.all())
 
-        self.assertEquals(campi_before+1, campi_after);
+        self.assertEquals(campi_before + 1, campi_after)
 
     def test_should_not_create_same_campus(self):
-        new_campus = Campus();
+        new_campus = Campus()
         new_campus.name = "Campus da Faculdade Gama"
         new_campus.acronym = "FGA"
         new_campus.phone = "(61) 3333-3333"
