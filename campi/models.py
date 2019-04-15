@@ -11,3 +11,7 @@ class Campus(models.Model):
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super(Campus, self).save(*args, **kwargs)
