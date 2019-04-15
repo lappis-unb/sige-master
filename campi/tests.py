@@ -1,6 +1,7 @@
 from django.test import TestCase
 from campi.models import Campus
 from django.db import IntegrityError
+from django.core.exceptions import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
 
 
@@ -44,7 +45,57 @@ class TestCampiModels(TestCase):
         new_campus.address = "Setor Leste - Gama"
         new_campus.website_address = "https://fga.unb.br/"
 
-        with self.assertRaises(IntegrityError):
+        with self.assertRaises(ValidationError):
+            new_campus.save()
+
+    def test_should_not_create_without_name(self):
+        new_campus = Campus()
+        new_campus.acronym = "FGa"
+        new_campus.phone = "(61) 3333-3333"
+        new_campus.address = "Setor Leste"
+        new_campus.website_address = "https://fga.unb.br/"
+
+        with self.assertRaises(ValidationError):
+            new_campus.save()
+
+    def test_should_not_create_without_acronym(self):
+        new_campus = Campus()
+        new_campus.name = "Facul Gama"
+        new_campus.phone = "(61) 3333-3333"
+        new_campus.address = "Setor Leste"
+        new_campus.website_address = "https://fga.unb.br/"
+
+        with self.assertRaises(ValidationError):
+            new_campus.save()
+
+    def test_should_not_create_without_phone(self):
+        new_campus = Campus()
+        new_campus.name = "Facul Gama"
+        new_campus.acronym = "FGa"
+        new_campus.address = "Setor Leste"
+        new_campus.website_address = "https://fga.unb.br/"
+
+        with self.assertRaises(ValidationError):
+            new_campus.save()
+
+    def test_should_not_create_without_address(self):
+        new_campus = Campus()
+        new_campus.name = "Facul Gama"
+        new_campus.acronym = "FGa"
+        new_campus.phone = "(61) 3333-3333"
+        new_campus.website_address = "https://fga.unb.br/"
+
+        with self.assertRaises(ValidationError):
+            new_campus.save()
+
+    def test_should_not_create_without_website_address(self):
+        new_campus = Campus()
+        new_campus.name = "Facul Gama"
+        new_campus.acronym = "FGa"
+        new_campus.phone = "(61) 3333-3333"
+        new_campus.address = "Setor Leste"
+
+        with self.assertRaises(ValidationError):
             new_campus.save()
 
     def test_read_a_existent_campus_by_acronym(self):
@@ -95,7 +146,7 @@ class TestCampiModels(TestCase):
         campus.acronym = "FGA"
 
         with self.assertRaises(IntegrityError):
-            campus.save()
+            campus.save_base()
 
     def test_delete_a_existent_campus(self):
         campus = Campus.objects.get(acronym="FGA")
