@@ -1,11 +1,14 @@
+import pytest
 from django.test import TestCase
-from campi.models import Campus
 from django.db import IntegrityError
 from django.core.exceptions import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
+from django.conf import settings
+
+from campi.models import Campus
 
 
-class TestCampiModels(TestCase):
+class CampiTestCase(TestCase):
 
     def setUp(self):
         self.campus = Campus.objects.create(
@@ -35,7 +38,7 @@ class TestCampiModels(TestCase):
         )
         campi_after = len(Campus.objects.all())
 
-        self.assertEquals(campi_before + 1, campi_after)
+        self.assertEqual(campi_before + 1, campi_after)
 
     def test_should_not_create_same_campus(self):
         new_campus = Campus()
@@ -68,16 +71,6 @@ class TestCampiModels(TestCase):
         with self.assertRaises(ValidationError):
             new_campus.save()
 
-    def test_should_not_create_without_phone(self):
-        new_campus = Campus()
-        new_campus.name = "Facul Gama"
-        new_campus.acronym = "FGa"
-        new_campus.address = "Setor Leste"
-        new_campus.website_address = "https://fga.unb.br/"
-
-        with self.assertRaises(ValidationError):
-            new_campus.save()
-
     def test_should_not_create_without_address(self):
         new_campus = Campus()
         new_campus.name = "Facul Gama"
@@ -88,30 +81,20 @@ class TestCampiModels(TestCase):
         with self.assertRaises(ValidationError):
             new_campus.save()
 
-    def test_should_not_create_without_website_address(self):
-        new_campus = Campus()
-        new_campus.name = "Facul Gama"
-        new_campus.acronym = "FGa"
-        new_campus.phone = "(61) 3333-3333"
-        new_campus.address = "Setor Leste"
-
-        with self.assertRaises(ValidationError):
-            new_campus.save()
-
     def test_read_a_existent_campus_by_acronym(self):
         campus = Campus.objects.get(acronym="FGA")
 
-        self.assertEquals(campus, self.campus)
+        self.assertEqual(campus, self.campus)
 
     def test_read_a_existent_campus_by_name(self):
         campus = Campus.objects.get(name="Campus da Faculdade Gama")
 
-        self.assertEquals(campus, self.campus)
+        self.assertEqual(campus, self.campus)
 
     def test_read_a_existent_campus_by_address(self):
         campus = Campus.objects.get(address="Setor Leste - Gama")
 
-        self.assertEquals(campus, self.campus)
+        self.assertEqual(campus, self.campus)
 
     def test_update_a_specific_campus(self):
         campus = Campus.objects.get(acronym="FGA")
@@ -135,11 +118,11 @@ class TestCampiModels(TestCase):
         new_address = campus.address
         new_website_address = campus.website_address
 
-        self.assertNotEquals(original_name, new_name)
-        self.assertNotEquals(original_acronym, new_acronym)
-        self.assertNotEquals(original_phone, new_phone)
-        self.assertNotEquals(original_address, new_address)
-        self.assertNotEquals(original_website_address, new_website_address)
+        self.assertNotEqual(original_name, new_name)
+        self.assertNotEqual(original_acronym, new_acronym)
+        self.assertNotEqual(original_phone, new_phone)
+        self.assertNotEqual(original_address, new_address)
+        self.assertNotEqual(original_website_address, new_website_address)
 
     def test_not_update_a_speficic_campus(self):
         campus = Campus.objects.get(acronym="FUP")
