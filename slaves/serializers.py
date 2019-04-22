@@ -5,4 +5,4 @@ from .models import Slave
 class SlaveSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Slave
-        fields = ('id', 'ip_address', 'location', 'transductor_list', 'url')
+        fields = ('id', 'ip_address', 'location', 'url')
