@@ -16,13 +16,16 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls import url
+from rest_framework.routers import DefaultRouter
 
-from slaves.urls import *
+from slaves import views as slaves_views
+from campi import views as campi_views
+
+router = DefaultRouter()
+router.register(r'campi', campi_views.CampusViewSet)
+router.register(r'slave', slaves_views.SlaveViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('slaves.urls')),
-
-    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    url(r'^', include(router.urls)),
+    path('', include(router.urls)),
 ]
