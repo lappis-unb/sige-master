@@ -1,0 +1,47 @@
+image: python:3.6
+
+services:
+  - postgres:9.6
+
+variables:
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: password
+  POSTGRES_DB: smi-master-test
+  POSTGRES_PORT: 5432
+  POSTGRES_HOST: postgres
+
+before_script:
+  - pip install -r requirements.txt
+  - python3 manage.py makemigrations
+  - python3 manage.py migrate
+
+test:
+  script:
+    - pytest
+
+stylesheet:
+  script:
+    - pycodestyle *
+
+code_quality:
+  image: docker:stable
+  variables:
+    DOCKER_DRIVER: overlay2
+  allow_failure: true
+  services:
+    - docker:stable-dind
+  before_script:
+    - export SP_VERSION=$(echo "$CI_SERVER_VERSION" | sed 's/^\([0-9]*\)\.\([0-9]*\).*/\1-\2-stable/')
+  script:
+    - docker run
+        --env SOURCE_CODE="$PWD"
+        --volume "$PWD":/code
+        --volume /var/run/docker.sock:/var/run/docker.sock
+        "registry.gitlab.com/gitlab-org/security-products/codequality:$SP_VERSION" /code
+  artifacts:
+    paths:
+      - gl-code-quality-report.json
+    reports:
+      codequality: gl-code-quality-report.json
+  only:
+    - master
