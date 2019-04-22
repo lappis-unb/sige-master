@@ -30,7 +30,10 @@ router = DefaultRouter()
 router.register(r'campi', campi_views.CampusViewSet)
 router.register(r'buildings', buildings_views.BuildingViewset)
 router.register(r'slave', slaves_views.SlaveViewSet)
-router.register(r'transductor_models', transductor_models_views.TransductorModelViewSet)
+router.register(
+    r'transductor_models',
+    transductor_models_views.TransductorModelViewSet
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
