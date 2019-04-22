@@ -2,13 +2,19 @@ from django.db import models
 from django.contrib.postgres.fields import ArrayField
 from django.core.validators import RegexValidator
 
-#TODO Make get all measurements and list transductor models methods
+'''
+    TODO Make get all measurements and list
+    transductor models methods
+'''
 
 
 # Create your models here.
 class Slave(models.Model):
 
-    ip_validator = RegexValidator(r'^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$', 'Incorrect IP address format')
+    ip_validator = RegexValidator(
+        r'^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$',
+        'Incorrect IP address format'
+    )
 
     ip_address = models.CharField(
         max_length=15,
