@@ -1,6 +1,7 @@
 from django.db import models
 from campi.models import Campus
 
+
 class Building(models.Model):
     campus = models.ForeignKey(Campus, on_delete=models.DO_NOTHING)
     phone = models.CharField(max_length=11, blank=True, default="")

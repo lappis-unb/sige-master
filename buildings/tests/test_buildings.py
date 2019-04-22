@@ -8,14 +8,21 @@ from django.core.exceptions import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
 
 from buildings.models import Building
+from campi.models import Campus
 
 
 class BuildingsTestCase(TestCase):
     def setUp(self):
-        building_01 = Building.objects.create(
+        self.campus_01 = Campus.objects.create(
+            name='Faculdade Gama',
+            acronym='FGa',
+            address="Setor Leste - Gama"
+        )
+        self.building_01 = Building.objects.create(
             name='pantheon',
             phone='55555555555',
-            acronym='Pan'
+            acronym='Pan',
+            campus=self.campus_01
         )
 
     def test_create_building(self):
@@ -24,6 +31,7 @@ class BuildingsTestCase(TestCase):
         building.name = 'ultimate building of chaos'
         building.phone = '00000000000'
         building.acronym = 'UBC'
+        building.campus = self.campus_01
         self.assertIsNone(building.save())
         self.assertEqual(size + 1, len(Building.objects.all()))
 
@@ -32,28 +40,29 @@ class BuildingsTestCase(TestCase):
         building = Building()
         building.phone = '00000000000'
         building.acronym = 'UBC'
+        building.campus = self.campus_01
         with self.assertRaises(ValidationError):
-            a = building.save()
+            building.save()
 
     def test_not_create_building_without_acronym(self):
         size = len(Building.objects.all())
         building = Building()
         building.phone = '00000000000'
         building.name = 'UBC'
+        building.campus = self.campus_01
         with self.assertRaises(ValidationError):
-            a = building.save()
+            building.save()
 
-    # for when making relationships with other models
-    # def test_not_create_building_without_rel(self):
-    #     size = len(Building.objects.all())
+    def test_not_create_building_without_campus(self):
+        size = len(Building.objects.all())
 
-    #     building = Building()
-    #     building.phone = 'Unlimited Blade Works'
-    #     building.phone = '00000000000'
-    #     building.acronym = 'UBW'
+        building = Building()
+        building.phone = 'Unlimited Blade Works'
+        building.phone = '00000000000'
+        building.acronym = 'UBW'
 
-    #     with self.assertRaises(DataError):
-    #         building.save()
+        with self.assertRaises(ValidationError):
+            building.save()
 
     def test_update_building(self):
         building = Building.objects.filter(name='pantheon')
