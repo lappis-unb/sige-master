@@ -19,10 +19,12 @@ from rest_framework.routers import DefaultRouter
 from django.urls import path
 from django.urls import include
 
-from buildings import views
+from buildings import views as buildings_views
+from campi import views as campi_views
 
 router = DefaultRouter()
-router.register(r'buildings', views.BuildingViewset)
+router.register(r'campi', campi_views.CampusViewSet)
+router.register(r'buildings', buildings_views.BuildingViewset)
 
 urlpatterns = [
     path('admin/', admin.site.urls),

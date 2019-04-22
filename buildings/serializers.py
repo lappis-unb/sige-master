@@ -9,5 +9,7 @@ class BuildingSerializer(serializers.HyperlinkedModelSerializer):
             'id',
             'name',
             'phone',
-            'acronym'
+            'acronym',
+            'campus',
+            'url',
         )
