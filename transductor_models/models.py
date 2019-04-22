@@ -32,6 +32,8 @@ class TransductorModel(models.Model):
     """
 
     name = models.CharField(max_length=50, unique=True)
+    serial_protocol = models.CharField(max_length=50, default="")
+    transport_protocol = models.CharField(max_length=50, default="")
 
     def __str__(self):
         return self.name
