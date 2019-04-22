@@ -108,7 +108,7 @@ class TransductorTestCase(TransactionTestCase):
                     serial_protocol='UDP',
                     transport_protocol='RTU'
                 )
-        )
+            )
 
     def test_retrieve_one_transductor_models(self):
         transductor_model = TransductorModel.objects.get(name='TR4020')
