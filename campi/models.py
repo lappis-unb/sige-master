@@ -1,7 +1,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 
-# Create your models here.
+
 class Campus(models.Model):
     name = models.CharField(max_length=50, unique=True)
     acronym = models.CharField(max_length=50, unique=True)
@@ -14,5 +14,4 @@ class Campus(models.Model):
 
     def save(self, *args, **kwargs):
         self.full_clean()
-
         super(Campus, self).save(*args, **kwargs)
