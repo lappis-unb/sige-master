@@ -20,7 +20,7 @@ class BuildingsTestCase(TestCase):
         )
         self.building_01 = Building.objects.create(
             name='pantheon',
-            phone='55555555555',
+            phone="(61) 3333-3333",
             acronym='Pan',
             campus=self.campus_01
         )
@@ -29,7 +29,7 @@ class BuildingsTestCase(TestCase):
         size = len(Building.objects.all())
         building = Building()
         building.name = 'ultimate building of chaos'
-        building.phone = '00000000000'
+        building.phone = "(61) 3333-3333"
         building.acronym = 'UBC'
         building.campus = self.campus_01
         self.assertIsNone(building.save())
@@ -38,7 +38,7 @@ class BuildingsTestCase(TestCase):
     def test_not_create_building_without_name(self):
         size = len(Building.objects.all())
         building = Building()
-        building.phone = '00000000000'
+        building.phone = "(61) 3333-3333"
         building.acronym = 'UBC'
         building.campus = self.campus_01
         with self.assertRaises(ValidationError):
@@ -47,7 +47,7 @@ class BuildingsTestCase(TestCase):
     def test_not_create_building_without_acronym(self):
         size = len(Building.objects.all())
         building = Building()
-        building.phone = '00000000000'
+        building.phone = "(61) 3333-3333"
         building.name = 'UBC'
         building.campus = self.campus_01
         with self.assertRaises(ValidationError):
@@ -58,7 +58,7 @@ class BuildingsTestCase(TestCase):
 
         building = Building()
         building.phone = 'Unlimited Blade Works'
-        building.phone = '00000000000'
+        building.phone = "(61) 3333-3333"
         building.acronym = 'UBW'
 
         with self.assertRaises(ValidationError):
