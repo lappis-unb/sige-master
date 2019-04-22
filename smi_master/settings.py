@@ -1,6 +1,8 @@
 import os
 import environ
 
+from unipath import Path
+
 env = environ.Env()
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -15,6 +17,26 @@ SECRET_KEY = 'dw%46&k@_hx-qw@m+5p7p)2t13q-6^5pmw!4+5p_hw!l62v)wk'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+
+PROJECT_DIR = Path(__file__).parent.parent
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': PROJECT_DIR + '/debug.log',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
 
 ALLOWED_HOSTS = []
 
