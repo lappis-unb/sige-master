@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class Building(models.Model):
     phone = models.CharField(max_length=11)
     name = models.CharField(max_length=120, unique=True)
