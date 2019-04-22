@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 from django.core.validators import RegexValidator
+from django.core.exceptions import ValidationError
 
 '''
     TODO Make get all measurements and list
@@ -22,12 +23,15 @@ class Slave(models.Model):
         validators=[ip_validator],
         default="0.0.0.0"
     )
-    location = models.CharField(default="", max_length=50)
+    location = models.CharField(max_length=50)
     broken = models.BooleanField(default=True)
 
     def __str__(self):
         return self.ip_address
 
     def save(self, *args, **kwargs):
-        self.full_clean()
-        super(Slave, self).save(*args, **kwargs)
+        try:
+            self.full_clean()
+            super(Slave, self).save(*args, **kwargs)
+        except ValidationError as error:
+            return error
