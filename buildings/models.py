@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 
 from utils import phone_validator
 from campi.models import Campus
@@ -13,8 +14,11 @@ class Building(models.Model):
         validators=[phone_validator],
         default=""
     )
-    name = models.CharField(max_length=120, unique=True)
-    acronym = models.CharField(max_length=30, unique=True)
+    name = models.CharField(max_length=120)
+    acronym = models.CharField(max_length=30)
+  
+    class Meta:
+        unique_together = (("campus", "name"), ("campus", "acronym"))
 
     def __str__(self):
         return self.name
