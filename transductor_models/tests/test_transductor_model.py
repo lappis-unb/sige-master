@@ -101,12 +101,10 @@ class TransductorModelTestCase(TestCase):
         transductor_model = TransductorModel.objects.filter(name='TR4020')
 
         with self.assertRaises(IntegrityError):
-            self.assertTrue(
-                transductor_model.update(
-                    name='TR3030',
-                    serial_protocol='UDP',
-                    transport_protocol='RTU'
-                )
+            transductor_model.update(
+                name='TR3030',
+                serial_protocol='UDP',
+                transport_protocol='RTU'
             )
 
     def test_retrieve_one_transductor_models(self):

@@ -1,0 +1,188 @@
+import pytest
+from django.utils import timezone
+from django.test import TestCase
+from django.db.utils import IntegrityError
+from django.core.exceptions import ValidationError
+
+from transductor_models.models import TransductorModel
+from transductors.models import Transductor, EnergyTransductor
+
+
+class TransductorTestCase(TestCase):
+    def setUp(self):
+        self.sample_transductor_model = TransductorModel.objects.create(
+            name='TR4020',
+            transport_protocol='UDP',
+            serial_protocol='ModbusRTU'
+        )
+
+        self.sample_energy_transductor = EnergyTransductor.objects.create(
+            serial_number='87654321',
+            ip_address='192.168.1.1',
+            location="MESP",
+            latitude=20.1,
+            longitude=37.9,
+            name="MESP 1",
+            broken=True,
+            active=False,
+            creation_date=timezone.now(),
+            calibration_date=timezone.now(),
+            last_data_collection=timezone.now(),
+            model=self.sample_transductor_model
+        )
+
+    def test_create_transductor(self):
+        size = len(EnergyTransductor.objects.all())
+
+        transductor = EnergyTransductor.objects.create(
+            serial_number='12345678',
+            ip_address='192.168.10.10',
+            location="MESP",
+            latitude=20.1,
+            longitude=37.9,
+            name="MESP 2",
+            broken=False,
+            active=True,
+            creation_date=timezone.now(),
+            calibration_date=timezone.now(),
+            last_data_collection=timezone.now(),
+            model=self.sample_transductor_model
+        )
+
+        self.assertIs(
+            EnergyTransductor,
+            transductor.__class__
+        )
+        self.assertEqual(size + 1, len(EnergyTransductor.objects.all()))
+
+    def test_not_create_transductor_with_existent_serial_number(self):
+        size = len(EnergyTransductor.objects.all())
+
+        with self.assertRaises(ValidationError):
+            transductor = EnergyTransductor.objects.create(
+                serial_number='87654321',
+                ip_address='192.168.10.10',
+                location="MESP",
+                latitude=20.1,
+                longitude=37.9,
+                name="MESP 2",
+                broken=False,
+                active=True,
+                creation_date=timezone.now(),
+                calibration_date=timezone.now(),
+                last_data_collection=timezone.now(),
+                model=self.sample_transductor_model
+            )
+
+        self.assertEqual(size, len(EnergyTransductor.objects.all()))
+
+    def test_not_create_transductor_with_no_serial_number(self):
+        size = len(EnergyTransductor.objects.all())
+
+        with self.assertRaises(ValidationError):
+            transductor = EnergyTransductor.objects.create(
+                ip_address='192.168.10.10',
+                location="MESP",
+                latitude=20.1,
+                longitude=37.9,
+                name="MESP 2",
+                broken=False,
+                active=True,
+                creation_date=timezone.now(),
+                calibration_date=timezone.now(),
+                last_data_collection=timezone.now(),
+                model=self.sample_transductor_model
+            )
+
+        self.assertEqual(size, len(EnergyTransductor.objects.all()))
+
+    def test_not_create_transductor_with_no_transductor_model(self):
+        size = len(EnergyTransductor.objects.all())
+
+        with self.assertRaises(ValidationError):
+            transductor = EnergyTransductor.objects.create(
+                serial_number='87554321',
+                ip_address='192.168.10.10',
+                location="MESP",
+                latitude=20.1,
+                longitude=37.9,
+                name="MESP 2",
+                broken=False,
+                active=True,
+                creation_date=timezone.now(),
+                calibration_date=timezone.now(),
+                last_data_collection=timezone.now()
+            )
+
+        self.assertEqual(size, len(EnergyTransductor.objects.all()))
+
+    def test_update_transductor_single_field(self):
+        transductor = EnergyTransductor.objects.filter(serial_number='87654321')
+        self.assertTrue(
+            transductor.update(
+                name='UAC'
+            )
+        )
+
+    def test_update_all_transductor_fields(self):
+        transductor = EnergyTransductor.objects.filter(serial_number='87654321')
+        self.assertTrue(
+            transductor.update(
+                serial_number='88888888',
+                ip_address='192.168.10.12',
+                location="UED",
+                latitude=20.2,
+                longitude=37.0,
+                name="UED 1",
+                broken=True,
+                active=False,
+                creation_date=timezone.now(),
+                calibration_date=timezone.now(),
+                last_data_collection=timezone.now()
+            )
+        )
+
+    def test_not_update_transductor_with_existent_serial_number(self):
+        EnergyTransductor.objects.create(
+            serial_number='12345678',
+            ip_address='192.168.10.10',
+            location="MESP",
+            latitude=20.1,
+            longitude=37.9,
+            name="MESP 2",
+            broken=False,
+            active=True,
+            creation_date=timezone.now(),
+            calibration_date=timezone.now(),
+            last_data_collection=timezone.now(),
+            model=self.sample_transductor_model
+        )
+
+        transductor = EnergyTransductor.objects.filter(serial_number='87654321')
+
+        with self.assertRaises(IntegrityError):
+            transductor.update(
+                serial_number='12345678',
+                ip_address='192.168.10.12',
+                location="UED",
+                latitude=20.2,
+                longitude=37.0,
+                name="UED 1",
+                broken=True,
+                active=False,
+                creation_date=timezone.now(),
+                calibration_date=timezone.now(),
+                last_data_collection=timezone.now()
+            )
+
+    def test_retrieve_one_transductors(self):
+        transductor = EnergyTransductor.objects.get(serial_number='87654321')
+
+        self.assertIs(EnergyTransductor, transductor.__class__)
+
+    def test_delete_transductor(self):
+        transductor = EnergyTransductor.objects.filter(serial_number='87654321')
+
+        self.assertTrue(
+            transductor.delete()
+        )
