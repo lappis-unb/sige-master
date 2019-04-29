@@ -2,6 +2,7 @@
 
 import django.core.validators
 from django.db import migrations, models
+import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
@@ -9,18 +10,22 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
+        ('campi', '0001_initial'),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Campus',
+            name='Building',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=50, unique=True)),
-                ('acronym', models.CharField(max_length=50, unique=True)),
                 ('phone', models.CharField(blank=True, default='', max_length=15, validators=[django.core.validators.RegexValidator('^\\(\\d{2,}\\) \\d{4,}\\-\\d{4}$', 'Invalid phone format')])),
-                ('address', models.CharField(max_length=50, unique=True)),
-                ('website_address', models.CharField(blank=True, default='', max_length=50, validators=[django.core.validators.RegexValidator('^(https?:\\/\\/)?(www\\.)?([a-zA-Z0-9]+(-?[a-zA-Z0-9])*\\.)+[\\w]{2,}(\\/\\S*)?$', 'Invalid website format')])),
+                ('name', models.CharField(max_length=120)),
+                ('acronym', models.CharField(max_length=30)),
+                ('campus', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='campi.Campus')),
             ],
+        ),
+        migrations.AlterUniqueTogether(
+            name='building',
+            unique_together={('campus', 'acronym'), ('campus', 'name')},
         ),
     ]
