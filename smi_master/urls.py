@@ -25,6 +25,7 @@ from buildings import views as buildings_views
 from slaves import views as slaves_views
 from campi import views as campi_views
 from transductor_models import views as transductor_models_views
+from transductors import views as energy_transductor_views
 
 router = DefaultRouter()
 router.register(r'campi', campi_views.CampusViewSet)
@@ -33,6 +34,10 @@ router.register(r'slave', slaves_views.SlaveViewSet)
 router.register(
     r'transductor_models',
     transductor_models_views.TransductorModelViewSet
+)
+router.register(
+    r'energy_transductors',
+    energy_transductor_views.EnergyTransductorViewSet
 )
 
 urlpatterns = [

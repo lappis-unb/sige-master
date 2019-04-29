@@ -50,11 +50,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'polymorphic',
     'rest_framework',
     'campi',
     'buildings',
     'slaves',
     'transductor_models',
+    'transductors',
 ]
 
 MIDDLEWARE = [
