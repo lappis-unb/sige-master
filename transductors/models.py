@@ -35,8 +35,9 @@ class Transductor(PolymorphicModel):
     )
 
     # There aren't slave servers yet
-    # slave_server = models.ManyToManyFields(SlaveServer, 
-    #                                        related_name='transductors')
+    # slave_server = models.ManyToManyFields(
+    #     SlaveServer, related_name='transductors'
+    # )
 
     class Meta:
         abstract = True
@@ -53,11 +54,10 @@ class Transductor(PolymorphicModel):
 
 class EnergyTransductor(Transductor):
     def __str__(self):
-        ret = 'Transductor: '
-        ret += self.name
-        ret += ' Serial number #'
-        ret += self.serial_number
-        return ret
+        return 'Transductor: '
+        + self.name
+        + ' Serial number #'
+        + self.serial_number
 
     def collect_broken_status(self):
         return self.broken

@@ -1,12 +1,12 @@
 import pytest
-from django.test import TransactionTestCase
+from django.test import TestCase
 from transductor_models.models import TransductorModel
 from django.db.utils import IntegrityError
 from django.core.exceptions import ValidationError
 from django.db import transaction
 
 
-class TransductorTestCase(TransactionTestCase):
+class TransductorTestCase(TestCase):
     def setUp(self):
         self.sample_transductor_model = TransductorModel.objects.create(
             name='TR4020',
