@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'campi',
     'buildings',
     'slaves',
+    'measurements',
 ]
 
 MIDDLEWARE = [

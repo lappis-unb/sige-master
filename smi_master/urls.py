@@ -24,11 +24,13 @@ from django.urls import include
 from buildings import views as buildings_views
 from slaves import views as slaves_views
 from campi import views as campi_views
+from measurements import views as measurements_views
 
 router = DefaultRouter()
 router.register(r'campi', campi_views.CampusViewSet)
 router.register(r'buildings', buildings_views.BuildingViewset)
 router.register(r'slave', slaves_views.SlaveViewSet)
+router.register(r'minutly_measurements', measurements_views.MinutlyMeasurementViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
