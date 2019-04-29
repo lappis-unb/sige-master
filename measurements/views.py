@@ -1,7 +1,7 @@
 from rest_framework import serializers, viewsets, mixins
 
-from .models import Measurement, MinutlyMeasurement, Qua
-from .serializers import MinutlyMeasurementSerializer
+from .models import Measurement, MinutlyMeasurement, QuarterlyMeasurement
+from .serializers import MinutlyMeasurementSerializer, QuarterlyMeasurementSerializer
 
 
 #  this viewset don't inherits from viewsets.ModelViewSet because it 
@@ -13,9 +13,9 @@ class MinutlyMeasurementViewSet(mixins.RetrieveModelMixin,
     queryset = MinutlyMeasurement.objects.all()
     serializer_class = MinutlyMeasurementSerializer
 
-class QuarterlyMeasurement(mixins.RetrieveModelMixin,
+class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
                                 mixins.DestroyModelMixin,
                                 mixins.ListModelMixin,
                                 viewsets.GenericViewSet):
-    queryset = MinutlyMeasurement.objects.all()
-    serializer_class = MinutlyMeasurementSerializer
+    queryset = QuarterlyMeasurement.objects.all()
+    serializer_class = QuarterlyMeasurementSerializer

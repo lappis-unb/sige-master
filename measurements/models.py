@@ -52,3 +52,13 @@ class MinutlyMeasurement(Measurement):
     dht_current_c = models.FloatField(default=0)
 
 
+class QuarterlyMeasurement(Measurement):
+
+    generated_energy_peak_time = models.FloatField(default=0)
+    generated_energy_off_peak_time = models.FloatField(default=0)
+    consumption_peak_time = models.FloatField(default=0)
+    consumption_off_peak_time = models.FloatField(default=0)
+    inductive_power_peak_time = models.FloatField(default=0)
+    inductive_power_off_peak_time = models.FloatField(default=0)
+    capacitive_power_peak_time = models.FloatField(default=0)
+    capacitive_power_off_peak_time = models.FloatField(default=0)

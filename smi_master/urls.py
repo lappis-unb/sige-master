@@ -31,6 +31,7 @@ router.register(r'campi', campi_views.CampusViewSet)
 router.register(r'buildings', buildings_views.BuildingViewset)
 router.register(r'slave', slaves_views.SlaveViewSet)
 router.register(r'minutly_measurements', measurements_views.MinutlyMeasurementViewSet)
+router.register(r'quarterly_measurements', measurements_views.QuarterlyMeasurementViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),

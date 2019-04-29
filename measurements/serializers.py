@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import MinutlyMeasurement
+from .models import MinutlyMeasurement, QuarterlyMeasurement
 
 
 class MinutlyMeasurementSerializer(serializers.HyperlinkedModelSerializer):
@@ -38,8 +38,22 @@ class MinutlyMeasurementSerializer(serializers.HyperlinkedModelSerializer):
                   'dht_current_b',
                   'dht_current_c',
                   'url')
+
         
-            
+class QuarterlyMeasurementSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = QuarterlyMeasurement
+        fields = ('id',
+                  'collection_time',
+                  'generated_energy_peak_time',
+                  'generated_energy_off_peak_time',
+                  'consumption_peak_time',
+                  'consumption_off_peak_time',
+                  'inductive_power_peak_time',
+                  'inductive_power_off_peak_time',
+                  'capacitive_power_peak_time',
+                  'capacitive_power_off_peak_time',
+                  'url')            
     
     
     
