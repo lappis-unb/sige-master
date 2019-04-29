@@ -51,6 +51,10 @@ class Transductor(PolymorphicModel):
     def get_measurements(self, datetime):
         raise NotImplementedError
 
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super(Transductor, self).save(*args, **kwargs)
+
 
 class EnergyTransductor(Transductor):
     def __str__(self):
