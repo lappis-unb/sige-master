@@ -1,12 +1,13 @@
 from rest_framework import serializers
 
-from .models import MinutlyMeasurement, QuarterlyMeasurement
+from .models import MinutelyMeasurement, QuarterlyMeasurement
 
 
-class MinutlyMeasurementSerializer(serializers.HyperlinkedModelSerializer):
+class MinutelyMeasurementSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = MinutlyMeasurement
+        model = MinutelyMeasurement
         fields = ('id',
+                  'transductor',
                   'collection_time',
                   'frequency_a',
                   'voltage_a',

@@ -1,17 +1,24 @@
 from django.db import models
+from transductors.models import EnergyTransductor
+from polymorphic.models import PolymorphicModel
 
-
-class Measurement(models.Model):
-    #TODO add transductor
+class Measurement(PolymorphicModel):
     collection_time = models.DateTimeField(blank=False,null=False)
+    transductor = models.ForeignKey(
+        EnergyTransductor,
+        related_name="%(app_label)s_%(class)s",
+        on_delete=models.CASCADE,
+        blank=False,
+        null=False
+    )
 
     class Meta:
         abstract = True
 
-class MinutlyMeasurement(Measurement):
+class MinutelyMeasurement(Measurement):
 
     def __str__(self):
-        return '%s' % self.collection_date
+        return '%s' % self.collection_time
 
     frequency_a = models.FloatField(default=0)
 
