@@ -25,6 +25,7 @@ from buildings import views as buildings_views
 from slaves import views as slaves_views
 from campi import views as campi_views
 from users import views as users_views
+
 from .views import login
 
 router = DefaultRouter()
