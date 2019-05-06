@@ -19,6 +19,7 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
             'calibration_date',
             'measurements_minutelymeasurement',
             'measurements_quarterlymeasurement',
+            'measurements_monthlymeasurement',
             'last_data_collection',
             'model',
             'url'

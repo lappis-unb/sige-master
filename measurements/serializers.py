@@ -1,6 +1,8 @@
 from rest_framework import serializers
 
-from .models import MinutelyMeasurement, QuarterlyMeasurement
+from .models import MinutelyMeasurement
+from .models import QuarterlyMeasurement
+from .models import MonthlyMeasurement
 
 
 class MinutelyMeasurementSerializer(serializers.HyperlinkedModelSerializer):
@@ -38,6 +40,7 @@ class MinutelyMeasurementSerializer(serializers.HyperlinkedModelSerializer):
                   'dht_current_a',
                   'dht_current_b',
                   'dht_current_c',
+                  'transductor',
                   'url')
 
         
@@ -54,7 +57,31 @@ class QuarterlyMeasurementSerializer(serializers.HyperlinkedModelSerializer):
                   'inductive_power_off_peak_time',
                   'capacitive_power_peak_time',
                   'capacitive_power_off_peak_time',
+                  'transductor',
                   'url')            
+    
+class MonthlyMeasurementSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = MonthlyMeasurement
+        fields = ('id',
+                  'generated_energy_peak_time',
+                  'generated_energy_off_peak_time',
+                  'consumption_peak_time',
+                  'consumption_off_peak_time',
+                  'inductive_power_peak_time',
+                  'inductive_power_off_peak_time',
+                  'capacitive_power_peak_time',
+                  'capacitive_power_off_peak_time',
+                  'active_max_power_peak_time',
+                  'active_max_power_off_peak_time',
+                  'reactive_max_power_peak_time',
+                  'reactive_max_power_off_peak_time',
+                  'active_max_power_list_peak_time',
+                  'active_max_power_list_off_peak_time',
+                  'reactive_max_power_list_peak_time',
+                  'reactive_max_power_list_off_peak_time',
+                  'url')            
+
     
     
     

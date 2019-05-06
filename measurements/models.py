@@ -1,6 +1,8 @@
 from django.db import models
 from transductors.models import EnergyTransductor
 from polymorphic.models import PolymorphicModel
+from django.contrib.postgres.fields import ArrayField, HStoreField
+
 
 class Measurement(PolymorphicModel):
     collection_time = models.DateTimeField(blank=False,null=False)
@@ -12,13 +14,13 @@ class Measurement(PolymorphicModel):
         null=False
     )
 
+    def __str__(self):
+        return '%s' % self.collection_time
+
     class Meta:
         abstract = True
 
 class MinutelyMeasurement(Measurement):
-
-    def __str__(self):
-        return '%s' % self.collection_time
 
     frequency_a = models.FloatField(default=0)
 
@@ -69,3 +71,34 @@ class QuarterlyMeasurement(Measurement):
     inductive_power_off_peak_time = models.FloatField(default=0)
     capacitive_power_peak_time = models.FloatField(default=0)
     capacitive_power_off_peak_time = models.FloatField(default=0)
+
+class MonthlyMeasurement(Measurement):
+
+    generated_energy_peak_time = models.FloatField(default=0)
+    generated_energy_off_peak_time = models.FloatField(default=0)
+    consumption_peak_time = models.FloatField(default=0)
+    consumption_off_peak_time = models.FloatField(default=0)
+    inductive_power_peak_time = models.FloatField(default=0)
+    inductive_power_off_peak_time = models.FloatField(default=0)
+    capacitive_power_peak_time = models.FloatField(default=0)
+    capacitive_power_off_peak_time = models.FloatField(default=0)
+    active_max_power_peak_time = models.FloatField(default=0)
+    active_max_power_off_peak_time = models.FloatField(default=0)
+    reactive_max_power_peak_time = models.FloatField(default=0)
+    reactive_max_power_off_peak_time = models.FloatField(
+        default=0
+    )
+    
+    # When using HStoreField remember to install the extension in the migration
+    active_max_power_list_peak_time = ArrayField(
+        HStoreField(), default=[]
+    )
+    active_max_power_list_off_peak_time = ArrayField(
+        HStoreField(), default=[]
+    )
+    reactive_max_power_list_peak_time = ArrayField(
+        HStoreField(), default=[]
+    )
+    reactive_max_power_list_off_peak_time = ArrayField(
+        HStoreField(), default=[]
+    )
