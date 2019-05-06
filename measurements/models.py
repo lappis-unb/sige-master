@@ -5,7 +5,7 @@ from django.contrib.postgres.fields import ArrayField, HStoreField
 
 
 class Measurement(PolymorphicModel):
-    collection_time = models.DateTimeField(blank=False,null=False)
+    collection_time = models.DateTimeField(blank=False, null=False)
     transductor = models.ForeignKey(
         EnergyTransductor,
         related_name="%(app_label)s_%(class)s",
@@ -19,6 +19,7 @@ class Measurement(PolymorphicModel):
 
     class Meta:
         abstract = True
+
 
 class MinutelyMeasurement(Measurement):
 
@@ -71,6 +72,7 @@ class QuarterlyMeasurement(Measurement):
     inductive_power_off_peak_time = models.FloatField(default=0)
     capacitive_power_peak_time = models.FloatField(default=0)
     capacitive_power_off_peak_time = models.FloatField(default=0)
+
 
 class MonthlyMeasurement(Measurement):
 
