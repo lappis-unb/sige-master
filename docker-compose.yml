@@ -12,6 +12,9 @@ services:
             - .:/smi-master
         depends_on:
             - db
+        networks:
+            - default
+            - smi-master
 
     db:
         container_name: postgres_master
@@ -24,3 +27,7 @@ services:
 
 volumes:
     master-pg-data: {}
+
+networks:
+  smi-master:
+    name: smi-master
