@@ -12,6 +12,8 @@ from rest_framework.status import HTTP_400_BAD_REQUEST
 from rest_framework.decorators import api_view
 from rest_framework.decorators import permission_classes
 
+from users.serializers import UserSerializer
+
 
 @csrf_exempt
 @api_view(["POST"])
@@ -20,7 +22,7 @@ def login(request):
     username = request.data.get("username")
     password = request.data.get("password")
     if username is None or password is None:
-        return Response({'error': 'Please provide both username and password'},
+        return Response({'error': 'Please provide username and password'},
                         status=HTTP_400_BAD_REQUEST)
 
     user = authenticate(username=username, password=password)
@@ -31,4 +33,9 @@ def login(request):
 
     token, _ = Token.objects.get_or_create(user=user)
 
-    return Response({'token': token.key}, status=HTTP_200_OK)
+    serialized_user = UserSerializer(user)
+
+    return Response(
+        {'token': token.key, 'user': serialized_user.data},
+        status=HTTP_200_OK
+    )

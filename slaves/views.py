@@ -10,4 +10,4 @@ from .serializers import SlaveSerializer
 class SlaveViewSet(viewsets.ModelViewSet):
     queryset = Slave.objects.all()
     serializer_class = SlaveSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
