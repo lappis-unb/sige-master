@@ -36,24 +36,4 @@ class CustomUser(AbstractUser):
             self.full_clean()
             super(CustomUser, self).save(*args, **kwargs)
         except ValidationError as error:
-            return error
-
-
-class ResearcherUser(CustomUser):
-    """
-    This user type is not capable of accessing the API's slave and transistor
-    creation endpoints. Has access to all data inside the master though.
-    """
-    class Meta:
-        proxy = True
-        verbose_name = _('Researcher')
-
-
-class ManagerUser(CustomUser):
-    """
-    This user type is capable of accessing all the resources of the master's
-    API.
-    """
-    class Meta:
-        proxy = True
-        verbose_name = _('Manager')
+            raise error
