@@ -20,7 +20,7 @@ class CustomUser(AbstractUser):
     username = models.CharField(max_length=20, unique=True)
     name = models.CharField(max_length=30)
     user_type = models.CharField(max_length=3,
-        choices=USER_TYPES, default='man')
+                                 choices=USER_TYPES, default='man')
 
     EMAIL_FIELD = 'email'
     USERNAME_FIELD = 'username'
@@ -31,7 +31,7 @@ class CustomUser(AbstractUser):
 
     def save(self, *args, **kwargs):
         try:
-            self.is_admin = self.user_type  == 'adm'
+            self.is_admin = self.user_type == 'adm'
             self.is_staff = self.user_type == 'man' or self.user_type == 'rsc'
             self.full_clean()
             super(CustomUser, self).save(*args, **kwargs)
