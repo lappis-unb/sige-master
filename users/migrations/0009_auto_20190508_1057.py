@@ -7,8 +7,6 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('authtoken', '0003_auto_20190508_1019'),
-        ('admin', '0004_auto_20190508_1019'),
         ('users', '0008_auto_20190508_1019'),
     ]
 
