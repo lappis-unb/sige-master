@@ -13,16 +13,4 @@ from .serializers import *
 class UserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (permissions.IsAdminUser,)
-
-
-class ResearcherUserViewSet(viewsets.ModelViewSet):
-    queryset = ResearcherUser.objects.all()
-    serializer_class = ResearcherUserSerializer
-    permission_classes = (permissions.IsAdminUser,)
-
-
-class ManagerUserViewSet(viewsets.ModelViewSet):
-    queryset = ManagerUser.objects.all()
-    serializer_class = ManagerUserSerializer
-    permission_classes = (permissions.IsAdminUser,)
+    permission_classes = (permissions.AllowAny,)
