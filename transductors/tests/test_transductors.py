@@ -4,6 +4,7 @@ from django.test import TestCase
 from django.db.utils import IntegrityError
 from django.core.exceptions import ValidationError
 
+from slaves.models import Slave
 from transductor_models.models import TransductorModel
 from transductors.models import Transductor, EnergyTransductor
 
@@ -29,6 +30,12 @@ class TransductorTestCase(TestCase):
             calibration_date=timezone.now(),
             last_data_collection=timezone.now(),
             model=self.sample_transductor_model
+        )
+
+        self.sample_slave_server = Slave.objects.create(
+            ip_address="10.0.0.1",
+            location="FGA",
+            broken=False
         )
 
     def test_create_transductor(self):
@@ -185,4 +192,20 @@ class TransductorTestCase(TestCase):
 
         self.assertTrue(
             transductor.delete()
+        )
+
+    def test_not_activate_transductor_with_no_slave_server_associated(self):
+        self.assertFalse(
+            self.sample_energy_transductor.get_active_status()
+        )
+
+    def test_should_activate_transductor_associated_with_slave_server(self):
+        self.assertIsNone(
+            self.sample_energy_transductor.slave_servers.add(
+                self.sample_slave_server
+            )
+        )
+
+        self.assertTrue(
+            self.sample_energy_transductor.get_active_status()
         )

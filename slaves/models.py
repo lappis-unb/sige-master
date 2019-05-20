@@ -35,11 +35,8 @@ class Slave(models.Model):
         return self.ip_address
 
     def save(self, *args, **kwargs):
-        try:
-            self.full_clean()
-            super(Slave, self).save(*args, **kwargs)
-        except ValidationError as error:
-            return error
+        self.full_clean()
+        super(Slave, self).save(*args, **kwargs)
 
     def add_transductor(self, transductor):
         self.transductors.add(transductor)
