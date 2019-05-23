@@ -1,26 +1,34 @@
 version: '3.5'
 
 services:
-    master:
-        container_name: master
-        build: .
+    master-db:
+        container_name: master-db
+        image: postgres:9.6
+        ports:
+            - 5431:5432
+        env_file: dev-env
+        networks:
+            - smi-network
+        volumes:
+            - master-pg-data:/var/lib/postgresql/data
+
+    master-api:
+        container_name: master-api
+        image: lappis/smi-master:0.9
         env_file: dev-env
         command: ["sh", "scripts/start.sh"]
         ports:
             - 8001:8001
+        networks:
+          - smi-network
         volumes:
             - .:/smi-master
         depends_on:
-            - db
-
-    db:
-        container_name: postgres_master
-        image: postgres:9.6
-        ports:
-            - 8008:8008
-        env_file: dev-env
-        volumes:
-            - master-pg-data:/var/lib/postgresql/data
+            - master-db
 
 volumes:
     master-pg-data: {}
+
+networks:
+  smi-network:
+    external: true
