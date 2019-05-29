@@ -24,3 +24,4 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
             'model',
             'url'
         )
+        read_only_fields = ('active', 'broken')
