@@ -2,6 +2,7 @@ Django==2.1.5
 django-environ==0.4.4
 djangorestframework==3.9.0
 django-polymorphic==2.0.3
+django_cron==0.5.1
 psycopg2==2.7.6.1
 psycopg2-binary==2.7.6.1
 pycodestyle==2.4.0

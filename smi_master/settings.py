@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.postgres',
+    'django_cron',
     'polymorphic',
     'rest_framework',
     'campi',
@@ -87,6 +88,11 @@ TEMPLATES = [
             ],
         },
     },
+]
+
+CRON_CLASSES = [
+    "slaves.cronjob.CheckTransductorBrokenCronjob",
+    "slaves.cronjob.GetAllMeasurementsCronjob"
 ]
 
 WSGI_APPLICATION = 'smi_master.wsgi.application'

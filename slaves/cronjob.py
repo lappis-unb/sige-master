@@ -1,5 +1,6 @@
 from django_cron import CronJobBase, Schedule
 
+
 class CheckTransductorBrokenCronJob(CronJobBase):
     RUN_EVERY_MINS = 0
     schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
@@ -7,6 +8,7 @@ class CheckTransductorBrokenCronJob(CronJobBase):
 
     def do(self):
         print("Check all broken transductors.")
+
 
 class GetAllMeasurementsCronJob(CronJobBase):
     RUN_EVERY_MINS = 0
