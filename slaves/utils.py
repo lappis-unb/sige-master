@@ -2,6 +2,7 @@ from .models import Slave
 from transductors.models import EnergyTransductor
 import urllib.request
 import json
+import os
 
 
 class CheckTransductorsAndSlaves():
@@ -12,7 +13,7 @@ class CheckTransductorsAndSlaves():
 
         for slave in slaves:
             # to work in dev dont forget to insert the port
-            url = 'http://' + slave.ip_address + '/broken_transductors'
+            url = 'http://' + slave.ip_address + ":" + os.getenv('SLAVE_PORT') + '/broken_transductors'
             web_request = urllib.request.urlopen(url)
 
             if(web_request.status == 200):
