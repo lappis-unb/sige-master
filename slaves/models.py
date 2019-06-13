@@ -22,7 +22,6 @@ class Slave(models.Model):
         max_length=15,
         unique=True,
         validators=[ip_validator],
-        default="0.0.0.0"
     )
     location = models.CharField(max_length=50)
     broken = models.BooleanField(default=True)
