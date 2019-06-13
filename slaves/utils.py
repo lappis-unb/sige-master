@@ -38,11 +38,10 @@ class CheckTransductorsAndSlaves():
                     slave.broken = True
                     slave.save()
 
-            except:
+            except Exception:
                 slave.broken = True
                 slave.save()
 
-            
 
 # TODO Não sabemos como resolver essa comunicação
 # Transdutores em mais de um slave tem que ser tratados de forma diferente?
