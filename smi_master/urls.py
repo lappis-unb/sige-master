@@ -27,12 +27,15 @@ from campi import views as campi_views
 from measurements import views as measurements_views
 from transductor_models import views as transductor_models_views
 from transductors import views as energy_transductor_views
+from users import views as users_views
+from .views import login
 
 router = DefaultRouter()
 router.register(r'campi', campi_views.CampusViewSet)
 router.register(r'buildings', buildings_views.BuildingViewset)
 router.register(r'slave', slaves_views.SlaveViewSet)
-router.register(r'minutely_measurements', 
+router.register(r'users', users_views.UserViewSet)
+router.register(r'minutely_measurements',
                 measurements_views.MinutelyMeasurementViewSet)
 router.register(r'quarterly_measurements',
                 measurements_views.QuarterlyMeasurementViewSet)
@@ -49,5 +52,6 @@ router.register(
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include(router.urls))
+    path('login/', login),
+    path('', include(router.urls)),
 ]

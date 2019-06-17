@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.postgres.fields import ArrayField
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
+from transductors.models import EnergyTransductor
 
 '''
     TODO Make get all measurements and list
@@ -21,17 +22,23 @@ class Slave(models.Model):
         max_length=15,
         unique=True,
         validators=[ip_validator],
-        default="0.0.0.0"
     )
     location = models.CharField(max_length=50)
     broken = models.BooleanField(default=True)
+
+    transductors = models.ManyToManyField(
+        EnergyTransductor, related_name='slave_servers'
+    )
 
     def __str__(self):
         return self.ip_address
 
     def save(self, *args, **kwargs):
-        try:
-            self.full_clean()
-            super(Slave, self).save(*args, **kwargs)
-        except ValidationError as error:
-            return error
+        self.full_clean()
+        super(Slave, self).save(*args, **kwargs)
+
+    def add_transductor(self, transductor):
+        self.transductors.add(transductor)
+
+    def remove_transductor(self, transductor):
+        self.transductors.remove(transductor)

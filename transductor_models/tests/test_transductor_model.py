@@ -1,12 +1,11 @@
 import pytest
-from django.test import TransactionTestCase
+from django.test import TestCase
 from transductor_models.models import TransductorModel
 from django.db.utils import IntegrityError
 from django.core.exceptions import ValidationError
-from django.db import transaction
 
 
-class TransductorTestCase(TransactionTestCase):
+class TransductorModelTestCase(TestCase):
     def setUp(self):
         self.sample_transductor_model = TransductorModel.objects.create(
             name='TR4020',
@@ -30,49 +29,49 @@ class TransductorTestCase(TransactionTestCase):
         self.assertEqual(size + 1, len(TransductorModel.objects.all()))
 
     def test_not_create_transductor_model_with_existent_name(self):
-            size = len(TransductorModel.objects.all())
+        size = len(TransductorModel.objects.all())
 
-            with self.assertRaises(ValidationError):
-                value = TransductorModel.objects.create(
-                    name='TR4020',
-                    transport_protocol='TCP',
-                    serial_protocol='ModbusRTU'
-                )
+        with self.assertRaises(ValidationError):
+            value = TransductorModel.objects.create(
+                name='TR4020',
+                transport_protocol='TCP',
+                serial_protocol='ModbusRTU'
+            )
 
-            self.assertEqual(size, len(TransductorModel.objects.all()))
+        self.assertEqual(size, len(TransductorModel.objects.all()))
 
     def test_not_create_transductor_model_with_no_name(self):
-            size = len(TransductorModel.objects.all())
+        size = len(TransductorModel.objects.all())
 
-            with self.assertRaises(ValidationError):
-                value = TransductorModel.objects.create(
-                    transport_protocol='TCP',
-                    serial_protocol='ModbusRTU'
-                )
+        with self.assertRaises(ValidationError):
+            value = TransductorModel.objects.create(
+                transport_protocol='TCP',
+                serial_protocol='ModbusRTU'
+            )
 
-            self.assertEqual(size, len(TransductorModel.objects.all()))
+        self.assertEqual(size, len(TransductorModel.objects.all()))
 
     def test_not_create_transductor_model_with_no_transport_protocol(self):
-            size = len(TransductorModel.objects.all())
+        size = len(TransductorModel.objects.all())
 
-            with self.assertRaises(ValidationError):
-                value = TransductorModel.objects.create(
-                    name='TR4020',
-                    serial_protocol='ModbusRTU'
-                )
+        with self.assertRaises(ValidationError):
+            value = TransductorModel.objects.create(
+                name='TR4020',
+                serial_protocol='ModbusRTU'
+            )
 
-            self.assertEqual(size, len(TransductorModel.objects.all()))
+        self.assertEqual(size, len(TransductorModel.objects.all()))
 
     def test_not_create_transductor_model_with_no_serial_protocol(self):
-            size = len(TransductorModel.objects.all())
+        size = len(TransductorModel.objects.all())
 
-            with self.assertRaises(ValidationError):
-                value = TransductorModel.objects.create(
-                    name='TR4020',
-                    transport_protocol='TCP',
-                )
+        with self.assertRaises(ValidationError):
+            value = TransductorModel.objects.create(
+                name='TR4020',
+                transport_protocol='TCP',
+            )
 
-            self.assertEqual(size, len(TransductorModel.objects.all()))
+        self.assertEqual(size, len(TransductorModel.objects.all()))
 
     def test_update_transductor_model_single_field(self):
         transductor_model = TransductorModel.objects.filter(name='TR4020')
@@ -102,12 +101,10 @@ class TransductorTestCase(TransactionTestCase):
         transductor_model = TransductorModel.objects.filter(name='TR4020')
 
         with self.assertRaises(IntegrityError):
-            self.assertTrue(
-                transductor_model.update(
-                    name='TR3030',
-                    serial_protocol='UDP',
-                    transport_protocol='RTU'
-                )
+            transductor_model.update(
+                name='TR3030',
+                serial_protocol='UDP',
+                transport_protocol='RTU'
             )
 
     def test_retrieve_one_transductor_models(self):
