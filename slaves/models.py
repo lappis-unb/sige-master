@@ -20,9 +20,14 @@ class Slave(models.Model):
 
     ip_address = models.CharField(
         max_length=15,
-        unique=True,
         validators=[ip_validator],
     )
+
+    port = models.CharField(
+        max_length=5,
+        default="80"
+    )
+
     location = models.CharField(max_length=50)
     broken = models.BooleanField(default=True)
 
