@@ -1,4 +1,6 @@
+from .api import *
 from django.db import models
+from django.contrib.postgres.fields import ArrayField
 
 
 class TransductorModel(models.Model):
@@ -12,13 +14,24 @@ class TransductorModel(models.Model):
         serial_protocol (str): The serial protocol.
     """
 
+    model_code = models.CharField(
+        max_length=10,
+        unique=True,
+        primary_key=True
+    )
+
     name = models.CharField(max_length=50, unique=True)
     serial_protocol = models.CharField(max_length=50)
     transport_protocol = models.CharField(max_length=50)
+    minutely_register_addresses = ArrayField(ArrayField(models.IntegerField()), default = None)
+    quarterly_register_addresses = ArrayField(ArrayField(models.IntegerField()), default = None)
+    monthly_register_addresses = ArrayField(ArrayField(models.IntegerField()), default = None)
 
     def __str__(self):
         return self.name
 
     def save(self, *args, **kwargs):
-        self.full_clean()
-        super(TransductorModel, self).save(*args, **kwargs)
+        response = create_transductor_model(self)
+        if(response.status_code == 200):
+            self.full_clean()
+            super(TransductorModel, self).save(*args, **kwargs)
