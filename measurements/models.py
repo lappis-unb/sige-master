@@ -90,17 +90,17 @@ class MonthlyMeasurement(Measurement):
     reactive_max_power_off_peak_time = models.FloatField(
         default=0
     )
-    
+
     # When using HStoreField remember to install the extension in the migration
     active_max_power_list_peak_time = ArrayField(
-        HStoreField(), default=[]
+        HStoreField(), default=None
     )
     active_max_power_list_off_peak_time = ArrayField(
-        HStoreField(), default=[]
+        HStoreField(), default=None
     )
     reactive_max_power_list_peak_time = ArrayField(
-        HStoreField(), default=[]
+        HStoreField(), default=None
     )
     reactive_max_power_list_off_peak_time = ArrayField(
-        HStoreField(), default=[]
+        HStoreField(), default=None
     )
