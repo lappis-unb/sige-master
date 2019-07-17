@@ -1,3 +1,4 @@
+from .api import *
 from django.db import models
 from datetime import datetime
 from polymorphic.models import PolymorphicModel
@@ -28,6 +29,7 @@ class Transductor(PolymorphicModel):
         TransductorModel,
         blank=False,
         null=False,
+        db_column="model_code",
         on_delete=models.PROTECT,
         related_name='transductors'
     )
@@ -37,6 +39,7 @@ class Transductor(PolymorphicModel):
 
     def __str__(self):
         raise NotImplementedError
+
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -56,6 +59,9 @@ class Transductor(PolymorphicModel):
     def get_active_status(self):
         self.activate()
         return self.active
+
+    def create_on_server(self, slave_server):
+        create_transductor(self, slave_server)
 
     def collect_broken_status(self):
         return self.broken

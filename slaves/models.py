@@ -44,6 +44,7 @@ class Slave(models.Model):
 
     def add_transductor(self, transductor):
         self.transductors.add(transductor)
+        transductor.create_on_server(self)
 
     def remove_transductor(self, transductor):
         self.transductors.remove(transductor)
