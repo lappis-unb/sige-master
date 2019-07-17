@@ -31,7 +31,7 @@ class TransductorModel(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
-        response = create_transductor_model(self)
-        if(response.status_code == 200):
+        if(create_transductor_model(self).status_code == 201):
+            print("Salvou!")
             self.full_clean()
             super(TransductorModel, self).save(*args, **kwargs)
