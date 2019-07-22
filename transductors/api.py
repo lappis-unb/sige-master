@@ -35,10 +35,4 @@ def create_transductor(transductor, slave_server):
         json = data
     )
 
-    print("###############")
-    print(response.text)
-    print(data["model"])
-    print(response.request.body)
-    print("###############")
-
     return response

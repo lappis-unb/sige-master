@@ -61,7 +61,7 @@ class Transductor(PolymorphicModel):
         return self.active
 
     def create_on_server(self, slave_server):
-        create_transductor(self, slave_server)
+        return create_transductor(self, slave_server)
 
     def collect_broken_status(self):
         return self.broken
