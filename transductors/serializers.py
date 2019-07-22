@@ -25,3 +25,6 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
             'url'
         )
         read_only_fields = ('active', 'broken')
+
+class AddToServerSerializer(serializers.Serializer):
+    slave_id = serializers.IntegerField()
