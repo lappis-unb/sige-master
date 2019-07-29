@@ -32,6 +32,5 @@ class TransductorModel(models.Model):
 
     def save(self, *args, **kwargs):
         if(create_transductor_model(self).status_code == 201):
-            print("Salvou!")
             self.full_clean()
             super(TransductorModel, self).save(*args, **kwargs)

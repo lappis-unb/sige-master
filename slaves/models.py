@@ -47,4 +47,14 @@ class Slave(models.Model):
         transductor.create_on_server(self)
 
     def remove_transductor(self, transductor):
-        self.transductors.remove(transductor)
+        response = transductor.delete_on_server(self)
+        if self.__successfully_deleted(response.status_code):
+            self.transductors.remove(transductor)
+        return response
+
+    # FIXME: Improve this
+    def __successfully_deleted(self, status):
+        if (status is not None) and ((200 <= status < 300) or (status == 404)):
+            return True
+        else:
+            return False

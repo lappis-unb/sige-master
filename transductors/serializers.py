@@ -26,5 +26,12 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
         )
         read_only_fields = ('active', 'broken')
 
+    def update(self, instance, validated_data):
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.update()
+
+        return instance
+
 class AddToServerSerializer(serializers.Serializer):
     slave_id = serializers.IntegerField()
