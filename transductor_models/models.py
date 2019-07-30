@@ -15,7 +15,7 @@ class TransductorModel(models.Model):
     """
 
     model_code = models.CharField(
-        max_length=10,
+        max_length=9,
         unique=True,
         primary_key=True
     )
@@ -23,14 +23,68 @@ class TransductorModel(models.Model):
     name = models.CharField(max_length=50, unique=True)
     serial_protocol = models.CharField(max_length=50)
     transport_protocol = models.CharField(max_length=50)
-    minutely_register_addresses = ArrayField(ArrayField(models.IntegerField()), default = None)
-    quarterly_register_addresses = ArrayField(ArrayField(models.IntegerField()), default = None)
-    monthly_register_addresses = ArrayField(ArrayField(models.IntegerField()), default = None)
+    minutely_register_addresses = ArrayField(ArrayField(models.IntegerField()),
+                                             default = None)
+    quarterly_register_addresses = ArrayField(ArrayField(models.IntegerField()),
+                                              default = None)
+    monthly_register_addresses = ArrayField(ArrayField(models.IntegerField()),
+                                            default = None)
 
     def __str__(self):
         return self.name
 
     def save(self, *args, **kwargs):
-        if(create_transductor_model(self).status_code == 201):
-            self.full_clean()
+        from slaves.models import Slave
+
+        for slave in Slave.objects.all():
+            create_transductor_model(self, slave)
+
+        self.full_clean()
+        super(TransductorModel, self).save(*args, **kwargs)
+
+    def update(self, *args, **kwargs):
+        from slaves.models import Slave
+        self.full_clean()
+
+        failed = False
+
+        for slave in Slave.objects.all():
+            response = update_transductor_model(self, slave)
+            if not self.__is_success_status(response.status_code):
+                failed = True
+
+        if not failed:
             super(TransductorModel, self).save(*args, **kwargs)
+        else:
+            # FIXME: Raise exception
+            print("Couldn't update this transductor model in all Slave Servers")
+
+    def delete(self, *args, **kwargs):
+        from slaves.models import Slave
+
+        failed = False
+        for slave in Slave.objects.all():
+            response = delete_transductor_model(self, slave)
+            if not self.__successfully_deleted(response.status_code):
+                failed = True
+
+        if not failed:
+            self.full_clean()
+            super(TransductorModel, self).delete(*args, **kwargs)
+        else:
+            # FIXME: Raise exception
+            print("Couldn't delete this transductor model in all Slave Servers")
+
+    # FIXME: Improve this
+    def __is_success_status(self, status):
+        if (status is not None) and (200 <= status < 300):
+            return True
+        else:
+            return False
+
+    # FIXME: Improve this
+    def __successfully_deleted(self, status):
+        if (status is not None) and ((200 <= status < 300) or (status == 404)):
+            return True
+        else:
+            return False

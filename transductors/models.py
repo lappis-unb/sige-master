@@ -50,7 +50,6 @@ class Transductor(PolymorphicModel):
 
         failed = False
 
-        # FIXME: Not working
         for slave in self.slave_servers.all():
             response = update_transductor(self, slave)
             if not self.__is_success_status(response.status_code):
@@ -58,6 +57,9 @@ class Transductor(PolymorphicModel):
 
         if not failed:
             super(Transductor, self).save(*args, **kwargs)
+        else:
+            # FIXME: Raise exception
+            print("Couldn't update this transductor in all Slave Servers")
 
     def delete(self, *args, **kwargs):
         self.active = False
@@ -72,7 +74,7 @@ class Transductor(PolymorphicModel):
             self.full_clean()
             super(Transductor, self).delete(*args, **kwargs)
         else:
-        # FIXME: Raise exception
+            # FIXME: Raise exception
             print("Couldn't delete this transductor in all Slave Servers")
 
     def get_measurements(self, datetime):
