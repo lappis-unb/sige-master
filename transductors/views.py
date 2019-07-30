@@ -21,8 +21,12 @@ class EnergyTransductorViewSet(viewsets.ModelViewSet):
     def add_to_server(self, request, pk=None):
         serializer_class = AddToServerSerializer(data=request.data)
         if serializer_class.is_valid():
-            slave_server = Slave.objects.get(id=serializer_class.data["slave_id"])
+            slave_server = Slave.objects.get(
+                id=serializer_class.data["slave_id"]
+            )
             response = self.get_object().create_on_server(slave_server)
-            return Response(data=json.loads(response.content), status=response.status_code)
+            return Response(data=json.loads(response.content),
+                            status=response.status_code)
         else:
-            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data=serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)

@@ -40,7 +40,6 @@ class Transductor(PolymorphicModel):
     def __str__(self):
         raise NotImplementedError
 
-
     def save(self, *args, **kwargs):
         self.full_clean()
         super(Transductor, self).save(*args, **kwargs)
@@ -112,6 +111,7 @@ class Transductor(PolymorphicModel):
             return True
         else:
             return False
+
 
 class EnergyTransductor(Transductor):
     def __str__(self):

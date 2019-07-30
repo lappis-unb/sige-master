@@ -33,5 +33,6 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
 
         return instance
 
+
 class AddToServerSerializer(serializers.Serializer):
     slave_id = serializers.IntegerField()

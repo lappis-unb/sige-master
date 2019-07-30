@@ -24,11 +24,11 @@ class TransductorModel(models.Model):
     serial_protocol = models.CharField(max_length=50)
     transport_protocol = models.CharField(max_length=50)
     minutely_register_addresses = ArrayField(ArrayField(models.IntegerField()),
-                                             default = None)
+                                             default=None)
     quarterly_register_addresses = ArrayField(ArrayField(models.IntegerField()),
-                                              default = None)
+                                              default=None)
     monthly_register_addresses = ArrayField(ArrayField(models.IntegerField()),
-                                            default = None)
+                                            default=None)
 
     def __str__(self):
         return self.name
