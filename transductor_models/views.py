@@ -9,4 +9,4 @@ from .serializers import TransductorModelSerializer
 class TransductorModelViewSet(viewsets.ModelViewSet):
     queryset = TransductorModel.objects.all()
     serializer_class = TransductorModelSerializer
-    permission_classes = (permissions.IsAdminUser,)
+    permission_classes = (permissions.AllowAny,)

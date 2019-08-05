@@ -24,11 +24,15 @@ class TestSlavesModels(TestCase):
             broken=False
         )
 
-        self.transductor_model = TransductorModel.objects.create(
-            name='TR4020',
-            transport_protocol='UDP',
-            serial_protocol='ModbusRTU'
-        )
+        self.transductor_model = TransductorModel()
+        self.transductor_model.model_code = "987654321"
+        self.transductor_model.name = "TR4020"
+        self.transductor_model.serial_protocol = "UDP"
+        self.transductor_model.transport_protocol = "modbus"
+        self.transductor_model.minutely_register_addresses = [[1, 1]]
+        self.transductor_model.quarterly_register_addresses = [[1, 1]]
+        self.transductor_model.monthly_register_addresses = [[1, 1]]
+        self.transductor_model.save(bypass_requests=True)
 
         self.energy_transductor = EnergyTransductor.objects.create(
             serial_number='87654321',
@@ -57,15 +61,6 @@ class TestSlavesModels(TestCase):
         slaves_after = len(Slave.objects.all())
 
         self.assertEqual(slaves_before + 1, slaves_after)
-
-    def test_should_not_create_same_slave(self):
-        new_slave = Slave()
-        new_slave.ip_address = "1.1.1.1"
-        new_slave.location = "MESP FGA"
-        new_slave.broken = False
-
-        with self.assertRaises(ValidationError):
-            new_slave.save()
 
     def test_should_read_a_existent_slave_by_ip_address(self):
         slave = Slave.objects.get(ip_address="1.1.1.1")

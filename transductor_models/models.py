@@ -34,43 +34,44 @@ class TransductorModel(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
-        from slaves.models import Slave
-
-        for slave in Slave.objects.all():
-            create_transductor_model(self, slave)
-
         self.full_clean()
-        super(TransductorModel, self).save(*args, **kwargs)
+        if not kwargs.get('bypass_requests', None):
+            from slaves.models import Slave
+            for slave in Slave.objects.all():
+                create_transductor_model(self, slave)
+
+        super(TransductorModel, self).save()
 
     def update(self, *args, **kwargs):
-        from slaves.models import Slave
         self.full_clean()
-
         failed = False
 
-        for slave in Slave.objects.all():
-            response = update_transductor_model(self, slave)
-            if not self.__is_success_status(response.status_code):
-                failed = True
+        if not kwargs.get('bypass_requests', None):
+            from slaves.models import Slave
+            for slave in Slave.objects.all():
+                response = update_transductor_model(self, slave)
+                if not self.__is_success_status(response.status_code):
+                    failed = True
 
         if not failed:
-            super(TransductorModel, self).save(*args, **kwargs)
+            super(TransductorModel, self).save()
         else:
             # FIXME: Raise exception
             print("Couldn't update this transductor model in all Slave Servers")
 
     def delete(self, *args, **kwargs):
-        from slaves.models import Slave
-
+        self.full_clean()
         failed = False
-        for slave in Slave.objects.all():
-            response = delete_transductor_model(self, slave)
-            if not self.__successfully_deleted(response.status_code):
-                failed = True
+
+        if not kwargs.get('bypass_requests', None):
+            from slaves.models import Slave
+            for slave in Slave.objects.all():
+                response = delete_transductor_model(self, slave)
+                if not self.__successfully_deleted(response.status_code):
+                    failed = True
 
         if not failed:
-            self.full_clean()
-            super(TransductorModel, self).delete(*args, **kwargs)
+            super(TransductorModel, self).delete()
         else:
             # FIXME: Raise exception
             print("Couldn't delete this transductor model in all Slave Servers")

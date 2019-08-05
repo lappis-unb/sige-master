@@ -42,7 +42,7 @@ class Transductor(PolymorphicModel):
 
     def save(self, *args, **kwargs):
         self.full_clean()
-        super(Transductor, self).save(*args, **kwargs)
+        super(Transductor, self).save()
 
     def update(self, *args, **kwargs):
         self.full_clean()
@@ -50,12 +50,13 @@ class Transductor(PolymorphicModel):
         failed = False
 
         for slave in self.slave_servers.all():
-            response = update_transductor(self, slave)
-            if not self.__is_success_status(response.status_code):
-                failed = True
+            if not kwargs.get('bypass_requests', None):
+                response = update_transductor(self, slave)
+                if not self.__is_success_status(response.status_code):
+                    failed = True
 
         if not failed:
-            super(Transductor, self).save(*args, **kwargs)
+            super(Transductor, self).save()
         else:
             # FIXME: Raise exception
             print("Couldn't update this transductor in all Slave Servers")
@@ -65,13 +66,14 @@ class Transductor(PolymorphicModel):
 
         failed = False
         for slave in self.slave_servers.all():
-            response = slave.remove_transductor(self)
-            if not self.__successfully_deleted(response.status_code):
-                failed = True
+            if not kwargs.get('bypass_requests', None):
+                response = slave.remove_transductor(self)
+                if not self.__successfully_deleted(response.status_code):
+                    failed = True
 
         if not failed:
             self.full_clean()
-            super(Transductor, self).delete(*args, **kwargs)
+            super(Transductor, self).delete()
         else:
             # FIXME: Raise exception
             print("Couldn't delete this transductor in all Slave Servers")
