@@ -5,9 +5,8 @@ from .models import MinutelyMeasurement
 from .models import QuarterlyMeasurement
 from .models import MonthlyMeasurement
 from .models import EnergyTransductor
-from .serializers import MinutelyMeasurementSerializer
-from .serializers import QuarterlyMeasurementSerializer
-from .serializers import MonthlyMeasurementSerializer
+
+from .serializers import *
 
 
 class MeasurementViewSet(mixins.RetrieveModelMixin,
@@ -51,3 +50,7 @@ class QuarterlyMeasurementViewSet(MeasurementViewSet):
 class MonthlyMeasurementViewSet(MeasurementViewSet):
     queryset = MonthlyMeasurement.objects.all()
     serializer_class = MonthlyMeasurementSerializer
+
+
+class VoltageThreePhaseViewSet(MinutelyMeasurementViewSet):
+    serializer_class = VoltageThreePhaseSerializer
