@@ -1,30 +1,37 @@
 version: '3.5'
-
 services:
-    master-db:
-        container_name: master-db
-        image: postgres:9.6
-        ports:
-            - 5431:5432
-        env_file: dev-env
-        networks:
-            - smi-network
-        volumes:
-            - master-pg-data:/var/lib/postgresql/data
 
-    master-api:
-        container_name: master-api
-        image: lappis/smi-master:0.9
-        env_file: dev-env
-        command: ["sh", "scripts/start.sh"]
-        ports:
-            - 8001:8001
-        networks:
-          - smi-network
-        volumes:
-            - .:/smi-master
-        depends_on:
-            - master-db
+  watchtower:
+    container_name: watchtower
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: master-api --run-once --cleanup
+    
+  master-db:
+    container_name: master-db
+    image: postgres:9.6
+    ports:
+        - 5431:5432
+    env_file: dev-env
+    networks:
+        - smi-network
+    volumes:
+        - master-pg-data:/var/lib/postgresql/data
+
+  master-api:
+    container_name: master-api
+    image: lappis/smi-master:0.9
+    env_file: dev-env
+    command: ["sh", "scripts/start.sh"]
+    ports:
+        - 8001:8001
+    networks:
+      - smi-network
+    volumes:
+        - .:/smi-master
+    depends_on:
+        - master-db
 
 volumes:
     master-pg-data: {}
