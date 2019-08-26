@@ -1,5 +1,5 @@
 import requests
-import datetime
+from datetime import datetime, timedelta
 
 
 def request_measurements(slave, transductor, start_date, measurement_type):
@@ -11,22 +11,14 @@ def request_measurements(slave, transductor, start_date, measurement_type):
         + slave.port\
         + endpoint
 
-    # Fix date interval
     params = {
         "serial_number": transductor.serial_number,
         "start_date": start_date,
-        "end_date": "2019-10-10"
-        # "end_date": datetime.date.today()
+        "end_date": datetime.now()
     }
 
-    response = requests.get(address, params)
-
-    print("###################")
-    print(response.content)
-    print("###################")
-
-    return response
-
+    return requests.get(address)
+#
 # def create_transductor(transductor, slave_server):
 #     protocol = "http://"
 #     endpoint = "/energy_transductors/"
