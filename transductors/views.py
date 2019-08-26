@@ -24,7 +24,7 @@ class EnergyTransductorViewSet(viewsets.ModelViewSet):
             slave_server = Slave.objects.get(
                 id=serializer_class.data["slave_id"]
             )
-            response = self.get_object().create_on_server(slave_server)
+            response = slave_server.add_transductor(self.get_object())
             return Response(data=json.loads(response.content),
                             status=response.status_code)
         else:

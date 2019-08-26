@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from slaves.models import Slave
 
 from .models import EnergyTransductor
 
