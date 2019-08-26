@@ -4,14 +4,14 @@ import datetime
 
 def request_measurements(slave, transductor, start_date, measurement_type):
     protocol = "http://"
-    endpoint = "/" + measurement_type +"_measurements/"
+    endpoint = "/" + measurement_type + "_measurements/"
     address = protocol\
         + slave.ip_address\
         + ":"\
         + slave.port\
         + endpoint
 
-    #Fix date interval
+    # Fix date interval
     params = {
         "serial_number": transductor.serial_number,
         "start_date": start_date,
