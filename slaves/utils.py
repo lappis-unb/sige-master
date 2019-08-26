@@ -1,5 +1,7 @@
+from .api import *
 from .models import Slave
 from transductors.models import EnergyTransductor
+from datetime import datetime, timedelta
 import urllib.request
 import json
 import os
@@ -45,3 +47,30 @@ class CheckTransductorsAndSlaves():
 
 # TODO Não sabemos como resolver essa comunicação
 # Transdutores em mais de um slave tem que ser tratados de forma diferente?
+
+class DataCollector():
+    @staticmethod
+    def get_measurements(*args, **kwargs):
+        slaves = Slave.objects.all()
+        start_date = datetime.strftime(datetime.now() - timedelta(1),
+                                       '%Y-%m-%d')
+
+        for slave in slaves:
+            print(slave.transductors.all())
+            for transductor in slave.transductors.all():
+                if kwargs.get('minutely', None):
+                    # Get response and save it in the master database
+                    request_measurements(slave,
+                                         transductor,
+                                         start_date,
+                                         "minutely")
+                if kwargs.get('quarterly', None):
+                    request_measurements(slave,
+                                         transductor,
+                                         start_date,
+                                         "quarterly")
+                if kwargs.get('monthly', None):
+                    request_measurements(slave,
+                                         transductor,
+                                         start_date,
+                                         "monthly")
