@@ -21,5 +21,8 @@ python3 manage.py migrate
 echo '======= RUNNING SEED'
 python3 seed_db.py
 
+echo '======= STARTING CRON'
+cron
+
 echo '======= RUNNING SERVER'
 python3 manage.py runserver 0.0.0.0:8001
