@@ -5,6 +5,9 @@ from datetime import datetime, timedelta
 import urllib.request
 import json
 import os
+from measurements.models import MinutelyMeasurement
+from measurements.models import QuarterlyMeasurement
+from measurements.models import MonthlyMeasurement
 
 
 class CheckTransductorsAndSlaves():
@@ -50,6 +53,102 @@ class CheckTransductorsAndSlaves():
 
 class DataCollector():
     @staticmethod
+    def build_monthly_measurements(msm, transductor):
+        MonthlyMeasurement.objects.create(
+            generated_energy_peak_time=msm['generated_energy_peak_time'],
+            generated_energy_off_peak_time=(
+                msm['generated_energy_off_peak_time']
+            ),
+            consumption_peak_time=msm['consumption_peak_time'],
+            consumption_off_peak_time=msm['consumption_off_peak_time'],
+            inductive_power_peak_time=msm['inductive_power_peak_time'],
+            inductive_power_off_peak_time=msm['inductive_power_off_peak_time'],
+            capacitive_power_peak_time=msm['capacitive_power_peak_time'],
+            capacitive_power_off_peak_time=(
+                msm['capacitive_power_off_peak_time']
+            ),
+            active_max_power_peak_time=msm['active_max_power_peak_time'],
+            active_max_power_off_peak_time=(
+                msm['active_max_power_off_peak_time']
+            ),
+            reactive_max_power_peak_time=msm['reactive_max_power_peak_time'],
+            reactive_max_power_off_peak_time=(
+                msm['reactive_max_power_off_peak_time']
+            ),
+            active_max_power_list_peak_time=(
+                msm['active_max_power_list_peak_time']
+            ),
+            active_max_power_list_off_peak_time=(
+                msm['active_max_power_list_off_peak_time']
+            ),
+            reactive_max_power_list_peak_time=(
+                msm['reactive_max_power_list_peak_time']
+            ),
+            reactive_max_power_list_off_peak_time=(
+                msm['reactive_max_power_list_off_peak_time']
+            ),
+            collection_time=msm['collection_date'],
+            transductor_id=transductor.serial_number
+        )
+
+    @staticmethod
+    def build_minutely_measurements(msm, transductor):
+        MinutelyMeasurement.objects.create(
+            frequency_a=msm['frequency_a'],
+            voltage_a=msm['voltage_a'],
+            voltage_b=msm['voltage_b'],
+            voltage_c=msm['voltage_c'],
+            current_b=msm['current_a'],
+            current_a=msm['current_b'],
+            current_c=msm['current_c'],
+            active_power_a=msm['active_power_a'],
+            active_power_b=msm['active_power_b'],
+            active_power_c=msm['active_power_c'],
+            total_active_power=msm['total_active_power'],
+            reactive_power_a=msm['reactive_power_a'],
+            reactive_power_b=msm['reactive_power_b'],
+            reactive_power_c=msm['reactive_power_c'],
+            total_reactive_power=msm['total_reactive_power'],
+            apparent_power_a=msm['apparent_power_a'],
+            apparent_power_b=msm['apparent_power_b'],
+            apparent_power_c=msm['apparent_power_c'],
+            total_apparent_power=msm['total_apparent_power'],
+            power_factor_a=msm['power_factor_a'],
+            power_factor_b=msm['power_factor_b'],
+            power_factor_c=msm['power_factor_c'],
+            total_power_factor=msm['total_power_factor'],
+            dht_voltage_a=msm['dht_voltage_a'],
+            dht_voltage_b=msm['dht_voltage_b'],
+            dht_voltage_c=msm['dht_voltage_c'],
+            dht_current_a=msm['dht_current_a'],
+            dht_current_b=msm['dht_current_b'],
+            dht_current_c=msm['dht_current_c'],
+            collection_time=msm['collection_date'],
+            transductor_id=transductor.serial_number
+        )
+
+    @staticmethod
+    def build_quarterly_measurements(msm, transductor):
+        QuarterlyMeasurement.objects.create(
+            generated_energy_peak_time=msm['generated_energy_peak_time'],
+            generated_energy_off_peak_time=(
+                msm['generated_energy_off_peak_time']
+            ),
+            consumption_peak_time=msm['consumption_peak_time'],
+            consumption_off_peak_time=msm['consumption_off_peak_time'],
+            inductive_power_peak_time=msm['inductive_power_peak_time'],
+            inductive_power_off_peak_time=(
+                msm['inductive_power_off_peak_time']
+            ),
+            capacitive_power_peak_time=msm['capacitive_power_peak_time'],
+            capacitive_power_off_peak_time=(
+                msm['capacitive_power_off_peak_time']
+            ),
+            collection_time=msm['collection_date'],
+            transductor_id=transductor.serial_number
+        )
+
+    @staticmethod
     def get_measurements(*args, **kwargs):
         slaves = Slave.objects.all()
 
@@ -68,47 +167,14 @@ class DataCollector():
 
                     for msm in measurements['results']:
                         # Create MinutelyMeasurement object
-
-                        from measurements.models import MinutelyMeasurement
                         try:
-                            MinutelyMeasurement.objects.create(
-                                frequency_a=msm['frequency_a'],
-                                voltage_a=msm['voltage_a'],
-                                voltage_b=msm['voltage_b'],
-                                voltage_c=msm['voltage_c'],
-                                current_b=msm['current_a'],
-                                current_a=msm['current_b'],
-                                current_c=msm['current_c'],
-                                active_power_a=msm['active_power_a'],
-                                active_power_b=msm['active_power_b'],
-                                active_power_c=msm['active_power_c'],
-                                total_active_power=msm['total_active_power'],
-                                reactive_power_a=msm['reactive_power_a'],
-                                reactive_power_b=msm['reactive_power_b'],
-                                reactive_power_c=msm['reactive_power_c'],
-                                total_reactive_power=msm['total_reactive_power'],
-                                apparent_power_a=msm['apparent_power_a'],
-                                apparent_power_b=msm['apparent_power_b'],
-                                apparent_power_c=msm['apparent_power_c'],
-                                total_apparent_power=msm['total_apparent_power'],
-                                power_factor_a=msm['power_factor_a'],
-                                power_factor_b=msm['power_factor_b'],
-                                power_factor_c=msm['power_factor_c'],
-                                total_power_factor=msm['total_power_factor'],
-                                dht_voltage_a=msm['dht_voltage_a'],
-                                dht_voltage_b=msm['dht_voltage_b'],
-                                dht_voltage_c=msm['dht_voltage_c'],
-                                dht_current_a=msm['dht_current_a'],
-                                dht_current_b=msm['dht_current_b'],
-                                dht_current_c=msm['dht_current_c'],
-                                collection_time=msm['collection_date'],
-                                transductor_id=transductor.serial_number
+                            DataCollector.build_minutely_measurements(
+                                msm, transductor
                             )
-
                             transductor.last_data_collection = datetime.now()
-                        except Exeption:
+                        except Exception as exception:
+                            print(exception)
                             pass
-
 
                 if kwargs.get('quarterly', None):
                     quarterly_response = request_measurements(
@@ -122,26 +188,13 @@ class DataCollector():
 
                     for msm in measurements['results']:
                         # Create QuarterlyMeasurement object
-
-                        from measurements.models import QuarterlyMeasurement
                         try:
-                            QuarterlyMeasurement.objects.create(
-                                generated_energy_peak_time=msm['generated_energy_peak_time'],
-                                generated_energy_off_peak_time=msm['generated_energy_off_peak_time'],
-                                consumption_peak_time=msm['consumption_peak_time'],
-                                consumption_off_peak_time=msm['consumption_off_peak_time'],
-                                inductive_power_peak_time=msm['inductive_power_peak_time'],
-                                inductive_power_off_peak_time=msm['inductive_power_off_peak_time'],
-                                capacitive_power_peak_time=msm['capacitive_power_peak_time'],
-                                capacitive_power_off_peak_time=msm['capacitive_power_off_peak_time'],
-                                collection_time=msm['collection_date'],
-                                transductor_id=transductor.serial_number
+                            DataCollector.build_quarterly_measurements(
+                                msm, transductor
                             )
-
                             transductor.last_data_collection = datetime.now()
                         except Exception:
                             pass
-
 
                 if kwargs.get('monthly', None):
                     monthly_response = request_measurements(
@@ -155,31 +208,10 @@ class DataCollector():
 
                     for msm in measurements['results']:
                         # Create MonthlyMeasurement object
-
-                        from measurements.models import MonthlyMeasurement
                         try:
-                            MonthlyMeasurement.objects.create(
-                                generated_energy_peak_time=msm['generated_energy_peak_time'],
-                                generated_energy_off_peak_time=msm['generated_energy_off_peak_time'],
-                                consumption_peak_time=msm['consumption_peak_time'],
-                                consumption_off_peak_time=msm['consumption_off_peak_time'],
-                                inductive_power_peak_time=msm['inductive_power_peak_time'],
-                                inductive_power_off_peak_time=msm['inductive_power_off_peak_time'],
-                                capacitive_power_peak_time=msm['capacitive_power_peak_time'],
-                                capacitive_power_off_peak_time=msm['capacitive_power_off_peak_time'],
-                                active_max_power_peak_time=msm['active_max_power_peak_time'],
-                                active_max_power_off_peak_time=msm['active_max_power_off_peak_time'],
-                                reactive_max_power_peak_time=msm['reactive_max_power_peak_time'],
-                                reactive_max_power_off_peak_time=msm['reactive_max_power_off_peak_time'],
-
-                                active_max_power_list_peak_time=msm['active_max_power_list_peak_time'],
-                                active_max_power_list_off_peak_time=msm['active_max_power_list_off_peak_time'],
-                                reactive_max_power_list_peak_time=msm['reactive_max_power_list_peak_time'],
-                                reactive_max_power_list_off_peak_time=msm['reactive_max_power_list_off_peak_time'],
-                                collection_time=msm['collection_date'],
-                                transductor_id=transductor.serial_number
+                            DataCollector.build_monthly_measurements(
+                                msm, transductor
                             )
-
                             transductor.last_data_collection = datetime.now()
                         except Exception:
                             pass
