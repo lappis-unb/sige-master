@@ -43,14 +43,23 @@ class Slave(models.Model):
         super(Slave, self).save(*args, **kwargs)
 
     def add_transductor(self, transductor):
-        self.transductors.add(transductor)
-        transductor.create_on_server(self)
+        response = transductor.create_on_server(self)
+        if self.__is_success_status(response.status_code):
+            self.transductors.add(transductor)
+        return response
 
     def remove_transductor(self, transductor):
         response = transductor.delete_on_server(self)
         if self.__successfully_deleted(response.status_code):
             self.transductors.remove(transductor)
         return response
+
+    # FIXME: Improve this
+    def __is_success_status(self, status):
+        if (status is not None) and (200 <= status < 300):
+            return True
+        else:
+            return False
 
     # FIXME: Improve this
     def __successfully_deleted(self, status):
