@@ -1,4 +1,4 @@
-from rest_framework import serializers, viewsets
+from rest_framework import serializers, viewsets, permissions
 
 from django.shortcuts import render
 
@@ -9,3 +9,4 @@ from .serializers import TransductorModelSerializer
 class TransductorModelViewSet(viewsets.ModelViewSet):
     queryset = TransductorModel.objects.all()
     serializer_class = TransductorModelSerializer
+    permission_classes = (permissions.AllowAny,)

@@ -12,3 +12,4 @@ pytest-cov==2.6.0
 pytest-watch==4.2.0
 pytest-django==3.4.5
 unipath==1.1
+requests==2.22.0
