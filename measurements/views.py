@@ -38,17 +38,20 @@ class MeasurementViewSet(mixins.RetrieveModelMixin,
 
 
 class MinutelyMeasurementViewSet(MeasurementViewSet):
-    queryset = MinutelyMeasurement.objects.all()
+    collect = MinutelyMeasurement.objects.select_related('transductor').all()
+    queryset = collect.order_by('id')
     serializer_class = MinutelyMeasurementSerializer
 
 
 class QuarterlyMeasurementViewSet(MeasurementViewSet):
-    queryset = QuarterlyMeasurement.objects.all()
+    collect = QuarterlyMeasurement.objects.select_related('transductor').all()
+    queryset = collect.order_by('id')
     serializer_class = QuarterlyMeasurementSerializer
 
 
 class MonthlyMeasurementViewSet(MeasurementViewSet):
-    queryset = MonthlyMeasurement.objects.all()
+    collect = MonthlyMeasurement.objects.select_related('transductor').all()
+    queryset = collect.order_by('id')
     serializer_class = MonthlyMeasurementSerializer
 
 
