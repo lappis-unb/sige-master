@@ -8,6 +8,9 @@ from .models import EnergyTransductor
 
 from .serializers import *
 
+from .pagination import PostLimitOffsetPagination
+from .pagination import PostPageNumberPagination
+
 
 class MeasurementViewSet(mixins.RetrieveModelMixin,
                          mixins.DestroyModelMixin,
@@ -41,18 +44,21 @@ class MinutelyMeasurementViewSet(MeasurementViewSet):
     collect = MinutelyMeasurement.objects.select_related('transductor').all()
     queryset = collect.order_by('id')
     serializer_class = MinutelyMeasurementSerializer
+    pagination_class = PostLimitOffsetPagination
 
 
 class QuarterlyMeasurementViewSet(MeasurementViewSet):
     collect = QuarterlyMeasurement.objects.select_related('transductor').all()
     queryset = collect.order_by('id')
     serializer_class = QuarterlyMeasurementSerializer
+    pagination_class = PostLimitOffsetPagination
 
 
 class MonthlyMeasurementViewSet(MeasurementViewSet):
     collect = MonthlyMeasurement.objects.select_related('transductor').all()
     queryset = collect.order_by('id')
     serializer_class = MonthlyMeasurementSerializer
+    pagination_class = PostLimitOffsetPagination
 
 
 class VoltageThreePhaseViewSet(MinutelyMeasurementViewSet):
