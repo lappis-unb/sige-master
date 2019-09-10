@@ -4,3 +4,5 @@ POSTGRES_DB=smi-master-dev
 POSTGRES_PORT=5432
 POSTGRES_HOST=master-db
 SLAVE_PORT=8000
+MASTER_SECRET_KEY=some-random-stuff
+ENVIRONMENT=development
