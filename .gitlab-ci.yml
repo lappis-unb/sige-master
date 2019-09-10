@@ -9,6 +9,8 @@ variables:
   POSTGRES_DB: smi-master-test
   POSTGRES_PORT: 5432
   POSTGRES_HOST: postgres
+  MASTER_SECRET_KEY: some-random-stuff
+  ENVIRONMENT: development
 
 before_script:
   - pip install -r requirements.txt
