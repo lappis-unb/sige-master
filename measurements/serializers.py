@@ -106,7 +106,7 @@ class MinutelyCurrentThreePhase(serializers.HyperlinkedModelSerializer):
                   'current_c')
 
 
-class MinutelyActivePowerThreePhase(serializers.HyperlinkedModelSerializer):
+class MinutelyActivePowerThreePhaseSerializer(serializers.HyperlinkedModelSerializer):
     """
     Class responsible to define a serializer which convert transductor
     active power fields data to JSON

@@ -12,7 +12,7 @@ from .serializers import QuarterlyMeasurementSerializer
 from .serializers import MonthlyMeasurementSerializer
 from .serializers import MinutelyVoltageThreePhase
 from .serializers import MinutelyCurrentThreePhase
-from .serializers import MinutelyActivePowerThreePhase
+from .serializers import MinutelyActivePowerThreePhaseSerializer
 from .serializers import MinutelyReactivePowerThreePhase
 from .serializers import MinutelyApparentPowerThreePhase
 from .serializers import MinutelyPowerFactorThreePhase
@@ -66,6 +66,17 @@ class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
                                   mixins.DestroyModelMixin,
                                   mixins.ListModelMixin,
                                   viewsets.GenericViewSet):
+    """
+    Class responsible to define a serializer which convert transductor
+    active power fields data to JSON
+
+    Attributes:
+
+        RetrieveModelMixin: The class that provide retrieve method
+        DestroyModelMixin: The class that provide destroy method
+        ListModelMixin: The class that provide list method
+        GenericViewSet: The class that make mixin useful
+    """
     queryset = QuarterlyMeasurement.objects.all()
     serializer_class = QuarterlyMeasurementSerializer
 
@@ -87,7 +98,7 @@ class MinutelyCurrentThreePhaseViewSet(MinutelyMeasurementViewSet):
 
 
 class MinutelyActivePowerThreePhaseViewSet(MinutelyMeasurementViewSet):
-    serializer_class = MinutelyActivePowerThreePhase
+    serializer_class = MinutelyActivePowerThreePhaseSerializer
 
 
 class MinutelyReactivePowerThreePhaseViewSet(MinutelyMeasurementViewSet):
