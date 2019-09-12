@@ -107,6 +107,22 @@ class MinutelyCurrentThreePhase(serializers.HyperlinkedModelSerializer):
 
 
 class MinutelyActivePowerThreePhase(serializers.HyperlinkedModelSerializer):
+    """
+    Class responsible to define a serializer which convert transductor
+    active power fields data to JSON
+
+    Attributes:
+
+        model (MinutelyMeasurement): The model which defines the type of measurement.
+        field (tuple): The attributes which define a active transductor.
+            .. note::
+                The tuple elements must be of str type.
+
+    Example of use:
+
+    >>> queryset = MinutelyMeasurement.objects.all()
+        serializer_class = MinutelyMeasurementSerializer
+    """
     class Meta:
         model = MinutelyMeasurement
         fields = ('id',
