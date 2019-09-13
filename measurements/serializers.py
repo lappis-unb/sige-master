@@ -127,7 +127,7 @@ class MinutelyActivePowerThreePhaseSerializer(serializers.HyperlinkedModelSerial
         model = MinutelyMeasurement
         fields = ('id',
                   'transductor',
-                  'collection_date',
+                  'collection_time',
                   'active_power_a',
                   'active_power_b',
                   'active_power_c')
