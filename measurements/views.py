@@ -58,17 +58,8 @@ class MinutelyMeasurementViewSet(mixins.RetrieveModelMixin,
                                  mixins.DestroyModelMixin,
                                  mixins.ListModelMixin,
                                  viewsets.GenericViewSet):
-    queryset = MinutelyMeasurement.objects.all()
-    serializer_class = MinutelyMeasurementSerializer
-
-
-class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
-                                  mixins.DestroyModelMixin,
-                                  mixins.ListModelMixin,
-                                  viewsets.GenericViewSet):
     """
-    Class responsible to define a serializer which convert transductor
-    active power fields data to JSON
+    A ViewSet class responsible for the minutely measurement endpoint creation   
 
     Attributes:
 
@@ -77,6 +68,14 @@ class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
         ListModelMixin: The class that provide list method
         GenericViewSet: The class that make mixin useful
     """
+    queryset = MinutelyMeasurement.objects.all()
+    serializer_class = MinutelyMeasurementSerializer
+
+
+class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
+                                  mixins.DestroyModelMixin,
+                                  mixins.ListModelMixin,
+                                  viewsets.GenericViewSet):
     queryset = QuarterlyMeasurement.objects.all()
     serializer_class = QuarterlyMeasurementSerializer
 
