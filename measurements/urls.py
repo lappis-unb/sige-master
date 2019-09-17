@@ -18,3 +18,8 @@ graph_router.register(
     VoltageThreePhaseViewSet,
     basename='minutelyvoltage'
 )
+graph_router.register(
+    r'minutely_threephase_current',
+    CurrentThreePhaseViewSet,
+    basename='minutelycurrent'
+)
