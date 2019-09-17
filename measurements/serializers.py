@@ -128,15 +128,18 @@ class MinutelyReactivePowerThreePhase(serializers.HyperlinkedModelSerializer):
                   'reactive_power_c')
 
 
-class MinutelyApparentPowerThreePhaseSerializer(serializers.HyperlinkedModelSerializer):
+class MinutelyApparentPowerThreePhaseSerializer(
+        serializers.HyperlinkedModelSerializer):
     """
     Class responsible to define a serializer which convert apparent
     three phase transductor fields data to JSON
 
     Attributes:
 
-        model (MinutelyMeasurement): The model which defines the type of measurement.
-        field (tuple): The attributes which define an apparent three phase transductor.
+        model (MinutelyMeasurement): The model which defines the type of
+        measurement.
+        field (tuple): The attributes which define an apparent three phase
+        transductor.
             .. note::
                 The tuple elements must be of str type.
 

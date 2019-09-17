@@ -1,5 +1,5 @@
 import pytest
-from django.test import TestCase
+from django.test import TestCase, Client
 from django.conf import settings
 from django.db import IntegrityError
 
@@ -48,39 +48,7 @@ class MeasurementsTestCase(TestCase):
 
         self.serializer_context = {"request": Request(self.request)}
 
-    def test_should_three_phase_aparent_serializer(self):
-        atp_serializer = MinutelyApparentPowerThreePhaseSerializer(
-            instance=self.minutely_measurements, context=self.serializer_context
-        ).data
+    def test_should_three_phase_aparent_request(self):
         self.assertEqual(
-            set(atp_serializer.keys()),
-            set(
-                [
-                    "id",
-                    "transductor",
-                    "collection_time",
-                    "apparent_power_a",
-                    "apparent_power_b",
-                    "apparent_power_c",
-                ]
-            ),
-        )
-
-    def test_should_not_three_phase_aparent_serializer(self):
-        atp_serializer = MinutelyApparentPowerThreePhaseSerializer(
-            instance=self.minutely_measurements, context=self.serializer_context
-        ).data
-        self.assertNotEqual(
-            set(atp_serializer.keys()),
-            set(
-                [
-                    "id",
-                    "transductor",
-                    "collection_time",
-                    "apparent_power_a",
-                    "apparent_power_b",
-                    "apparent_power_c",
-                    "current_a",
-                ]
-            ),
+            self.client.get("/chart/minutely_apparent_power/").status_code, 200
         )
