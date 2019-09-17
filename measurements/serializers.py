@@ -106,14 +106,16 @@ class MinutelyCurrentThreePhase(serializers.HyperlinkedModelSerializer):
                   'current_c')
 
 
-class MinutelyActivePowerThreePhaseSerializer(serializers.HyperlinkedModelSerializer):
+class MinutelyActivePowerThreePhaseSerializer(
+        serializers.HyperlinkedModelSerializer):
     """
     Class responsible to define a serializer which convert transductor
     active power fields data to JSON
 
     Attributes:
 
-        model (MinutelyMeasurement): The model which defines the type of measurement.
+        model (MinutelyMeasurement): The model which defines 
+                                     the type of measurement.
         field (tuple): The attributes which define a active transductor.
             .. note::
                 The tuple elements must be of str type.
