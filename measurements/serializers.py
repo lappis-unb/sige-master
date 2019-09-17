@@ -105,3 +105,12 @@ class CurrentThreePhaseSerializer(MinutelyMeasurementSerializer):
             'current_b',
             'current_c'
         )
+
+class FrequencySerializer(MinutelyMeasurementSerializer):
+    class Meta:
+        fields = (
+            'id',
+            'transductor',
+            'collection_time',
+            'frequency_a'
+        )
