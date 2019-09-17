@@ -14,7 +14,7 @@ from .serializers import MinutelyVoltageThreePhase
 from .serializers import MinutelyCurrentThreePhase
 from .serializers import MinutelyActivePowerThreePhase
 from .serializers import MinutelyReactivePowerThreePhase
-from .serializers import MinutelyApparentPowerThreePhase
+from .serializers import MinutelyApparentPowerThreePhaseSerializer
 from .serializers import MinutelyPowerFactorThreePhase
 from .serializers import MinutelyDHTVoltageThreePhase
 from .serializers import MinutelyDHTCurrentThreePhase
@@ -95,7 +95,7 @@ class MinutelyReactivePowerThreePhaseViewSet(MinutelyMeasurementViewSet):
 
 
 class MinutelyApparentPowerThreePhaseViewSet(MinutelyMeasurementViewSet):
-    serializer_class = MinutelyApparentPowerThreePhase
+    serializer_class = MinutelyApparentPowerThreePhaseSerializer
 
 
 class MinutelyPowerFactorThreePhaseViewSet(MinutelyMeasurementViewSet):

@@ -88,7 +88,7 @@ class MinutelyVoltageThreePhase(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = MinutelyMeasurement
         fields = ('id',
-                  'collection_date',
+                  'collection_time',
                   'transductor',
                   'voltage_a',
                   'voltage_b',
@@ -100,7 +100,7 @@ class MinutelyCurrentThreePhase(serializers.HyperlinkedModelSerializer):
         model = MinutelyMeasurement
         fields = ('id',
                   'transductor',
-                  'collection_date',
+                  'collection_time',
                   'current_a',
                   'current_b',
                   'current_c')
@@ -111,7 +111,7 @@ class MinutelyActivePowerThreePhase(serializers.HyperlinkedModelSerializer):
         model = MinutelyMeasurement
         fields = ('id',
                   'transductor',
-                  'collection_date',
+                  'collection_time',
                   'active_power_a',
                   'active_power_b',
                   'active_power_c')
@@ -122,18 +122,34 @@ class MinutelyReactivePowerThreePhase(serializers.HyperlinkedModelSerializer):
         model = MinutelyMeasurement
         fields = ('id',
                   'transductor',
-                  'collection_date',
+                  'collection_time',
                   'reactive_power_a',
                   'reactive_power_b',
                   'reactive_power_c')
 
 
-class MinutelyApparentPowerThreePhase(serializers.HyperlinkedModelSerializer):
+class MinutelyApparentPowerThreePhaseSerializer(serializers.HyperlinkedModelSerializer):
+    """
+    Class responsible to define a serializer which convert apparent
+    three phase transductor fields data to JSON
+
+    Attributes:
+
+        model (MinutelyMeasurement): The model which defines the type of measurement.
+        field (tuple): The attributes which define an apparent three phase transductor.
+            .. note::
+                The tuple elements must be of str type.
+
+    Example of use:
+
+    >>> queryset = MinutelyMeasurement.objects.all()
+        serializer_class = MinutelyApparentPowerThreePhase
+    """
     class Meta:
         model = MinutelyMeasurement
         fields = ('id',
                   'transductor',
-                  'collection_date',
+                  'collection_time',
                   'apparent_power_a',
                   'apparent_power_b',
                   'apparent_power_c')
@@ -144,7 +160,7 @@ class MinutelyPowerFactorThreePhase(serializers.HyperlinkedModelSerializer):
         model = MinutelyMeasurement
         fields = ('id',
                   'transductor',
-                  'collection_date',
+                  'collection_time',
                   'power_factor_a',
                   'power_factor_b',
                   'power_factor_c')
@@ -155,7 +171,7 @@ class MinutelyDHTVoltageThreePhase(serializers.HyperlinkedModelSerializer):
         model = MinutelyMeasurement
         fields = ('id',
                   'transductor',
-                  'collection_date',
+                  'collection_time',
                   'dht_voltage_a',
                   'dht_voltage_b',
                   'dht_voltage_c')
@@ -166,7 +182,7 @@ class MinutelyDHTCurrentThreePhase(serializers.HyperlinkedModelSerializer):
         model = MinutelyMeasurement
         fields = ('id',
                   'transductor',
-                  'collection_date',
+                  'collection_time',
                   'dht_current_a',
                   'dht_current_b',
                   'dht_current_c')
@@ -177,7 +193,7 @@ class MinutelyFrequency(serializers.HyperlinkedModelSerializer):
         model = MinutelyMeasurement
         fields = ('id',
                   'transductor',
-                  'collection_date',
+                  'collection_time',
                   'frequency_a')
 
 
@@ -186,7 +202,7 @@ class MinutelyTotalActivePower(serializers.HyperlinkedModelSerializer):
         model = MinutelyMeasurement
         fields = ('id',
                   'transductor',
-                  'collection_date',
+                  'collection_time',
                   'total_active_power')
 
 
@@ -195,7 +211,7 @@ class MinutelyTotalReactivePower(serializers.HyperlinkedModelSerializer):
         model = MinutelyMeasurement
         fields = ('id',
                   'transductor',
-                  'collection_date',
+                  'collection_time',
                   'total_reactive_power')
 
 
@@ -204,7 +220,7 @@ class MinutelyTotalApparentPower(serializers.HyperlinkedModelSerializer):
         model = MinutelyMeasurement
         fields = ('id',
                   'transductor',
-                  'collection_date',
+                  'collection_time',
                   'total_apparent_power')
 
 
@@ -213,5 +229,5 @@ class MinutelyTotalPowerFactor(serializers.HyperlinkedModelSerializer):
         model = MinutelyMeasurement
         fields = ('id',
                   'transductor',
-                  'collection_date',
+                  'collection_time',
                   'total_power_factor')

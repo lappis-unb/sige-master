@@ -10,6 +10,7 @@ from slaves.models import Slave
 from transductors.models import EnergyTransductor
 from transductor_models.models import TransductorModel
 from datetime import datetime
+from django.utils import timezone
 
 
 class MeasurementsTestCase(TestCase):
@@ -35,7 +36,7 @@ class MeasurementsTestCase(TestCase):
 
         self.transductor.slave_servers.add(self.slave)
 
-        self.time = datetime.now()
+        self.time = timezone.now()
 
         self.minutely_measurements = MinutelyMeasurement.objects.create(
             transductor=self.transductor,
@@ -58,7 +59,7 @@ class MeasurementsTestCase(TestCase):
         before = len(MinutelyMeasurement.objects.all())
         MinutelyMeasurement.objects.create(
             transductor=self.transductor,
-            collection_time=datetime.now()
+            collection_time=timezone.now()
         )
         after = len(MinutelyMeasurement.objects.all())
 
@@ -74,7 +75,7 @@ class MeasurementsTestCase(TestCase):
 
     def test_should_not_create_minutely_measurement_without_transductor(self):
         new_measurement = MinutelyMeasurement()
-        new_measurement.collection_time = datetime.now()
+        new_measurement.collection_time = timezone.now()
 
         with self.assertRaises(IntegrityError):
             new_measurement.save()
@@ -88,7 +89,7 @@ class MeasurementsTestCase(TestCase):
         before = len(QuarterlyMeasurement.objects.all())
         QuarterlyMeasurement.objects.create(
             transductor=self.transductor,
-            collection_time=datetime.now()
+            collection_time=timezone.now()
         )
         after = len(QuarterlyMeasurement.objects.all())
 
@@ -104,7 +105,7 @@ class MeasurementsTestCase(TestCase):
 
     def test_should_not_create_quarterly_measurement_without_transductor(self):
         new_measurement = QuarterlyMeasurement()
-        new_measurement.collection_time = datetime.now()
+        new_measurement.collection_time = timezone.now()
 
         with self.assertRaises(IntegrityError):
             new_measurement.save()
@@ -118,7 +119,7 @@ class MeasurementsTestCase(TestCase):
         before = len(MonthlyMeasurement.objects.all())
         MonthlyMeasurement.objects.create(
             transductor=self.transductor,
-            collection_time=datetime.now()
+            collection_time=timezone.now()
         )
         after = len(MonthlyMeasurement.objects.all())
 
@@ -134,7 +135,7 @@ class MeasurementsTestCase(TestCase):
 
     def test_should_not_create_monthly_measurement_without_transductor(self):
         new_measurement = MonthlyMeasurement()
-        new_measurement.collection_time = datetime.now()
+        new_measurement.collection_time = timezone.now()
 
         with self.assertRaises(IntegrityError):
             new_measurement.save()
