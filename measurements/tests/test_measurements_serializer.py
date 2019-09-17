@@ -1,7 +1,7 @@
 import pytest
 from rest_framework.request import Request
 from rest_framework.test import APIRequestFactory
-from django.test import TestCase
+from django.test import Client, TestCase
 from django.conf import settings
 from django.db import IntegrityError
 
@@ -42,7 +42,7 @@ class MeasurementsSerializerTestCase(TestCase):
             collection_time=self.time
         )
 
-    def test_should_retrive_active_power(self):
+    def test_should_serialize_active_power(self):
         factory = APIRequestFactory()
         request = factory.get('/')
 
@@ -55,4 +55,20 @@ class MeasurementsSerializerTestCase(TestCase):
 
         self.assertEqual(set(self.serializer.data.keys()), set(['id','transductor','collection_time','active_power_a','active_power_b','active_power_c']))
 
+    
+    def test_should_not_serialize_active_power(self):
+        factory = APIRequestFactory()
+        request = factory.get('/')
 
+        self.active_power = MinutelyMeasurement.objects.create(
+            transductor=self.transductor,
+            collection_time=datetime.now()
+        )
+
+        self.serializer = MinutelyActivePowerThreePhaseSerializer(instance=self.active_power, context={'request': Request(request)})
+
+        self.assertNotEqual(set(self.serializer.data.keys()), set(['id','transductor','collection_date','active_power_a','active_power_b','active_power_c']))
+
+
+    def test_should_get_active_power(self):
+        self.assertEqual(self.client.get('/chart/minutely_active_power/').status_code, 200)
