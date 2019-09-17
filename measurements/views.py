@@ -63,3 +63,11 @@ class MonthlyMeasurementViewSet(MeasurementViewSet):
 
 class VoltageThreePhaseViewSet(MinutelyMeasurementViewSet):
     serializer_class = VoltageThreePhaseSerializer
+
+
+class CurrentThreePhaseViewSet(MinutelyMeasurementViewSet):
+    serializer_class = CurrentThreePhaseSerializer
+
+
+class FrequencyViewSet(MinutelyMeasurementViewSet):
+    serializer_class = FrequencySerializer

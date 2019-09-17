@@ -18,3 +18,13 @@ graph_router.register(
     VoltageThreePhaseViewSet,
     basename='minutelyvoltage'
 )
+graph_router.register(
+    r'minutely_threephase_current',
+    CurrentThreePhaseViewSet,
+    basename='minutelycurrent'
+)
+graph_router.register(
+    r'minutely_frequency',
+    FrequencyViewSet,
+    basename='minutelyfrequency'
+)

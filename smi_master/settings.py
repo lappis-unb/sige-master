@@ -16,10 +16,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = env('MASTER_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-if env('ENVIRONMENT') == 'production':
-    DEBUG = True
-else:
+if env('ENVIRONMENT') is 'production':
     DEBUG = False
+else:
+    DEBUG = True
 
 PROJECT_DIR = Path(__file__).parent.parent
 LOGGING = {
