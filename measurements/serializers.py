@@ -117,7 +117,8 @@ class MinutelyActivePowerThreePhase(serializers.HyperlinkedModelSerializer):
                   'active_power_c')
 
 
-class MinutelyReactivePowerThreePhase(serializers.HyperlinkedModelSerializer):
+class MinutelyReactivePowerThreePhaseSerializer(
+      serializers.HyperlinkedModelSerializer):
     class Meta:
         model = MinutelyMeasurement
         fields = ('id',
