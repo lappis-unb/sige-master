@@ -95,6 +95,15 @@ class MinutelyReactivePowerThreePhaseViewSet(MinutelyMeasurementViewSet):
 
 
 class MinutelyApparentPowerThreePhaseViewSet(MinutelyMeasurementViewSet):
+    """
+    A ViewSet class responsible to get the minutely apparent power
+    three phase
+
+    Attributes:
+
+        MinutelyMeasurementViewSet:  a ViewSet class responsible for the
+        minutely measurement
+    """
     serializer_class = MinutelyApparentPowerThreePhaseSerializer
 
 
