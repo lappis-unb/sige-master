@@ -14,7 +14,7 @@ class MeasurementsEndPointsTestCase(TestCase):
         self.__user.save()
         self.__credentials = ("admin", "admin")
         self.__api_client = APIClient()
-        self.__reactive_power_minutely_end_point = "/chart/minutely"
+        self.__reactive_power_minutely_end_point = "/graph/minutely"
         self.__reactive_power_minutely_end_point += "_reactive_power/"
 
     def test_get_with_auth_reactive_power_minutely_end_point(self):

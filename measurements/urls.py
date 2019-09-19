@@ -2,7 +2,6 @@ from .views import *
 
 from rest_framework import routers
 
-
 app_name = "minutely_measurements"
 
 router = routers.DefaultRouter()
@@ -31,78 +30,78 @@ graph_router.register(
 
 graph_router.register(
     r'minutely_voltage',
-    measurements_views.MinutelyVoltageThreePhaseViewSet,
+    MinutelyVoltageThreePhaseViewSet,
     basename='minutelyvoltage'
 )
 
 graph_router.register(
     r'minutely_current',
-    measurements_views.MinutelyCurrentThreePhaseViewSet,
+    MinutelyCurrentThreePhaseViewSet,
     basename='minutelycurrent'
 )
 
 graph_router.register(
     r'minutely_active_power',
-    measurements_views.MinutelyActivePowerThreePhaseViewSet,
+    MinutelyActivePowerThreePhaseViewSet,
     basename='minutelyactivepower'
 )
 
 graph_router.register(
     r'minutely_reactive_power',
-    measurements_views.MinutelyReactivePowerThreePhaseViewSet,
+    MinutelyReactivePowerThreePhaseViewSet,
     basename='minutelyreactivepower'
 )
 
 graph_router.register(
     r'minutely_apparent_power',
-    measurements_views.MinutelyApparentPowerThreePhaseViewSet,
+    MinutelyApparentPowerThreePhaseViewSet,
     basename='minutelyapparentpower'
 )
 
 graph_router.register(
     r'minutely_power_factor',
-    measurements_views.MinutelyPowerFactorThreePhaseViewSet,
+    MinutelyPowerFactorThreePhaseViewSet,
     basename='minutelypowerfactor'
 )
 
 graph_router.register(
     r'minutely_dht_voltage',
-    measurements_views.MinutelyDHTVoltageThreePhaseViewSet,
+    MinutelyDHTVoltageThreePhaseViewSet,
     basename='minutelydhtvoltage'
 )
 
 graph_router.register(
     r'minutely_dht_current',
-    measurements_views.MinutelyDHTCurrentThreePhaseViewSet,
+    MinutelyDHTCurrentThreePhaseViewSet,
     basename='minutelydhtcurrent'
 )
 
 graph_router.register(
     r'minutely_frequency',
-    measurements_views.MinutelyFrequencyViewSet,
+    MinutelyFrequencyViewSet,
     basename='minutelyfrequency'
 )
 
 graph_router.register(
     r'minutely_total_active_power',
-    measurements_views.MinutelyTotalActivePowerViewSet,
+    MinutelyTotalActivePowerViewSet,
     basename='minutelytotalactivepower'
 )
 
 graph_router.register(
     r'minutely_total_reactive_power',
-    measurements_views.MinutelyTotalReactivePowerViewSet,
+    MinutelyTotalReactivePowerViewSet,
     basename='minutelytotalreactivepower'
 )
 
 graph_router.register(
     r'minutely_total_apparent_power',
-    measurements_views.MinutelyTotalApparentPowerViewSet,
+    MinutelyTotalApparentPowerViewSet,
     basename='minutelytotalapparentpower'
 )
 
 graph_router.register(
     r'minutely_total_power_factor',
-    measurements_views.MinutelyTotalPowerFactorViewSet,
+    MinutelyTotalPowerFactorViewSet,
     basename='minutelytotalpowerfactor'
 )
