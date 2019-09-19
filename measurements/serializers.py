@@ -119,6 +119,8 @@ class FrequencySerializer(MinutelyMeasurementSerializer):
             'collection_time',
             'frequency_a'
         )
+
+
 class MinutelyVoltageThreePhase(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = MinutelyMeasurement
