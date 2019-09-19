@@ -11,11 +11,15 @@ from transductors.models import Transductor, EnergyTransductor
 
 class TransductorTestCase(TestCase):
     def setUp(self):
-        self.sample_transductor_model = TransductorModel.objects.create(
-            name='TR4020',
-            transport_protocol='UDP',
-            serial_protocol='ModbusRTU'
-        )
+        self.sample_transductor_model = TransductorModel()
+        self.sample_transductor_model.model_code = "987654321"
+        self.sample_transductor_model.name = "TR4020"
+        self.sample_transductor_model.serial_protocol = "UDP"
+        self.sample_transductor_model.transport_protocol = "modbus"
+        self.sample_transductor_model.minutely_register_addresses = [[1, 1]]
+        self.sample_transductor_model.quarterly_register_addresses = [[1, 1]]
+        self.sample_transductor_model.monthly_register_addresses = [[1, 1]]
+        self.sample_transductor_model.save(bypass_requests=True)
 
         self.sample_energy_transductor = EnergyTransductor.objects.create(
             serial_number='87654321',

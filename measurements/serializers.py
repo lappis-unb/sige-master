@@ -84,6 +84,41 @@ class MonthlyMeasurementSerializer(serializers.HyperlinkedModelSerializer):
                   'url')
 
 
+class VoltageThreePhaseSerializer(MinutelyMeasurementSerializer):
+    class Meta:
+        model = MinutelyMeasurement
+        fields = (
+            'id',
+            'transductor',
+            'collection_time',
+            'voltage_a',
+            'voltage_b',
+            'voltage_c'
+        )
+
+
+class CurrentThreePhaseSerializer(MinutelyMeasurementSerializer):
+    class Meta:
+        model = MinutelyMeasurement
+        fields = (
+            'id',
+            'transductor',
+            'collection_time',
+            'current_a',
+            'current_b',
+            'current_c'
+        )
+
+
+class FrequencySerializer(MinutelyMeasurementSerializer):
+    class Meta:
+        model = MinutelyMeasurement
+        fields = (
+            'id',
+            'transductor',
+            'collection_time',
+            'frequency_a'
+        )
 class MinutelyVoltageThreePhase(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = MinutelyMeasurement

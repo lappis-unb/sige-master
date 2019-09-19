@@ -1,3 +1,4 @@
+from .api import *
 from django.db import models
 from datetime import datetime
 from polymorphic.models import PolymorphicModel
@@ -28,6 +29,7 @@ class Transductor(PolymorphicModel):
         TransductorModel,
         blank=False,
         null=False,
+        db_column="model_code",
         on_delete=models.PROTECT,
         related_name='transductors'
     )
@@ -40,30 +42,82 @@ class Transductor(PolymorphicModel):
 
     def save(self, *args, **kwargs):
         self.full_clean()
-        super(Transductor, self).save(*args, **kwargs)
+        super(Transductor, self).save()
+
+    def update(self, *args, **kwargs):
+        self.full_clean()
+
+        failed = False
+
+        for slave in self.slave_servers.all():
+            if not kwargs.get('bypass_requests', None):
+                response = update_transductor(self, slave)
+                if not self.__is_success_status(response.status_code):
+                    failed = True
+
+        if not failed:
+            super(Transductor, self).save()
+        else:
+            # FIXME: Raise exception
+            print("Couldn't update this transductor in all Slave Servers")
+
+    def delete(self, *args, **kwargs):
+        self.active = False
+
+        failed = False
+        for slave in self.slave_servers.all():
+            if not kwargs.get('bypass_requests', None):
+                response = slave.remove_transductor(self)
+                if not self.__successfully_deleted(response.status_code):
+                    failed = True
+
+        if not failed:
+            self.full_clean()
+            super(Transductor, self).delete()
+        else:
+            # FIXME: Raise exception
+            print("Couldn't delete this transductor in all Slave Servers")
 
     def get_measurements(self, datetime):
         raise NotImplementedError
 
     def activate(self):
         if(len(self.slave_servers.all()) > 0):
-            print("Successfully activated!")
             self.active = True
         else:
-            print("Can't activate a transductor with no slave associated!")
             self.active = False
 
     def get_active_status(self):
         self.activate()
         return self.active
 
+    def create_on_server(self, slave_server):
+        return create_transductor(self, slave_server)
+
+    def delete_on_server(self, slave_server):
+        return delete_transductor(self, slave_server)
+
     def collect_broken_status(self):
         return self.broken
+
+    # FIXME: Improve this
+    def __is_success_status(self, status):
+        if (status is not None) and (200 <= status < 300):
+            return True
+        else:
+            return False
+
+    # FIXME: Improve this
+    def __successfully_deleted(self, status):
+        if (status is not None) and ((200 <= status < 300) or (status == 404)):
+            return True
+        else:
+            return False
 
 
 class EnergyTransductor(Transductor):
     def __str__(self):
-        return 'Transductor: '
+        return 'Energy Transductor: '
         + self.name
         + ' Serial number #'
         + self.serial_number
