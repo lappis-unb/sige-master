@@ -36,6 +36,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('login/', login),
     path('', include(router.urls)),
-    path('graph/', include(measurements_routes.graph_router.urls))
-    path('chart/', include(single_router.urls)),
+    path('graph/', include(measurements_routes.graph_router.urls)),
 ]
