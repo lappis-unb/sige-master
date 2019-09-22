@@ -233,6 +233,8 @@ class MinutelyTotalPowerFactor(serializers.HyperlinkedModelSerializer):
                   'transductor',
                   'collection_date',
                   'total_power_factor')
+
+
 class VoltageThreePhaseSerializer(MinutelyMeasurementSerializer):
     class Meta:
         model = MinutelyMeasurement
