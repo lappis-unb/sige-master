@@ -13,10 +13,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'dw%46&k@_hx-qw@m+5p7p)2t13q-6^5pmw!4+5p_hw!l62v)wk'
+SECRET_KEY = env('MASTER_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+if env('ENVIRONMENT') is 'production':
+    DEBUG = False
+else:
+    DEBUG = True
 
 PROJECT_DIR = Path(__file__).parent.parent
 LOGGING = {
@@ -38,9 +41,7 @@ LOGGING = {
     },
 }
 
-ALLOWED_HOSTS = [
-    '*'
-]
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -53,6 +54,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.postgres',
+    'django_cron',
     'polymorphic',
     'rest_framework',
     'rest_framework.authtoken',
@@ -91,6 +93,11 @@ TEMPLATES = [
             ],
         },
     },
+]
+
+CRON_CLASSES = [
+    "slaves.cronjob.CheckTransductorBrokenCronjob",
+    "slaves.cronjob.GetAllMeasurementsCronjob"
 ]
 
 WSGI_APPLICATION = 'smi_master.wsgi.application'

@@ -14,7 +14,8 @@ services:
 
     master-api:
         container_name: master-api
-        image: lappis/smi-master:0.9
+        # image: lappis/smi-master:latest
+        build: .
         env_file: dev-env
         command: ["sh", "scripts/start.sh"]
         ports:

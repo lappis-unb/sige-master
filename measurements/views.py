@@ -6,27 +6,14 @@ from .models import Measurement
 from .models import MinutelyMeasurement
 from .models import QuarterlyMeasurement
 from .models import MonthlyMeasurement
+from .models import EnergyTransductor
 
-from .serializers import MinutelyMeasurementSerializer
-from .serializers import QuarterlyMeasurementSerializer
-from .serializers import MonthlyMeasurementSerializer
-from .serializers import MinutelyVoltageThreePhase
-from .serializers import MinutelyCurrentThreePhase
-from .serializers import MinutelyActivePowerThreePhaseSerializer
-from .serializers import MinutelyReactivePowerThreePhase
-from .serializers import MinutelyApparentPowerThreePhase
-from .serializers import MinutelyPowerFactorThreePhase
-from .serializers import MinutelyDHTVoltageThreePhase
-from .serializers import MinutelyDHTCurrentThreePhase
-from .serializers import MinutelyFrequency
-from .serializers import MinutelyTotalActivePower
-from .serializers import MinutelyTotalReactivePower
-from .serializers import MinutelyTotalApparentPower
-from .serializers import MinutelyTotalPowerFactor
+from .serializers import *
+
+from .pagination import PostLimitOffsetPagination
+from .pagination import PostPageNumberPagination
 
 
-#  this viewset don't inherits from viewsets.ModelViewSet because it
-#  can't have update and create methods so it only inherits from parts of it
 class MeasurementViewSet(mixins.RetrieveModelMixin,
                          mixins.DestroyModelMixin,
                          mixins.ListModelMixin,
@@ -39,11 +26,12 @@ class MeasurementViewSet(mixins.RetrieveModelMixin,
         serial_number = self.request.query_params.get('serial_number', None)
 
         if serial_number is not None:
-            transductor = EnergyTransductor.objects.get(
-                serial_number=serial_number
-            )
-
-            self.queryset = self.queryset.filter(transductor=transductor)
+            try:
+                transductor = EnergyTransductor.objects.get(
+                    serial_number=serial_number
+                )
+            except EnergyTransductor.DoesNotExist:
+                return []
 
         if((start_date is not None) and (end_date is not None)):
             self.queryset = self.queryset.filter(
@@ -54,37 +42,30 @@ class MeasurementViewSet(mixins.RetrieveModelMixin,
         return self.queryset.reverse()
 
 
-class MinutelyMeasurementViewSet(mixins.RetrieveModelMixin,
-                                 mixins.DestroyModelMixin,
-                                 mixins.ListModelMixin,
-                                 viewsets.GenericViewSet):
+class MinutelyMeasurementViewSet(MeasurementViewSet):
     """
     A ViewSet class responsible for the minutely measurement endpoint creation   
 
     Attributes:
 
-        RetrieveModelMixin: The class that provide retrieve method
-        DestroyModelMixin: The class that provide destroy method
-        ListModelMixin: The class that provide list method
-        GenericViewSet: The class that make mixin useful
+        MeasurementViewSet: inherit from MeasurementViewSet
     """
-    queryset = MinutelyMeasurement.objects.all()
+    collect = MinutelyMeasurement.objects.select_related('transductor').all()
+    queryset = collect.order_by('id')
     serializer_class = MinutelyMeasurementSerializer
+    pagination_class = PostLimitOffsetPagination
 
 
-class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
-                                  mixins.DestroyModelMixin,
-                                  mixins.ListModelMixin,
-                                  viewsets.GenericViewSet):
-    queryset = QuarterlyMeasurement.objects.all()
+class QuarterlyMeasurementViewSet(MeasurementViewSet):
+    collect = QuarterlyMeasurement.objects.select_related('transductor').all()
+    queryset = collect.order_by('id')
     serializer_class = QuarterlyMeasurementSerializer
+    pagination_class = PostLimitOffsetPagination
 
 
-class MonthlyMeasurementViewSet(mixins.RetrieveModelMixin,
-                                mixins.DestroyModelMixin,
-                                mixins.ListModelMixin,
-                                viewsets.GenericViewSet):
-    queryset = MonthlyMeasurement.objects.all()
+class MonthlyMeasurementViewSet(MeasurementViewSet):
+    collect = MonthlyMeasurement.objects.select_related('transductor').all()
+    queryset = collect.order_by('id')
     serializer_class = MonthlyMeasurementSerializer
 
 
@@ -138,3 +119,16 @@ class MinutelyTotalApparentPowerViewSet(MinutelyMeasurementViewSet):
 
 class MinutelyTotalPowerFactorViewSet(MinutelyMeasurementViewSet):
     serializer_class = MinutelyTotalPowerFactor
+    pagination_class = PostLimitOffsetPagination
+
+
+class VoltageThreePhaseViewSet(MinutelyMeasurementViewSet):
+    serializer_class = VoltageThreePhaseSerializer
+
+
+class CurrentThreePhaseViewSet(MinutelyMeasurementViewSet):
+    serializer_class = CurrentThreePhaseSerializer
+
+
+class FrequencyViewSet(MinutelyMeasurementViewSet):
+    serializer_class = FrequencySerializer
