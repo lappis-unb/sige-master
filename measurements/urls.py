@@ -28,3 +28,9 @@ graph_router.register(
     FrequencyViewSet,
     basename='minutelyfrequency'
 )
+
+graph_router.register(
+    r'minutely_active_power',
+    MinutelyActivePowerThreePhaseViewSet,
+    basename='minutelyactivepower'
+)
