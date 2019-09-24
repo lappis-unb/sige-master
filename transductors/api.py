@@ -48,7 +48,7 @@ def __get_transductor_data(transductor, slave_server):
     long = transductor.longitude if transductor.longitude is not None else 0.0
 
     return {
-        "model": __get_model_url(transductor, slave_server),
+        "model": transductor.model,
         "serial_number": transductor.serial_number,
         "ip_address": transductor.ip_address,
         "physical_location": transductor.location,
@@ -60,16 +60,3 @@ def __get_transductor_data(transductor, slave_server):
         "firmware_version": '0.1'
     }
 
-
-def __get_model_url(transductor, slave_server):
-    protocol = "http://"
-    endpoint = "/energy_transductors/"
-    model_endpoint = "/transductor_models/"
-
-    return protocol\
-        + slave_server.ip_address\
-        + ":"\
-        + slave_server.port\
-        + model_endpoint\
-        + transductor.model.model_code\
-        + "/"
