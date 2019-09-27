@@ -40,12 +40,10 @@ class MeasurementViewSet(mixins.RetrieveModelMixin,
             raise exception
 
         try:
-            self.queryset = self.model.objects.all()
-
             transductor = EnergyTransductor.objects.get(
                 serial_number=serial_number
             )
-            self.queryset = self.queryset.filter(
+            self.queryset = self.model.objects.filter(
                 collection_date__gte=start_date
             )
             self.queryset = self.queryset.filter(collection_date__lte=end_date)
