@@ -1,4 +1,7 @@
 from rest_framework import serializers, viewsets, mixins
+from rest_framework.exceptions import APIException
+from .exceptions import *
+from .utils import *
 
 from .models import Measurement
 from .models import MinutelyMeasurement
@@ -17,48 +20,57 @@ class MeasurementViewSet(mixins.RetrieveModelMixin,
                          mixins.ListModelMixin,
                          viewsets.GenericViewSet):
     queryset = None
+    model = None
+    pagination_class = PostLimitOffsetPagination
 
     def get_queryset(self):
-        start_date = self.request.query_params.get('start_date', None)
-        end_date = self.request.query_params.get('end_date', None)
-        serial_number = self.request.query_params.get('serial_number', None)
+        start_date = self.request.query_params.get('start_date')
+        end_date = self.request.query_params.get('end_date')
+        serial_number = self.request.query_params.get('serial_number')
 
-        if serial_number is not None:
-            try:
-                transductor = EnergyTransductor.objects.get(
-                    serial_number=serial_number
-                )
-            except EnergyTransductor.DoesNotExist:
-                return []
+        try:
+            params = [
+                {'name': 'start_date', 'value': start_date},
+                {'name': 'end_date', 'value': end_date},
+                {'name': 'serial_number', 'value': serial_number}
+            ]
 
-        if((start_date is not None) and (end_date is not None)):
+            validate_query_params(params)
+        except MeasurementsParamsException as exception:
+            raise exception        
+
+        try:
+            self.queryset = self.model.objects.all()
+
+            transductor = EnergyTransductor.objects.get(
+                serial_number=serial_number
+            )
             self.queryset = self.queryset.filter(
                 collection_date__gte=start_date
             )
             self.queryset = self.queryset.filter(collection_date__lte=end_date)
+        except EnergyTransductor.DoesNotExist as exception:
+            raise exception
 
         return self.queryset.reverse()
 
 
 class MinutelyMeasurementViewSet(MeasurementViewSet):
-    collect = MinutelyMeasurement.objects.select_related('transductor').all()
-    queryset = collect.order_by('id')
+    model = MinutelyMeasurement
+    queryset = MinutelyMeasurement.objects.none()
     serializer_class = MinutelyMeasurementSerializer
-    pagination_class = PostLimitOffsetPagination
 
 
 class QuarterlyMeasurementViewSet(MeasurementViewSet):
-    collect = QuarterlyMeasurement.objects.select_related('transductor').all()
-    queryset = collect.order_by('id')
+    model = QuarterlyMeasurement
+    queryset = QuarterlyMeasurement.objects.none()
     serializer_class = QuarterlyMeasurementSerializer
-    pagination_class = PostLimitOffsetPagination
 
 
 class MonthlyMeasurementViewSet(MeasurementViewSet):
-    collect = MonthlyMeasurement.objects.select_related('transductor').all()
-    queryset = collect.order_by('id')
+    model = MonthlyMeasurement
+    queryset = MonthlyMeasurement.objects.none()
     serializer_class = MonthlyMeasurementSerializer
-    pagination_class = PostLimitOffsetPagination
 
 
 class VoltageThreePhaseViewSet(MinutelyMeasurementViewSet):
