@@ -44,9 +44,9 @@ class MeasurementViewSet(mixins.RetrieveModelMixin,
                 serial_number=serial_number
             )
             self.queryset = self.model.objects.filter(
-                collection_date__gte=start_date
+                collection_time__gte=start_date
             )
-            self.queryset = self.queryset.filter(collection_date__lte=end_date)
+            self.queryset = self.queryset.filter(collection_time__lte=end_date)
         except EnergyTransductor.DoesNotExist:
             raise APIException(
                 'Serial number field not match '
