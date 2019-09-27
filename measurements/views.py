@@ -37,7 +37,7 @@ class MeasurementViewSet(mixins.RetrieveModelMixin,
 
             validate_query_params(params)
         except MeasurementsParamsException as exception:
-            raise exception        
+            raise exception
 
         try:
             self.queryset = self.model.objects.all()
@@ -49,8 +49,11 @@ class MeasurementViewSet(mixins.RetrieveModelMixin,
                 collection_date__gte=start_date
             )
             self.queryset = self.queryset.filter(collection_date__lte=end_date)
-        except EnergyTransductor.DoesNotExist as exception:
-            raise exception
+        except EnergyTransductor.DoesNotExist:
+            raise APIException(
+                'Serial number field not match '
+                'with any EnergyTransductor existent.'
+            )
 
         return self.queryset.reverse()
 
