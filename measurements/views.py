@@ -1,5 +1,6 @@
 from rest_framework import serializers, viewsets, mixins
 from rest_framework.exceptions import APIException
+from django.db.models.query import QuerySet
 from .exceptions import *
 from .utils import *
 
@@ -27,6 +28,7 @@ class MeasurementViewSet(mixins.RetrieveModelMixin,
         start_date = self.request.query_params.get('start_date')
         end_date = self.request.query_params.get('end_date')
         serial_number = self.request.query_params.get('serial_number')
+        transductor = None
 
         try:
             params = [
@@ -53,12 +55,11 @@ class MeasurementViewSet(mixins.RetrieveModelMixin,
                 'with any EnergyTransductor existent.'
             )
 
-        mount_data_list()
-
-        return self.queryset.reverse()
+        return self.mount_data_list(transductor)
 
     def mount_data_list(self):
         pass
+
 
 class MinutelyMeasurementViewSet(MeasurementViewSet):
     model = MinutelyMeasurement
@@ -85,8 +86,25 @@ class VoltageThreePhaseViewSet(MinutelyMeasurementViewSet):
 class CurrentThreePhaseViewSet(MinutelyMeasurementViewSet):
     serializer_class = CurrentThreePhaseSerializer
 
-    def mount_data_list(self):
-        self.queryset.list_current_a = [1]
+    def mount_data_list(self, transductor):
+        list_current_a = \
+            [data.__dict__['current_a'] for data in self.queryset]
+        list_current_b = \
+            [data.__dict__['current_b'] for data in self.queryset]
+        list_current_c = \
+            [data.__dict__['current_c'] for data in self.queryset]
+        list_collection_time = \
+            [data.__dict__['collection_time'] for data in self.queryset]
+
+        minutely_measurements = {}
+        minutely_measurements['transductor'] = transductor
+        minutely_measurements['collections_time'] = list_collection_time
+        minutely_measurements['list_current_a'] = list_current_a
+        minutely_measurements['list_current_b'] = list_current_b
+        minutely_measurements['list_current_c'] = list_current_c
+
+        return [minutely_measurements]
+
 
 class FrequencyViewSet(MinutelyMeasurementViewSet):
     serializer_class = FrequencySerializer
