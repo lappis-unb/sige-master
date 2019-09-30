@@ -5,22 +5,11 @@ from django.db.utils import IntegrityError
 from django.core.exceptions import ValidationError
 
 from slaves.models import Slave
-from transductor_models.models import TransductorModel
 from transductors.models import Transductor, EnergyTransductor
 
 
 class TransductorTestCase(TestCase):
     def setUp(self):
-        self.sample_transductor_model = TransductorModel()
-        self.sample_transductor_model.model_code = "987654321"
-        self.sample_transductor_model.name = "TR4020"
-        self.sample_transductor_model.serial_protocol = "UDP"
-        self.sample_transductor_model.transport_protocol = "modbus"
-        self.sample_transductor_model.minutely_register_addresses = [[1, 1]]
-        self.sample_transductor_model.quarterly_register_addresses = [[1, 1]]
-        self.sample_transductor_model.monthly_register_addresses = [[1, 1]]
-        self.sample_transductor_model.save(bypass_requests=True)
-
         self.sample_energy_transductor = EnergyTransductor.objects.create(
             serial_number='87654321',
             ip_address='192.168.1.1',
@@ -33,7 +22,7 @@ class TransductorTestCase(TestCase):
             creation_date=timezone.now(),
             calibration_date=timezone.now(),
             last_data_collection=timezone.now(),
-            model=self.sample_transductor_model
+            model='EnergyTransductorModel'
         )
 
         self.sample_slave_server = Slave.objects.create(
@@ -57,7 +46,7 @@ class TransductorTestCase(TestCase):
             creation_date=timezone.now(),
             calibration_date=timezone.now(),
             last_data_collection=timezone.now(),
-            model=self.sample_transductor_model
+            model='EnergyTransductorModel'
         )
 
         self.assertIs(
@@ -82,7 +71,7 @@ class TransductorTestCase(TestCase):
                 creation_date=timezone.now(),
                 calibration_date=timezone.now(),
                 last_data_collection=timezone.now(),
-                model=self.sample_transductor_model
+                model='EnergyTransductorModel'
             )
 
         self.assertEqual(size, len(EnergyTransductor.objects.all()))
@@ -102,7 +91,7 @@ class TransductorTestCase(TestCase):
                 creation_date=timezone.now(),
                 calibration_date=timezone.now(),
                 last_data_collection=timezone.now(),
-                model=self.sample_transductor_model
+                model='EnergyTransductorModel'
             )
 
         self.assertEqual(size, len(EnergyTransductor.objects.all()))
@@ -166,7 +155,7 @@ class TransductorTestCase(TestCase):
             creation_date=timezone.now(),
             calibration_date=timezone.now(),
             last_data_collection=timezone.now(),
-            model=self.sample_transductor_model
+            model='EnergyTransductorModel'
         )
 
         transductor = EnergyTransductor.objects.filter(serial_number='87654321')

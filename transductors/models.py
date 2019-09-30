@@ -28,7 +28,6 @@ class Transductor(PolymorphicModel):
         max_length=256,
         blank=False,
         null=False,
-        default='EnergyTransductor'
     )
 
     class Meta:

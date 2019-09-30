@@ -59,4 +59,3 @@ def __get_transductor_data(transductor, slave_server):
         "measurement_monthlymeasurement": [],
         "firmware_version": '0.1'
     }
-

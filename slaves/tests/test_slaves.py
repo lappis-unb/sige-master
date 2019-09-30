@@ -2,7 +2,6 @@ from django.test import TestCase
 from django.utils import timezone
 
 from slaves.models import Slave
-from transductor_models.models import TransductorModel
 from transductors.models import EnergyTransductor
 
 from django.db import IntegrityError
@@ -24,16 +23,6 @@ class TestSlavesModels(TestCase):
             broken=False
         )
 
-        self.transductor_model = TransductorModel()
-        self.transductor_model.model_code = "987654321"
-        self.transductor_model.name = "TR4020"
-        self.transductor_model.serial_protocol = "UDP"
-        self.transductor_model.transport_protocol = "modbus"
-        self.transductor_model.minutely_register_addresses = [[1, 1]]
-        self.transductor_model.quarterly_register_addresses = [[1, 1]]
-        self.transductor_model.monthly_register_addresses = [[1, 1]]
-        self.transductor_model.save(bypass_requests=True)
-
         self.energy_transductor = EnergyTransductor.objects.create(
             serial_number='87654321',
             ip_address='192.168.1.1',
@@ -46,7 +35,7 @@ class TestSlavesModels(TestCase):
             creation_date=timezone.now(),
             calibration_date=timezone.now(),
             last_data_collection=timezone.now(),
-            model=self.transductor_model
+            model='EnergyTransductorModel'
         )
 
         self.slave_1.transductors.add(self.energy_transductor)
