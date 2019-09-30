@@ -53,8 +53,12 @@ class MeasurementViewSet(mixins.RetrieveModelMixin,
                 'with any EnergyTransductor existent.'
             )
 
+        mount_data_list()
+
         return self.queryset.reverse()
 
+    def mount_data_list(self):
+        pass
 
 class MinutelyMeasurementViewSet(MeasurementViewSet):
     model = MinutelyMeasurement
@@ -81,6 +85,8 @@ class VoltageThreePhaseViewSet(MinutelyMeasurementViewSet):
 class CurrentThreePhaseViewSet(MinutelyMeasurementViewSet):
     serializer_class = CurrentThreePhaseSerializer
 
+    def mount_data_list(self):
+        self.queryset.list_current_a = [1]
 
 class FrequencyViewSet(MinutelyMeasurementViewSet):
     serializer_class = FrequencySerializer

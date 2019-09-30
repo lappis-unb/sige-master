@@ -101,9 +101,9 @@ class VoltageThreePhaseSerializer(MinutelyMeasurementSerializer):
 
 
 class CurrentThreePhaseSerializer(MinutelyMeasurementSerializer):
-    list_current_a = ArrayField(HStoreField(), default=list)
-    list_current_b = ArrayField(HStoreField(), default=list)
-    list_current_c = ArrayField(HStoreField(), default=list)
+    list_current_a = serializers.ListField(default=[])
+    list_current_b = serializers.ListField(default=[])
+    list_current_c = serializers.ListField(default=[])
 
     class Meta:
         model = MinutelyMeasurement
@@ -116,6 +116,11 @@ class CurrentThreePhaseSerializer(MinutelyMeasurementSerializer):
             'list_current_c'
         )
 
+    def create(self, validated_data):
+        validated_data.list_current_a = [1]
+        validated_data.list_current_b = [2]
+        validated_data.list_current_c = [3]
+        return super().create(validated_data)
 
 class FrequencySerializer(MinutelyMeasurementSerializer):
     class Meta:
