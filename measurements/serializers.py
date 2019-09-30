@@ -4,6 +4,9 @@ from .models import MinutelyMeasurement
 from .models import QuarterlyMeasurement
 from .models import MonthlyMeasurement
 
+from django.contrib.postgres.fields import ArrayField
+from django.contrib.postgres.fields import HStoreField
+
 
 class MinutelyMeasurementSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -98,15 +101,19 @@ class VoltageThreePhaseSerializer(MinutelyMeasurementSerializer):
 
 
 class CurrentThreePhaseSerializer(MinutelyMeasurementSerializer):
+    list_current_a = ArrayField(HStoreField(), default=list)
+    list_current_b = ArrayField(HStoreField(), default=list)
+    list_current_c = ArrayField(HStoreField(), default=list)
+
     class Meta:
         model = MinutelyMeasurement
         fields = (
             'id',
             'transductor',
             'collection_time',
-            'current_a',
-            'current_b',
-            'current_c'
+            'list_current_a',
+            'list_current_b',
+            'list_current_c'
         )
 
 
