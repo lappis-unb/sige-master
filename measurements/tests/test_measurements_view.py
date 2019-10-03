@@ -25,7 +25,11 @@ class MeasurementsTestCase(TestCase):
         )
 
         self.transductor_model = TransductorModel.objects.create(
-            name="TR4020", serial_protocol="UDP", transport_protocol="modbus"
+            model_code='987654321', name="TR4020",
+            serial_protocol="UDP", transport_protocol="modbus",
+            minutely_register_addresses = [[1, 1]],
+            quarterly_register_addresses = [[1, 1]],
+            monthly_register_addresses = [[1, 1]]
         )
 
         self.transductor = EnergyTransductor.objects.create(
@@ -50,5 +54,5 @@ class MeasurementsTestCase(TestCase):
 
     def test_should_three_phase_aparent_request(self):
         self.assertEqual(
-            self.client.get("/chart/minutely_apparent_power/").status_code, 200
+            self.client.get("/graph/minutely_apparent_power/").status_code, 200
         )

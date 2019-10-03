@@ -84,28 +84,6 @@ class MonthlyMeasurementSerializer(serializers.HyperlinkedModelSerializer):
                   'url')
 
 
-class MinutelyVoltageThreePhase(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = MinutelyMeasurement
-        fields = ('id',
-                  'collection_time',
-                  'transductor',
-                  'voltage_a',
-                  'voltage_b',
-                  'voltage_c')
-
-
-class MinutelyCurrentThreePhase(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = MinutelyMeasurement
-        fields = ('id',
-                  'transductor',
-                  'collection_time',
-                  'current_a',
-                  'current_b',
-                  'current_c')
-
-
 class MinutelyActivePowerThreePhase(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = MinutelyMeasurement
@@ -191,15 +169,6 @@ class MinutelyDHTCurrentThreePhase(serializers.HyperlinkedModelSerializer):
                   'dht_current_c')
 
 
-class MinutelyFrequency(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = MinutelyMeasurement
-        fields = ('id',
-                  'transductor',
-                  'collection_time',
-                  'frequency_a')
-
-
 class MinutelyTotalActivePower(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = MinutelyMeasurement
@@ -234,3 +203,38 @@ class MinutelyTotalPowerFactor(serializers.HyperlinkedModelSerializer):
                   'transductor',
                   'collection_time',
                   'total_power_factor')
+class VoltageThreePhaseSerializer(MinutelyMeasurementSerializer):
+    class Meta:
+        model = MinutelyMeasurement
+        fields = (
+            'id',
+            'transductor',
+            'collection_time',
+            'voltage_a',
+            'voltage_b',
+            'voltage_c'
+        )
+
+
+class CurrentThreePhaseSerializer(MinutelyMeasurementSerializer):
+    class Meta:
+        model = MinutelyMeasurement
+        fields = (
+            'id',
+            'transductor',
+            'collection_time',
+            'current_a',
+            'current_b',
+            'current_c'
+        )
+
+
+class FrequencySerializer(MinutelyMeasurementSerializer):
+    class Meta:
+        model = MinutelyMeasurement
+        fields = (
+            'id',
+            'transductor',
+            'collection_time',
+            'frequency_a'
+        )
