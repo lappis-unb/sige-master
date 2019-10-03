@@ -1,7 +1,6 @@
 from rest_framework import serializers, viewsets, mixins
 from rest_framework.exceptions import APIException
 from django.db.models.query import QuerySet
-from .exceptions import *
 from .utils import *
 
 from .models import Measurement
@@ -30,16 +29,13 @@ class MeasurementViewSet(mixins.RetrieveModelMixin,
         serial_number = self.request.query_params.get('serial_number')
         transductor = None
 
-        try:
-            params = [
-                {'name': 'start_date', 'value': start_date},
-                {'name': 'end_date', 'value': end_date},
-                {'name': 'serial_number', 'value': serial_number}
-            ]
+        params = [
+            {'name': 'start_date', 'value': start_date},
+            {'name': 'end_date', 'value': end_date},
+            {'name': 'serial_number', 'value': serial_number}
+        ]
 
-            validate_query_params(params)
-        except MeasurementsParamsException as exception:
-            raise exception
+        validate_query_params(params)
 
         try:
             transductor = EnergyTransductor.objects.get(
@@ -48,11 +44,13 @@ class MeasurementViewSet(mixins.RetrieveModelMixin,
             self.queryset = self.model.objects.filter(
                 collection_time__gte=start_date
             )
-            self.queryset = self.queryset.filter(collection_time__lte=end_date)
+            self.queryset = self.queryset.filter(
+                collection_time__lte=end_date
+            )
         except EnergyTransductor.DoesNotExist:
             raise APIException(
-                'Serial number field not match '
-                'with any EnergyTransductor existent.'
+                'Serial number field does not match '
+                'any existent EnergyTransductor.'
             )
 
         return self.mount_data_list(transductor)
@@ -87,21 +85,22 @@ class CurrentThreePhaseViewSet(MinutelyMeasurementViewSet):
     serializer_class = CurrentThreePhaseSerializer
 
     def mount_data_list(self, transductor):
-        list_current_a = \
-            [data.__dict__['current_a'] for data in self.queryset]
-        list_current_b = \
-            [data.__dict__['current_b'] for data in self.queryset]
-        list_current_c = \
-            [data.__dict__['current_c'] for data in self.queryset]
-        list_collection_time = \
-            [data.__dict__['collection_time'] for data in self.queryset]
+        list_current_a = self.queryset.values('current_a')
+        list_current_b = self.queryset.values('current_b')
+        list_current_c = self.queryset.values('current_c')
+
+        list_collection_time = self.queryset.values('collection_time')
+        range_time = [
+            list_collection_time.first(),
+            list_collection_time.last()
+        ]
 
         minutely_measurements = {}
         minutely_measurements['transductor'] = transductor
-        minutely_measurements['collections_time'] = list_collection_time
-        minutely_measurements['list_current_a'] = list_current_a
-        minutely_measurements['list_current_b'] = list_current_b
-        minutely_measurements['list_current_c'] = list_current_c
+        minutely_measurements['range_time'] = range_time
+        minutely_measurements['phase_a'] = list_current_a
+        minutely_measurements['phase_b'] = list_current_b
+        minutely_measurements['phase_c'] = list_current_c
 
         return [minutely_measurements]
 
