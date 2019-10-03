@@ -1,5 +1,4 @@
-version: '3.5'
-
+version: '3.7'
 services:
     master-db:
         container_name: master-db
@@ -14,7 +13,6 @@ services:
 
     master-api:
         container_name: master-api
-        # image: lappis/smi-master:latest
         build: .
         env_file: dev-env
         command: ["sh", "scripts/start.sh"]
