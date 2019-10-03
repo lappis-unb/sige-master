@@ -81,6 +81,7 @@ class MonthlyMeasurementViewSet(MeasurementViewSet):
     serializer_class = MonthlyMeasurementSerializer
     pagination_class = PostLimitOffsetPagination
 
+
 class MinutelyActivePowerThreePhaseViewSet(MinutelyMeasurementViewSet):
     serializer_class = MinutelyActivePowerThreePhase
 
@@ -112,7 +113,6 @@ class MinutelyDHTVoltageThreePhaseViewSet(MinutelyMeasurementViewSet):
 
 class MinutelyDHTCurrentThreePhaseViewSet(MinutelyMeasurementViewSet):
     serializer_class = MinutelyDHTCurrentThreePhase
-
 
 
 class MinutelyTotalActivePowerViewSet(MinutelyMeasurementViewSet):

@@ -88,4 +88,3 @@ graph_router.register(
     MinutelyTotalPowerFactorViewSet,
     basename='minutelytotalpowerfactor'
 )
-
