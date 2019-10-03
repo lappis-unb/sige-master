@@ -22,6 +22,7 @@ class MeasurementViewSet(mixins.RetrieveModelMixin,
     queryset = None
     model = None
     pagination_class = PostLimitOffsetPagination
+    fields = []
 
     def get_queryset(self):
         start_date = self.request.query_params.get('start_date')
@@ -42,9 +43,8 @@ class MeasurementViewSet(mixins.RetrieveModelMixin,
                 serial_number=serial_number
             )
             self.queryset = self.model.objects.filter(
-                collection_time__gte=start_date
-            )
-            self.queryset = self.queryset.filter(
+                transductor=transductor,
+                collection_time__gte=start_date,
                 collection_time__lte=end_date
             )
         except EnergyTransductor.DoesNotExist:
@@ -55,14 +55,34 @@ class MeasurementViewSet(mixins.RetrieveModelMixin,
 
         return self.mount_data_list(transductor)
 
-    def mount_data_list(self):
-        pass
+    def mount_data_list(self, transductor):
+        return []
 
 
 class MinutelyMeasurementViewSet(MeasurementViewSet):
     model = MinutelyMeasurement
     queryset = MinutelyMeasurement.objects.none()
     serializer_class = MinutelyMeasurementSerializer
+    fields = []
+
+    def mount_data_list(self, transductor):
+        list_a = self.queryset.values_list(
+            fields[0], fields[3]
+        )
+        list_b = self.queryset.values_list(
+            fields[1], fields[3]
+        )
+        list_c = self.queryset.values_list(
+            fields[2], fields[3]
+        )
+
+        minutely_measurements = {}
+        minutely_measurements['transductor'] = transductor
+        minutely_measurements['phase_a'] = list_a
+        minutely_measurements['phase_b'] = list_b
+        minutely_measurements['phase_c'] = list_c
+
+        return [minutely_measurements]
 
 
 class QuarterlyMeasurementViewSet(MeasurementViewSet):
@@ -83,26 +103,7 @@ class VoltageThreePhaseViewSet(MinutelyMeasurementViewSet):
 
 class CurrentThreePhaseViewSet(MinutelyMeasurementViewSet):
     serializer_class = CurrentThreePhaseSerializer
-
-    def mount_data_list(self, transductor):
-        list_current_a = self.queryset.values('current_a')
-        list_current_b = self.queryset.values('current_b')
-        list_current_c = self.queryset.values('current_c')
-
-        list_collection_time = self.queryset.values('collection_time')
-        range_time = [
-            list_collection_time.first(),
-            list_collection_time.last()
-        ]
-
-        minutely_measurements = {}
-        minutely_measurements['transductor'] = transductor
-        minutely_measurements['range_time'] = range_time
-        minutely_measurements['phase_a'] = list_current_a
-        minutely_measurements['phase_b'] = list_current_b
-        minutely_measurements['phase_c'] = list_current_c
-
-        return [minutely_measurements]
+    fields = ['current_a', 'current_b', 'current_c', 'collection_time']
 
 
 class FrequencyViewSet(MinutelyMeasurementViewSet):

@@ -101,28 +101,18 @@ class VoltageThreePhaseSerializer(MinutelyMeasurementSerializer):
 
 
 class CurrentThreePhaseSerializer(MinutelyMeasurementSerializer):
-    list_current_a = serializers.ListField(
-        child=serializers.FloatField(default=0.0), default=[]
-    )
-    list_current_b = serializers.ListField(
-        child=serializers.FloatField(default=0.0), default=[]
-    )
-    list_current_c = serializers.ListField(
-        child=serializers.FloatField(default=0.0), default=[]
-    )
-    collections_time = serializers.ListField(
-        child=serializers.DateTimeField(), default=[]
-    )
+    phase_a = serializers.ListField(default=[])
+    phase_b = serializers.ListField(default=[])
+    phase_c = serializers.ListField(default=[])
 
     class Meta:
         model = MinutelyMeasurement
         fields = (
             'id',
             'transductor',
-            'collections_time',
-            'list_current_a',
-            'list_current_b',
-            'list_current_c'
+            'phase_a',
+            'phase_b',
+            'phase_c'
         )
 
 
