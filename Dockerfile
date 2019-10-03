@@ -1,9 +1,7 @@
 FROM python:3.6
 
 RUN apt-get update && \
-    apt-get install -y postgresql \
-                       postgresql-client \
-                       libpq-dev\
+    apt-get install -y libpq-dev \
                        cron
 
 WORKDIR /smi-master
