@@ -93,7 +93,24 @@ class MonthlyMeasurementSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class ThreePhaseSerializer(MinutelyMeasurementSerializer):
+    """
+    Class responsible to define a serializer which convert apparent
+    three phase transductor fields data to JSON
 
+    Attributes:
+
+        model (MinutelyMeasurement): The model which defines the type of
+        measurement.
+        field (tuple): The attributes which define an apparent three phase
+        transductor.
+            .. note::
+                The tuple elements must be of str type.
+
+    Example of use:
+
+    >>> queryset = MinutelyMeasurement.objects.all()
+        serializer_class = MinutelyApparentPowerThreePhase
+    """
     class Meta:
         model = MinutelyMeasurement
         fields = (

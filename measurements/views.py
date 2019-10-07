@@ -3,13 +3,23 @@ from rest_framework.exceptions import APIException
 from django.db.models.query import QuerySet
 from .utils import *
 
+from transductors.models import EnergyTransductor
+
 from .models import Measurement
 from .models import MinutelyMeasurement
 from .models import QuarterlyMeasurement
 from .models import MonthlyMeasurement
-from .models import EnergyTransductor
 
-from .serializers import *
+from .serializers import MeasurementSerializer
+from .serializers import ThreePhaseSerializer
+from .serializers import MinutelyMeasurementSerializer
+from .serializers import QuarterlyMeasurementSerializer
+from .serializers import MonthlyMeasurementSerializer
+
+
+#  this viewset don't inherits from viewsets.ModelViewSet because it
+#  can't have update and create methods so it only inherits from parts of it
+from .models import EnergyTransductor
 
 from .pagination import PostLimitOffsetPagination
 from .pagination import PostPageNumberPagination
@@ -121,6 +131,95 @@ class MonthlyMeasurementViewSet(MeasurementViewSet):
     model = MonthlyMeasurement
     queryset = MonthlyMeasurement.objects.none()
     serializer_class = MonthlyMeasurementSerializer
+
+
+class MinutelyActivePowerThreePhaseViewSet(MinutelyMeasurementViewSet):
+    serializer_class = ThreePhaseSerializer
+    fields = [
+        'active_power_a',
+        'active_power_b',
+        'active_power_c',
+        'collection_time'
+    ]
+
+
+class MinutelyReactivePowerThreePhaseViewSet(MinutelyMeasurementViewSet):
+    serializer_class = ThreePhaseSerializer
+    fields = [
+        'reactive_power_a',
+        'reactive_power_b',
+        'reactive_power_c',
+        'collection_time'
+    ]
+
+
+class MinutelyApparentPowerThreePhaseViewSet(MinutelyMeasurementViewSet):
+    """
+    A ViewSet class responsible to get the minutely apparent power
+    three phase
+
+    Attributes:
+
+        MinutelyMeasurementViewSet:  a ViewSet class responsible for the
+        minutely measurement
+    """
+    serializer_class = ThreePhaseSerializer
+    fields = [
+        'apparent_power_a',
+        'apparent_power_b',
+        'apparent_power_c',
+        'collection_time'
+    ]
+
+
+class MinutelyPowerFactorThreePhaseViewSet(MinutelyMeasurementViewSet):
+    serializer_class = ThreePhaseSerializer
+    fields = [
+        'power_factor_a',
+        'power_factor_b',
+        'power_factor_c',
+        'collection_time'
+    ]
+
+
+class MinutelyDHTVoltageThreePhaseViewSet(MinutelyMeasurementViewSet):
+    serializer_class = ThreePhaseSerializer
+    fields = [
+        'dht_voltage_a',
+        'dht_voltage_b',
+        'dht_voltage_c',
+        'collection_time'
+    ]
+
+
+class MinutelyDHTCurrentThreePhaseViewSet(MinutelyMeasurementViewSet):
+    serializer_class = ThreePhaseSerializer
+    fields = [
+        'dht_current_a',
+        'dht_current_b',
+        'dht_current_c',
+        'collection_time'
+    ]
+
+
+class MinutelyTotalActivePowerViewSet(MinutelyMeasurementViewSet):
+    serializer_class = MeasurementSerializer
+    fields = ['total_active_power', 'collection_time']
+
+
+class MinutelyTotalReactivePowerViewSet(MinutelyMeasurementViewSet):
+    serializer_class = MeasurementSerializer
+    fields = ['total_reactive_power', 'collection_time']
+
+
+class MinutelyTotalApparentPowerViewSet(MinutelyMeasurementViewSet):
+    serializer_class = MeasurementSerializer
+    fields = ['total_apparent_power', 'collection_time']
+
+
+class MinutelyTotalPowerFactorViewSet(MinutelyMeasurementViewSet):
+    serializer_class = MeasurementSerializer
+    fields = ['total_power_factor', 'collection_time']
 
 
 class VoltageThreePhaseViewSet(MinutelyMeasurementViewSet):
