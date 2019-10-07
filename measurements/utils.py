@@ -8,6 +8,7 @@ messages = {
     'end_date': _('It must have an end_date argument')
 }
 
+
 def validate_query_params(params):
     error_messages = {}
     for attribute in params:

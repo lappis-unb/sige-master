@@ -9,6 +9,11 @@ from django.contrib.postgres.fields import HStoreField
 
 
 class MinutelyMeasurementSerializer(serializers.HyperlinkedModelSerializer):
+    phase_a = serializers.ListField(default=[])
+    phase_b = serializers.ListField(default=[])
+    phase_c = serializers.ListField(default=[])
+    measurement = serializers.ListField(default=[])
+
     class Meta:
         model = MinutelyMeasurement
         fields = ('id',
@@ -87,23 +92,7 @@ class MonthlyMeasurementSerializer(serializers.HyperlinkedModelSerializer):
                   'url')
 
 
-class VoltageThreePhaseSerializer(MinutelyMeasurementSerializer):
-    class Meta:
-        model = MinutelyMeasurement
-        fields = (
-            'id',
-            'transductor',
-            'collection_time',
-            'voltage_a',
-            'voltage_b',
-            'voltage_c'
-        )
-
-
-class CurrentThreePhaseSerializer(MinutelyMeasurementSerializer):
-    phase_a = serializers.ListField(default=[])
-    phase_b = serializers.ListField(default=[])
-    phase_c = serializers.ListField(default=[])
+class ThreePhaseSerializer(MinutelyMeasurementSerializer):
 
     class Meta:
         model = MinutelyMeasurement
@@ -116,12 +105,11 @@ class CurrentThreePhaseSerializer(MinutelyMeasurementSerializer):
         )
 
 
-class FrequencySerializer(MinutelyMeasurementSerializer):
+class MeasurementSerializer(MinutelyMeasurementSerializer):
     class Meta:
         model = MinutelyMeasurement
         fields = (
             'id',
             'transductor',
-            'collection_time',
-            'frequency_a'
+            'measurement'
         )
