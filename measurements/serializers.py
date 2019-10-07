@@ -9,10 +9,6 @@ from django.contrib.postgres.fields import HStoreField
 
 
 class MinutelyMeasurementSerializer(serializers.HyperlinkedModelSerializer):
-    phase_a = serializers.ListField(default=[])
-    phase_b = serializers.ListField(default=[])
-    phase_c = serializers.ListField(default=[])
-    measurement = serializers.ListField(default=[])
 
     class Meta:
         model = MinutelyMeasurement
@@ -111,6 +107,10 @@ class ThreePhaseSerializer(MinutelyMeasurementSerializer):
     >>> queryset = MinutelyMeasurement.objects.all()
         serializer_class = MinutelyApparentPowerThreePhase
     """
+    phase_a = serializers.ListField(default=[])
+    phase_b = serializers.ListField(default=[])
+    phase_c = serializers.ListField(default=[])
+
     class Meta:
         model = MinutelyMeasurement
         fields = (
@@ -123,6 +123,8 @@ class ThreePhaseSerializer(MinutelyMeasurementSerializer):
 
 
 class MeasurementSerializer(MinutelyMeasurementSerializer):
+    measurement = serializers.ListField(default=[])
+
     class Meta:
         model = MinutelyMeasurement
         fields = (
