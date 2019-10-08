@@ -125,7 +125,6 @@ class MeasurementsTestCase(TestCase):
         self.assertEqual(
             self.client.get('/graph/minutely_active_power/').status_code,
             200)
-        
 
     def test_should_three_phase_aparent_serializer(self):
         self.time = timezone.now()

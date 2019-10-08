@@ -84,7 +84,8 @@ class MonthlyMeasurementSerializer(serializers.HyperlinkedModelSerializer):
                   'url')
 
 
-class MinutelyActivePowerThreePhaseSerializer(serializers.HyperlinkedModelSerializer):
+class MinutelyActivePowerThreePhaseSerializer(
+        serializers.HyperlinkedModelSerializer):
     """
     Class responsible to define a serializer which convert transductor
     active power fields data to JSON
