@@ -18,6 +18,9 @@ s.close()
 END
 }
 
+echo '======= CHECKING FOR UNINSTALLED PKGs AND INSTALLING'
+pip freeze || pip install -r requirements.txt
+
 until function_postgres_ready; do
   >&2 echo "======= POSTGRES IS UNAVAILABLE, WAITING"
   sleep 1
