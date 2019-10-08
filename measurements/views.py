@@ -11,7 +11,7 @@ from .serializers import MinutelyMeasurementSerializer
 from .serializers import QuarterlyMeasurementSerializer
 from .serializers import MonthlyMeasurementSerializer
 from .serializers import MinutelyActivePowerThreePhase
-from .serializers import MinutelyReactivePowerThreePhase
+from .serializers import MinutelyReactivePowerThreePhaseSerializer
 from .serializers import MinutelyApparentPowerThreePhaseSerializer
 from .serializers import MinutelyPowerFactorThreePhase
 from .serializers import MinutelyDHTVoltageThreePhase
