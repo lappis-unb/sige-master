@@ -1,6 +1,12 @@
 venv/*
+
+# Any pycache related
 __pycache__
 */__pycache__/*
+*/migrations/__pycache__/*
+*/tests/__pycache__/*
+*.pyc
+
 .vscode
 .pytest_cache
 *.log

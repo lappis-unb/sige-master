@@ -9,7 +9,7 @@ from measurements.models import MonthlyMeasurement
 from slaves.models import Slave
 from transductors.models import EnergyTransductor
 from transductor_models.models import TransductorModel
-# from datetime import datetime
+from datetime import datetime
 from django.utils import timezone
 
 

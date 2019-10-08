@@ -22,6 +22,16 @@ before_script:
   - python3 manage.py makemigrations
   - python3 manage.py migrate
 
+docker:
+  stage: test
+  image: docker:stable
+  services:
+    - docker:dind
+  before_script:
+    - docker --version
+  script:
+    - docker build -t smi-master .
+
 test:
   stage: test
   script:

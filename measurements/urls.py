@@ -29,18 +29,6 @@ graph_router.register(
 )
 
 graph_router.register(
-    r'minutely_voltage',
-    MinutelyVoltageThreePhaseViewSet,
-    basename='minutelyvoltage'
-)
-
-graph_router.register(
-    r'minutely_current',
-    MinutelyCurrentThreePhaseViewSet,
-    basename='minutelycurrent'
-)
-
-graph_router.register(
     r'minutely_active_power',
     MinutelyActivePowerThreePhaseViewSet,
     basename='minutelyactivepower'
@@ -74,12 +62,6 @@ graph_router.register(
     r'minutely_dht_current',
     MinutelyDHTCurrentThreePhaseViewSet,
     basename='minutelydhtcurrent'
-)
-
-graph_router.register(
-    r'minutely_frequency',
-    MinutelyFrequencyViewSet,
-    basename='minutelyfrequency'
 )
 
 graph_router.register(
