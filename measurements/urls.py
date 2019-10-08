@@ -34,3 +34,57 @@ graph_router.register(
     MinutelyActivePowerThreePhaseViewSet,
     basename='minutelyactivepower'
 )
+
+graph_router.register(
+    r'minutely_reactive_power',
+    MinutelyReactivePowerThreePhaseViewSet,
+    basename='minutelyreactivepower'
+)
+
+graph_router.register(
+    r'minutely_apparent_power',
+    MinutelyApparentPowerThreePhaseViewSet,
+    basename='minutelyapparentpower'
+)
+
+graph_router.register(
+    r'minutely_power_factor',
+    MinutelyPowerFactorThreePhaseViewSet,
+    basename='minutelypowerfactor'
+)
+
+graph_router.register(
+    r'minutely_dht_voltage',
+    MinutelyDHTVoltageThreePhaseViewSet,
+    basename='minutelydhtvoltage'
+)
+
+graph_router.register(
+    r'minutely_dht_current',
+    MinutelyDHTCurrentThreePhaseViewSet,
+    basename='minutelydhtcurrent'
+)
+
+graph_router.register(
+    r'minutely_total_active_power',
+    MinutelyTotalActivePowerViewSet,
+    basename='minutelytotalactivepower'
+)
+
+graph_router.register(
+    r'minutely_total_reactive_power',
+    MinutelyTotalReactivePowerViewSet,
+    basename='minutelytotalreactivepower'
+)
+
+graph_router.register(
+    r'minutely_total_apparent_power',
+    MinutelyTotalApparentPowerViewSet,
+    basename='minutelytotalapparentpower'
+)
+
+graph_router.register(
+    r'minutely_total_power_factor',
+    MinutelyTotalPowerFactorViewSet,
+    basename='minutelytotalpowerfactor'
+)

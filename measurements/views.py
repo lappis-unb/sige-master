@@ -6,9 +6,28 @@ from .models import Measurement
 from .models import MinutelyMeasurement
 from .models import QuarterlyMeasurement
 from .models import MonthlyMeasurement
-from .models import EnergyTransductor
 
-from .serializers import *
+from .serializers import MinutelyMeasurementSerializer
+from .serializers import QuarterlyMeasurementSerializer
+from .serializers import MonthlyMeasurementSerializer
+from .serializers import MinutelyActivePowerThreePhaseSerializer
+from .serializers import MinutelyReactivePowerThreePhase
+from .serializers import MinutelyApparentPowerThreePhaseSerializer
+from .serializers import MinutelyPowerFactorThreePhase
+from .serializers import MinutelyDHTVoltageThreePhase
+from .serializers import MinutelyDHTCurrentThreePhase
+from .serializers import MinutelyTotalActivePower
+from .serializers import MinutelyTotalReactivePower
+from .serializers import MinutelyTotalApparentPower
+from .serializers import MinutelyTotalPowerFactor
+from .serializers import VoltageThreePhaseSerializer
+from .serializers import FrequencySerializer
+from .serializers import CurrentThreePhaseSerializer
+
+
+#  this viewset don't inherits from viewsets.ModelViewSet because it
+#  can't have update and create methods so it only inherits from parts of it
+from .models import EnergyTransductor
 
 from .pagination import PostLimitOffsetPagination
 from .pagination import PostPageNumberPagination
@@ -67,14 +86,7 @@ class MonthlyMeasurementViewSet(MeasurementViewSet):
     collect = MonthlyMeasurement.objects.select_related('transductor').all()
     queryset = collect.order_by('id')
     serializer_class = MonthlyMeasurementSerializer
-
-
-class MinutelyVoltageThreePhaseViewSet(MinutelyMeasurementViewSet):
-    serializer_class = MinutelyVoltageThreePhase
-
-
-class MinutelyCurrentThreePhaseViewSet(MinutelyMeasurementViewSet):
-    serializer_class = MinutelyCurrentThreePhase
+    pagination_class = PostLimitOffsetPagination
 
 
 class MinutelyActivePowerThreePhaseViewSet(MinutelyMeasurementViewSet):
@@ -86,7 +98,16 @@ class MinutelyReactivePowerThreePhaseViewSet(MinutelyMeasurementViewSet):
 
 
 class MinutelyApparentPowerThreePhaseViewSet(MinutelyMeasurementViewSet):
-    serializer_class = MinutelyApparentPowerThreePhase
+    """
+    A ViewSet class responsible to get the minutely apparent power
+    three phase
+
+    Attributes:
+
+        MinutelyMeasurementViewSet:  a ViewSet class responsible for the
+        minutely measurement
+    """
+    serializer_class = MinutelyApparentPowerThreePhaseSerializer
 
 
 class MinutelyPowerFactorThreePhaseViewSet(MinutelyMeasurementViewSet):
@@ -99,10 +120,6 @@ class MinutelyDHTVoltageThreePhaseViewSet(MinutelyMeasurementViewSet):
 
 class MinutelyDHTCurrentThreePhaseViewSet(MinutelyMeasurementViewSet):
     serializer_class = MinutelyDHTCurrentThreePhase
-
-
-class MinutelyFrequencyViewSet(MinutelyMeasurementViewSet):
-    serializer_class = MinutelyFrequency
 
 
 class MinutelyTotalActivePowerViewSet(MinutelyMeasurementViewSet):
@@ -119,7 +136,6 @@ class MinutelyTotalApparentPowerViewSet(MinutelyMeasurementViewSet):
 
 class MinutelyTotalPowerFactorViewSet(MinutelyMeasurementViewSet):
     serializer_class = MinutelyTotalPowerFactor
-    pagination_class = PostLimitOffsetPagination
 
 
 class VoltageThreePhaseViewSet(MinutelyMeasurementViewSet):

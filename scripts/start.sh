@@ -3,11 +3,29 @@
 # Exporting all environment variables to use in crontab
 env | sed 's/^\(.*\)$/ \1/g' > /root/env
 
-while ! pg_isready -h $POSTGRES_HOST -p $POSTGRES_PORT -q -U $POSTGRES_USER; do
-  >&2 echo "Postgres is unavailable - sleeping...";
-  sleep 5;
-done;
->&2 echo "Postgres is up - executing commands...";
+function_postgres_ready() {
+python << END
+import socket
+import time
+import os
+
+port = int(os.environ["POSTGRES_PORT"])
+
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+s.connect(('master-db', port))
+s.close()
+END
+}
+
+echo '======= CHECKING FOR UNINSTALLED PKGs AND INSTALLING'
+pip freeze || pip install -r requirements.txt
+
+until function_postgres_ready; do
+  >&2 echo "======= POSTGRES IS UNAVAILABLE, WAITING"
+  sleep 1
+done
+echo "======= POSTGRES IS UP, CONNECTING"
 
 echo '======= RUNNING PIP INSTALL'
 pip install --no-cache-dir -r requirements.txt

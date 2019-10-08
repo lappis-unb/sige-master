@@ -1,5 +1,4 @@
 version: '3.5'
-
 services:
     master-db:
         container_name: master-db
@@ -14,7 +13,6 @@ services:
 
     master-api:
         container_name: master-api
-        # image: lappis/smi-master:latest
         build: .
         env_file: dev-env
         command: ["sh", "scripts/start.sh"]
@@ -24,11 +22,13 @@ services:
           - smi-network
         volumes:
             - .:/smi-master
+            - pip_cache:/usr/local/lib/python3.6/site-packages
         depends_on:
             - master-db
 
 volumes:
     master-pg-data: {}
+    pip_cache:
 
 networks:
   smi-network:
