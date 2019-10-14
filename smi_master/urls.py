@@ -9,7 +9,6 @@ from django.conf.urls import url
 from buildings import views as buildings_views
 from slaves import views as slaves_views
 from campi import views as campi_views
-from transductor_models import views as transductor_models_views
 from transductors import views as energy_transductor_views
 from users import views as users_views
 from .views import login
@@ -21,10 +20,6 @@ router.register(r'campi', campi_views.CampusViewSet)
 router.register(r'buildings', buildings_views.BuildingViewset)
 router.register(r'slave', slaves_views.SlaveViewSet)
 router.register(r'users', users_views.UserViewSet)
-router.register(
-    r'transductor_models',
-    transductor_models_views.TransductorModelViewSet
-)
 router.register(
     r'energy_transductors',
     energy_transductor_views.EnergyTransductorViewSet

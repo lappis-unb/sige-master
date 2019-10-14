@@ -2,7 +2,6 @@ from .api import *
 from django.db import models
 from datetime import datetime
 from polymorphic.models import PolymorphicModel
-from transductor_models.models import TransductorModel
 from django.core.exceptions import ValidationError
 
 
@@ -25,13 +24,10 @@ class Transductor(PolymorphicModel):
     calibration_date = models.DateTimeField(null=True, blank=True)
     last_data_collection = models.DateTimeField(null=True, blank=True)
 
-    model = models.ForeignKey(
-        TransductorModel,
+    model = models.CharField(
+        max_length=256,
         blank=False,
         null=False,
-        db_column="model_code",
-        on_delete=models.PROTECT,
-        related_name='transductors'
     )
 
     class Meta:
