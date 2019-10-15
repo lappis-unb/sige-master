@@ -8,7 +8,6 @@ from measurements.models import QuarterlyMeasurement
 from measurements.models import MonthlyMeasurement
 from slaves.models import Slave
 from transductors.models import EnergyTransductor
-from transductor_models.models import TransductorModel
 from datetime import datetime
 from django.utils import timezone
 
@@ -22,20 +21,10 @@ class MeasurementsTestCase(TestCase):
             broken=False
         )
 
-        self.transductor_model = TransductorModel()
-        self.transductor_model.model_code = "987654321"
-        self.transductor_model.name = "TR4020"
-        self.transductor_model.serial_protocol = "UDP"
-        self.transductor_model.transport_protocol = "modbus"
-        self.transductor_model.minutely_register_addresses = [[1, 1]]
-        self.transductor_model.quarterly_register_addresses = [[1, 1]]
-        self.transductor_model.monthly_register_addresses = [[1, 1]]
-        self.transductor_model.save(bypass_requests=True)
-
         self.transductor = EnergyTransductor.objects.create(
             serial_number="12345678",
             ip_address="1.1.1.1",
-            model=self.transductor_model,
+            model='EnergyTransductorModel',
         )
 
         self.transductor.slave_servers.add(self.slave)

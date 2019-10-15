@@ -62,7 +62,6 @@ INSTALLED_APPS = [
     'buildings',
     'slaves',
     'measurements',
-    'transductor_models',
     'transductors',
     'users',
 ]
