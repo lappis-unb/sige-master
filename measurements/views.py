@@ -11,7 +11,7 @@ from .serializers import MinutelyMeasurementSerializer
 from .serializers import QuarterlyMeasurementSerializer
 from .serializers import MonthlyMeasurementSerializer
 from .serializers import MinutelyActivePowerThreePhase
-from .serializers import MinutelyReactivePowerThreePhase
+from .serializers import MinutelyReactivePowerThreePhaseSerializer
 from .serializers import MinutelyApparentPowerThreePhaseSerializer
 from .serializers import MinutelyPowerFactorThreePhase
 from .serializers import MinutelyDHTVoltageThreePhase
@@ -87,7 +87,23 @@ class MinutelyActivePowerThreePhaseViewSet(MinutelyMeasurementViewSet):
 
 
 class MinutelyReactivePowerThreePhaseViewSet(MinutelyMeasurementViewSet):
-    serializer_class = MinutelyReactivePowerThreePhase
+    """
+        Class responsible to get reactive power measurements.
+
+        Attributes:
+            model(MinutelyMeasurement): The model which save measurements per
+            minute of transductores.
+            serializer_class(MinutelyReactivePowerThreePhaseSerializer): The
+            seriliazer that convert model's information to serializer format of
+            rest framework.
+            permission_classes(None): Attribute can define the permission's
+            level of this class.
+
+            Example of use:
+                >> queryset = MinutelyMeasurement.objects.all()
+                >> serializer_class = MinutelyReactivePowerThreePhaseSerializer
+    """
+    serializer_class = MinutelyReactivePowerThreePhaseSerializer
 
 
 class MinutelyApparentPowerThreePhaseViewSet(MinutelyMeasurementViewSet):
