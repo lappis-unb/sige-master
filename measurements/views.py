@@ -16,7 +16,9 @@ from .serializers import MinutelyMeasurementSerializer
 from .serializers import QuarterlyMeasurementSerializer
 from .serializers import MonthlyMeasurementSerializer
 
-
+from .lttb import downsample
+import numpy as np
+from datetime import datetime
 #  this viewset don't inherits from viewsets.ModelViewSet because it
 #  can't have update and create methods so it only inherits from parts of it
 from .models import EnergyTransductor
@@ -56,6 +58,8 @@ class MeasurementViewSet(mixins.RetrieveModelMixin,
                 transductor=transductor,
                 collection_time__gte=start_date,
                 collection_time__lte=end_date
+            ).order_by(
+                'collection_time'
             )
         except EnergyTransductor.DoesNotExist:
             raise APIException(
@@ -77,7 +81,7 @@ class MinutelyMeasurementViewSet(MeasurementViewSet):
 
     def mount_data_list(self, transductor):
         minutely_measurements = []
-        IS_THREEPHASIC = 4
+        IS_THREEPHASIC = 3
 
         if len(self.fields) is IS_THREEPHASIC:
             minutely_measurements = self.threephasic_measurement_collections(
@@ -91,15 +95,9 @@ class MinutelyMeasurementViewSet(MeasurementViewSet):
         return minutely_measurements
 
     def threephasic_measurement_collections(self, transductor):
-        list_a = self.queryset.values_list(
-            self.fields[0], self.fields[3]
-        )
-        list_b = self.queryset.values_list(
-            self.fields[1], self.fields[3]
-        )
-        list_c = self.queryset.values_list(
-            self.fields[2], self.fields[3]
-        )
+        list_a = self.apply_filter(self.fields[0])
+        list_b = self.apply_filter(self.fields[1])
+        list_c = self.apply_filter(self.fields[2])
 
         minutely_measurements = {}
         minutely_measurements['transductor'] = transductor
@@ -110,15 +108,45 @@ class MinutelyMeasurementViewSet(MeasurementViewSet):
         return [minutely_measurements]
 
     def simple_measurement_collections(self, transductor):
-        list_measurement = self.queryset.values_list(
-            self.fields[0], self.fields[1]
-        )
+        list_measurement = self.apply_filter(self.fields[0])
 
         minutely_measurements = {}
         minutely_measurements['transductor'] = transductor
         minutely_measurements['measurement'] = list_measurement
 
         return [minutely_measurements]
+
+
+    def apply_filter(self, value):
+        filtered_values = self.queryset.values(
+            value, 'collection_time'
+        )
+        indexes = range(len(filtered_values))
+        filtered_values = (
+            [
+                [
+                    counter,
+                    item[value],
+                    datetime.timestamp(item['collection_time'])
+                ]
+                for counter, item in zip(indexes, filtered_values)
+            ]
+        )
+        filtered_values = np.array(filtered_values)
+        filtered_values = downsample(filtered_values, 10)
+        filtered_values = (
+            [
+                [
+                    item[1],
+                    datetime
+                        .utcfromtimestamp(item[2])
+                        .strftime('%d/%m/%Y %H:%M:%S')
+                ]
+                for item in filtered_values
+            ]
+        )
+
+        return filtered_values
 
 
 class QuarterlyMeasurementViewSet(MeasurementViewSet):
@@ -135,22 +163,12 @@ class MonthlyMeasurementViewSet(MeasurementViewSet):
 
 class MinutelyActivePowerThreePhaseViewSet(MinutelyMeasurementViewSet):
     serializer_class = ThreePhaseSerializer
-    fields = [
-        'active_power_a',
-        'active_power_b',
-        'active_power_c',
-        'collection_time'
-    ]
+    fields = ['active_power_a', 'active_power_b', 'active_power_c']
 
 
 class MinutelyReactivePowerThreePhaseViewSet(MinutelyMeasurementViewSet):
     serializer_class = ThreePhaseSerializer
-    fields = [
-        'reactive_power_a',
-        'reactive_power_b',
-        'reactive_power_c',
-        'collection_time'
-    ]
+    fields = ['reactive_power_a', 'reactive_power_b', 'reactive_power_c']
 
 
 class MinutelyApparentPowerThreePhaseViewSet(MinutelyMeasurementViewSet):
@@ -164,74 +182,54 @@ class MinutelyApparentPowerThreePhaseViewSet(MinutelyMeasurementViewSet):
         minutely measurement
     """
     serializer_class = ThreePhaseSerializer
-    fields = [
-        'apparent_power_a',
-        'apparent_power_b',
-        'apparent_power_c',
-        'collection_time'
-    ]
+    fields = ['apparent_power_a', 'apparent_power_b', 'apparent_power_c']
 
 
 class MinutelyPowerFactorThreePhaseViewSet(MinutelyMeasurementViewSet):
     serializer_class = ThreePhaseSerializer
-    fields = [
-        'power_factor_a',
-        'power_factor_b',
-        'power_factor_c',
-        'collection_time'
-    ]
+    fields = ['power_factor_a', 'power_factor_b', 'power_factor_c']
 
 
 class MinutelyDHTVoltageThreePhaseViewSet(MinutelyMeasurementViewSet):
     serializer_class = ThreePhaseSerializer
-    fields = [
-        'dht_voltage_a',
-        'dht_voltage_b',
-        'dht_voltage_c',
-        'collection_time'
-    ]
+    fields = ['dht_voltage_a', 'dht_voltage_b', 'dht_voltage_c']
 
 
 class MinutelyDHTCurrentThreePhaseViewSet(MinutelyMeasurementViewSet):
     serializer_class = ThreePhaseSerializer
-    fields = [
-        'dht_current_a',
-        'dht_current_b',
-        'dht_current_c',
-        'collection_time'
-    ]
+    fields = ['dht_current_a', 'dht_current_b', 'dht_current_c']
 
 
 class MinutelyTotalActivePowerViewSet(MinutelyMeasurementViewSet):
     serializer_class = MeasurementSerializer
-    fields = ['total_active_power', 'collection_time']
+    fields = ['total_active_power']
 
 
 class MinutelyTotalReactivePowerViewSet(MinutelyMeasurementViewSet):
     serializer_class = MeasurementSerializer
-    fields = ['total_reactive_power', 'collection_time']
+    fields = ['total_reactive_power']
 
 
 class MinutelyTotalApparentPowerViewSet(MinutelyMeasurementViewSet):
     serializer_class = MeasurementSerializer
-    fields = ['total_apparent_power', 'collection_time']
+    fields = ['total_apparent_power']
 
 
 class MinutelyTotalPowerFactorViewSet(MinutelyMeasurementViewSet):
     serializer_class = MeasurementSerializer
-    fields = ['total_power_factor', 'collection_time']
+    fields = ['total_power_factor']
 
 
 class VoltageThreePhaseViewSet(MinutelyMeasurementViewSet):
     serializer_class = ThreePhaseSerializer
-    fields = ['voltage_a', 'voltage_b', 'voltage_c', 'collection_time']
+    fields = ['voltage_a', 'voltage_b', 'voltage_c']
 
 
 class CurrentThreePhaseViewSet(MinutelyMeasurementViewSet):
     serializer_class = ThreePhaseSerializer
-    fields = ['current_a', 'current_b', 'current_c', 'collection_time']
+    fields = ['current_a', 'current_b', 'current_c']
 
 
 class FrequencyViewSet(MinutelyMeasurementViewSet):
     serializer_class = MeasurementSerializer
-    fields = ['frequency_a', 'collection_time']
+    fields = ['frequency_a']
