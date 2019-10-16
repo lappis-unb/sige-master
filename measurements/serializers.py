@@ -97,8 +97,7 @@ class ThreePhaseSerializer(MinutelyMeasurementSerializer):
 
         model (MinutelyMeasurement): The model which defines the type of
         measurement.
-        field (tuple): The attributes which define an apparent three phase
-        transductor.
+        fields (tuple): Generic representation of all threephasic measurements.
             .. note::
                 The tuple elements must be of str type.
 

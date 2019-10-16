@@ -171,6 +171,21 @@ class MinutelyActivePowerThreePhaseViewSet(MinutelyMeasurementViewSet):
 
 
 class MinutelyReactivePowerThreePhaseViewSet(MinutelyMeasurementViewSet):
+    """
+    A ViewSet Class responsible to get reactive power measurements.
+
+    Attributes:
+        model(MinutelyMeasurement): The model which save measurements per
+        minute of transductores.
+        serializer_class(ThreePhaseSerializer): The serialiazer that
+        convert model's information to serializer format of rest framework.
+        fields(reactive_power_a, reactive_power_b, reactive_power_c): fields
+        representing all measurements that is referenced by this ViewSet.
+
+        Example of use:
+            >> queryset = MinutelyMeasurement.objects.all()
+            >> serializer_class = ThreePhaseSerializer
+    """
     serializer_class = ThreePhaseSerializer
     fields = ['reactive_power_a', 'reactive_power_b', 'reactive_power_c']
 
@@ -178,12 +193,20 @@ class MinutelyReactivePowerThreePhaseViewSet(MinutelyMeasurementViewSet):
 class MinutelyApparentPowerThreePhaseViewSet(MinutelyMeasurementViewSet):
     """
     A ViewSet class responsible to get the minutely apparent power
-    three phase
+    three phase.
 
     Attributes:
+        model(MinutelyMeasurement): The model which save measurements per
+        minute of transductores.
+        serializer_class(ThreePhaseSerializer): The serialiazer that
+        convert model's information to serializer format of rest framework.
+        fields(apparent_power_a, apparent_power_b, apparent_power_c): fields
+        representing all measurements that is referenced by this ViewSet.
 
-        MinutelyMeasurementViewSet:  a ViewSet class responsible for the
-        minutely measurement
+        Example of use:
+            >> queryset = MinutelyMeasurement.objects.all()
+            >> serializer_class = ThreePhaseSerializer
+
     """
     serializer_class = ThreePhaseSerializer
     fields = ['apparent_power_a', 'apparent_power_b', 'apparent_power_c']
