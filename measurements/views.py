@@ -1,14 +1,24 @@
-from rest_framework import serializers, viewsets, mixins
-from rest_framework.exceptions import APIException
+from datetime import datetime
+import numpy as np
+from .lttb import downsample
+
 from django.db.models.query import QuerySet
-from .utils import *
+
+from rest_framework import serializers
+from rest_framework import viewsets
+from rest_framework import mixins
+
+from rest_framework.exceptions import APIException
 
 from transductors.models import EnergyTransductor
+
+from measurements import utils as validations
 
 from .models import Measurement
 from .models import MinutelyMeasurement
 from .models import QuarterlyMeasurement
 from .models import MonthlyMeasurement
+from .models import EnergyTransductor
 
 from .serializers import MeasurementSerializer
 from .serializers import ThreePhaseSerializer
@@ -16,17 +26,12 @@ from .serializers import MinutelyMeasurementSerializer
 from .serializers import QuarterlyMeasurementSerializer
 from .serializers import MonthlyMeasurementSerializer
 
-from .lttb import downsample
-import numpy as np
-from datetime import datetime
-#  this viewset don't inherits from viewsets.ModelViewSet because it
-#  can't have update and create methods so it only inherits from parts of it
-from .models import EnergyTransductor
-
 from .pagination import PostLimitOffsetPagination
 from .pagination import PostPageNumberPagination
 
 
+#  this viewset don't inherits from viewsets.ModelViewSet because it
+#  can't have update and create methods so it only inherits from parts of it
 class MeasurementViewSet(mixins.RetrieveModelMixin,
                          mixins.DestroyModelMixin,
                          mixins.ListModelMixin,
@@ -48,7 +53,7 @@ class MeasurementViewSet(mixins.RetrieveModelMixin,
             {'name': 'serial_number', 'value': serial_number}
         ]
 
-        validate_query_params(params)
+        validations.validate_query_params(params)
 
         try:
             transductor = EnergyTransductor.objects.get(
@@ -116,7 +121,6 @@ class MinutelyMeasurementViewSet(MeasurementViewSet):
 
         return [minutely_measurements]
 
-
     def apply_filter(self, value):
         filtered_values = self.queryset.values(
             value, 'collection_time'
@@ -139,8 +143,8 @@ class MinutelyMeasurementViewSet(MeasurementViewSet):
                 [
                     item[1],
                     datetime
-                        .utcfromtimestamp(item[2])
-                        .strftime('%d/%m/%Y %H:%M:%S')
+                    .utcfromtimestamp(item[2])
+                    .strftime('%d/%m/%Y %H:%M:%S')
                 ]
                 for item in filtered_values
             ]

@@ -1,6 +1,7 @@
 import numpy as np
 from datetime import datetime
 
+
 def _areas_of_triangles(a, bs, c):
     """Calculate areas of triangles from duples of vertex coordinates.
 
