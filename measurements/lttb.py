@@ -39,6 +39,9 @@ def downsample(data, n_out):
         Array of shape (n_out, 2)
     """
     # Validate input
+    if len(data) == 0:
+        return data
+
     if data.shape[1] < 2:
         raise ValueError('data should have at minimun 2 columns')
 
@@ -48,7 +51,7 @@ def downsample(data, n_out):
     if n_out > data.shape[0]:
         raise ValueError('n_out must be <= number of rows in data')
 
-    if n_out == data.shape[0]:
+    if n_out <= data.shape[0]:
         return data
 
     if n_out < 3:
