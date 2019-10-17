@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "cl": "auto-changelog"
+  },
+  "dependencies": {
+    "auto-changelog": "^1.16.1"
+  }
+}
