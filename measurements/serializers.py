@@ -129,6 +129,7 @@ class MeasurementSerializer(MinutelyMeasurementSerializer):
             'measurement'
         )
 
+
 class QuarterlySerializer(QuarterlyMeasurementSerializer):
     measurements = serializers.ListField(default=[])
 

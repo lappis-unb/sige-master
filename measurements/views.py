@@ -163,32 +163,34 @@ class QuarterlyMeasurementViewSet(MeasurementViewSet):
         measurements = self.queryset.values(
             self.fields[0], self.fields[1], 'collection_time'
         )
-        # measurements = [a for a in measurements if a['collection_time'].hour == a]
 
         measurements_list = (
             [
                 [
-                    measurements[0][self.fields[0]] +
-                    measurements[0][self.fields[1]],
+                    measurements[0][self.fields[0]] + measurements[0][
+                        self.fields[1]
+                    ],
                     measurements[0]['collection_time']
                     .strftime('%d/%m/%Y %H:%M:%S')
                 ]
             ]
         )
 
-        for i in range(1, len(measurements)-1):
+        for i in range(1, len(measurements) - 1):
             actual_hour = measurements[i]['collection_time'].hour
-            last_hour = measurements[i-1]['collection_time'].hour
+            last_hour = measurements[i - 1]['collection_time'].hour
             if actual_hour == last_hour:
-                measurements_list[len(measurements_list)-1][0] += (
-                    measurements[i][self.fields[0]] +
-                    measurements[i][self.fields[1]]
+                measurements_list[len(measurements_list) - 1][0] += (
+                    measurements[i][self.fields[0]] + measurements[i][
+                        self.fields[1]
+                    ]
                 )
             else:
                 measurements_list.append(
                     [
-                        measurements[i][self.fields[0]] +
-                        measurements[i][self.fields[1]],
+                        measurements[i][self.fields[0]] + measurements[i][
+                            self.fields[1]
+                        ],
                         measurements[i]['collection_time']
                         .strftime('%d/%m/%Y %H:%M:%S')
                     ]
