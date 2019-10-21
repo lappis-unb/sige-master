@@ -25,6 +25,7 @@ from .serializers import ThreePhaseSerializer
 from .serializers import MinutelyMeasurementSerializer
 from .serializers import QuarterlyMeasurementSerializer
 from .serializers import MonthlyMeasurementSerializer
+from .serializers import QuarterlySerializer
 
 from .pagination import PostLimitOffsetPagination
 from .pagination import PostPageNumberPagination
@@ -158,6 +159,57 @@ class QuarterlyMeasurementViewSet(MeasurementViewSet):
     queryset = QuarterlyMeasurement.objects.none()
     serializer_class = QuarterlyMeasurementSerializer
 
+    def mount_data_list(self, transductor):
+        measurements = self.queryset.values(
+            self.fields[0], self.fields[1], 'collection_time'
+        )
+        # measurements = [a for a in measurements if a['collection_time'].hour == a]
+
+        measurements_list = (
+            [
+                [
+                    measurements[0][self.fields[0]] +
+                    measurements[0][self.fields[1]],
+                    measurements[0]['collection_time']
+                    .strftime('%d/%m/%Y %H:%M:%S')
+                ]
+            ]
+        )
+
+        for i in range(1, len(measurements)-1):
+            actual_hour = measurements[i]['collection_time'].hour
+            last_hour = measurements[i-1]['collection_time'].hour
+            if actual_hour == last_hour:
+                measurements_list[len(measurements_list)-1][0] += (
+                    measurements[i][self.fields[0]] +
+                    measurements[i][self.fields[1]]
+                )
+            else:
+                measurements_list.append(
+                    [
+                        measurements[i][self.fields[0]] +
+                        measurements[i][self.fields[1]],
+                        measurements[i]['collection_time']
+                        .strftime('%d/%m/%Y %H:%M:%S')
+                    ]
+                )
+
+        # measurements = (
+        #     [
+        #         [
+        #             item[self.fields[0]] + item[self.fields[1]],
+        #             item['collection_time'].strftime('%d/%m/%Y %H:%M:%S')
+        #         ]
+        #         for item in measurements
+        #     ]
+        # )
+
+        quarterly_measurements = {}
+        quarterly_measurements['transductor'] = transductor
+        quarterly_measurements['measurements'] = measurements_list
+
+        return [quarterly_measurements]
+
 
 class MonthlyMeasurementViewSet(MeasurementViewSet):
     model = MonthlyMeasurement
@@ -260,3 +312,13 @@ class CurrentThreePhaseViewSet(MinutelyMeasurementViewSet):
 class FrequencyViewSet(MinutelyMeasurementViewSet):
     serializer_class = MeasurementSerializer
     fields = ['frequency_a']
+
+
+class ConsumptionViewSet(QuarterlyMeasurementViewSet):
+    serializer_class = QuarterlySerializer
+    fields = ['consumption_peak_time', 'consumption_off_peak_time']
+
+
+class GenerationViewSet(QuarterlyMeasurementViewSet):
+    serializer_class = QuarterlySerializer
+    fields = ['generated_energy_peak_time', 'generated_energy_off_peak_time']

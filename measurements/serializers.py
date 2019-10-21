@@ -4,9 +4,6 @@ from .models import MinutelyMeasurement
 from .models import QuarterlyMeasurement
 from .models import MonthlyMeasurement
 
-from django.contrib.postgres.fields import ArrayField
-from django.contrib.postgres.fields import HStoreField
-
 
 class MinutelyMeasurementSerializer(serializers.HyperlinkedModelSerializer):
 
@@ -130,4 +127,15 @@ class MeasurementSerializer(MinutelyMeasurementSerializer):
             'id',
             'transductor',
             'measurement'
+        )
+
+class QuarterlySerializer(QuarterlyMeasurementSerializer):
+    measurements = serializers.ListField(default=[])
+
+    class Meta:
+        model = QuarterlyMeasurement
+        fields = (
+            'id',
+            'transductor',
+            'measurements'
         )

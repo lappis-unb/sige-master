@@ -87,3 +87,15 @@ graph_router.register(
     MinutelyTotalPowerFactorViewSet,
     basename='minutelytotalpowerfactor'
 )
+
+graph_router.register(
+    r'quarterly_consumption',
+    ConsumptionViewSet,
+    basename='quarterlyconsumption'
+)
+
+graph_router.register(
+    r'quarterly_generated_energy',
+    GenerationViewSet,
+    basename='quarterly_generation'
+)
