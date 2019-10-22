@@ -101,9 +101,41 @@ class MinutelyMeasurementViewSet(MeasurementViewSet):
         return minutely_measurements
 
     def threephasic_measurement_collections(self, transductor):
-        list_a = self.apply_filter(self.fields[0])
-        list_b = self.apply_filter(self.fields[1])
-        list_c = self.apply_filter(self.fields[2])
+        is_filtered = self.request.query_params.get('is_filtered')
+
+        if is_filtered == 'True':
+            list_a = self.apply_filter(self.fields[0])
+            list_b = self.apply_filter(self.fields[1])
+            list_c = self.apply_filter(self.fields[2])
+        else:
+            list_a = self.queryset.values_list(
+                self.fields[0], 'collection_time'
+            )
+            list_a = (
+                [
+                    [element[0], element[1].strftime('%d/%m/%Y %H:%M:%S')]
+                    for element in list_a
+                ]
+            )
+            list_b = self.queryset.values_list(
+                self.fields[1], 'collection_time'
+            )
+            list_b = (
+                [
+                    [element[0], element[1].strftime('%d/%m/%Y %H:%M:%S')]
+                    for element in list_b
+                ]
+            )
+            list_c = self.queryset.values_list(
+                self.fields[2], 'collection_time'
+            )
+            list_c = (
+                [
+                    [element[0], element[1].strftime('%d/%m/%Y %H:%M:%S')]
+                    for element in list_c
+                ]
+            )
+
 
         minutely_measurements = {}
         minutely_measurements['transductor'] = transductor
