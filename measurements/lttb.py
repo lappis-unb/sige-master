@@ -49,9 +49,6 @@ def downsample(data, n_out):
         raise ValueError('data should be sorted on first column')
 
     if n_out > data.shape[0]:
-        raise ValueError('n_out must be <= number of rows in data')
-
-    if n_out <= data.shape[0]:
         return data
 
     if n_out < 3:
