@@ -193,15 +193,13 @@ class QuarterlyMeasurementViewSet(MeasurementViewSet):
 
     def mount_data_list(self, transductor):
         measurements = self.queryset.values(
-            self.fields[0], self.fields[1], 'collection_time'
+            self.fields[0], 'collection_time'
         )
 
         measurements_list = (
             [
                 [
-                    measurements[0][self.fields[0]] + measurements[0][
-                        self.fields[1]
-                    ],
+                    measurements[0][self.fields[0]],
                     measurements[0]['collection_time']
                 ]
             ]
@@ -218,9 +216,7 @@ class QuarterlyMeasurementViewSet(MeasurementViewSet):
 
             if answer_hour == measurements_list[len(measurements_list) - 1][1].hour:
                 measurements_list[len(measurements_list) - 1][0] += (
-                    measurements[i][self.fields[0]] + measurements[i][
-                        self.fields[1]
-                    ]
+                    measurements[i][self.fields[0]]
                 )
             else:
                 answer_date = timezone.datetime(
@@ -234,9 +230,7 @@ class QuarterlyMeasurementViewSet(MeasurementViewSet):
                 )
                 measurements_list.append(
                     [
-                        measurements[i][self.fields[0]] + measurements[i][
-                            self.fields[1]
-                        ],
+                        measurements[i][self.fields[0]],
                         answer_date
                     ]
                 )
@@ -356,11 +350,21 @@ class FrequencyViewSet(MinutelyMeasurementViewSet):
     fields = ['frequency_a']
 
 
-class ConsumptionViewSet(QuarterlyMeasurementViewSet):
+class ConsumptionPeakViewSet(QuarterlyMeasurementViewSet):
     serializer_class = QuarterlySerializer
-    fields = ['consumption_peak_time', 'consumption_off_peak_time']
+    fields = ['consumption_peak_time']
 
 
-class GenerationViewSet(QuarterlyMeasurementViewSet):
+class ConsumptionOffPeakViewSet(QuarterlyMeasurementViewSet):
     serializer_class = QuarterlySerializer
-    fields = ['generated_energy_peak_time', 'generated_energy_off_peak_time']
+    fields = ['consumption_off_peak_time']
+
+
+class GenerationPeakViewSet(QuarterlyMeasurementViewSet):
+    serializer_class = QuarterlySerializer
+    fields = ['generated_energy_peak_time']
+
+
+class GenerationOffPeakViewSet(QuarterlyMeasurementViewSet):
+    serializer_class = QuarterlySerializer
+    fields = ['generated_energy_off_peak_time']

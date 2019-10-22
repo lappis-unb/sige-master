@@ -126,7 +126,7 @@ class MeasurementSerializer(MinutelyMeasurementSerializer):
         fields = (
             'id',
             'transductor',
-            'measurement'
+            'measurements'
         )
 
 
