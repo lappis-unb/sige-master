@@ -113,7 +113,7 @@ class MinutelyMeasurementViewSet(MeasurementViewSet):
             )
             list_a = (
                 [
-                    [element[0], element[1].strftime('%d/%m/%Y %H:%M:%S')]
+                    [element[0], element[1].strftime('%m/%d/%Y %H:%M:%S')]
                     for element in list_a
                 ]
             )
@@ -122,7 +122,7 @@ class MinutelyMeasurementViewSet(MeasurementViewSet):
             )
             list_b = (
                 [
-                    [element[0], element[1].strftime('%d/%m/%Y %H:%M:%S')]
+                    [element[0], element[1].strftime('%m/%d/%Y %H:%M:%S')]
                     for element in list_b
                 ]
             )
@@ -131,7 +131,7 @@ class MinutelyMeasurementViewSet(MeasurementViewSet):
             )
             list_c = (
                 [
-                    [element[0], element[1].strftime('%d/%m/%Y %H:%M:%S')]
+                    [element[0], element[1].strftime('%m/%d/%Y %H:%M:%S')]
                     for element in list_c
                 ]
             )
@@ -177,7 +177,7 @@ class MinutelyMeasurementViewSet(MeasurementViewSet):
                     item[1],
                     timezone.datetime
                     .utcfromtimestamp(item[2])
-                    .strftime('%d/%m/%Y %H:%M:%S')
+                    .strftime('%m/%d/%Y %H:%M:%S')
                 ]
                 for item in filtered_values
             ]
@@ -226,7 +226,7 @@ class QuarterlyMeasurementViewSet(MeasurementViewSet):
 
                 measurements_list[len(measurements_list) - 1][1] = (
                     measurements_list[len(measurements_list) - 1][1]
-                    .strftime('%d/%m/%Y %H:%M:%S')
+                    .strftime('%m/%d/%Y %H:%M:%S')
                 )
                 measurements_list.append(
                     [
@@ -237,7 +237,7 @@ class QuarterlyMeasurementViewSet(MeasurementViewSet):
 
         measurements_list[len(measurements_list) - 1][1] = (
             measurements_list[len(measurements_list) - 1][1]
-            .strftime('%d/%m/%Y %H:%M:%S')
+            .strftime('%m/%d/%Y %H:%M:%S')
         )
 
         quarterly_measurements = {}
