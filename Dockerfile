@@ -18,3 +18,6 @@ RUN touch /var/log/cron.log
 RUN /usr/bin/crontab /etc/cron.d/smi-cron
 
 RUN pip install --no-cache-dir -r requirements.txt
+
+CMD ['echo '======= RUNNING SEED'']
+CMD ['python', 'seed_db.py']
