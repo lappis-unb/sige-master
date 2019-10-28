@@ -42,6 +42,13 @@ class MeasurementViewSet(mixins.RetrieveModelMixin,
     pagination_class = PostLimitOffsetPagination
     fields = []
 
+
+class MinutelyMeasurementViewSet(MeasurementViewSet):
+    model = MinutelyMeasurement
+    queryset = MinutelyMeasurement.objects.none()
+    serializer_class = MinutelyMeasurementSerializer
+    fields = []
+
     def get_queryset(self):
         start_date = self.request.query_params.get('start_date')
         end_date = self.request.query_params.get('end_date')
@@ -74,16 +81,6 @@ class MeasurementViewSet(mixins.RetrieveModelMixin,
             )
 
         return self.mount_data_list(transductor)
-
-    def mount_data_list(self, transductor):
-        return []
-
-
-class MinutelyMeasurementViewSet(MeasurementViewSet):
-    model = MinutelyMeasurement
-    queryset = MinutelyMeasurement.objects.none()
-    serializer_class = MinutelyMeasurementSerializer
-    fields = []
 
     def mount_data_list(self, transductor):
         minutely_measurements = []
@@ -135,7 +132,6 @@ class MinutelyMeasurementViewSet(MeasurementViewSet):
                     for element in list_c
                 ]
             )
-
 
         minutely_measurements = {}
         minutely_measurements['transductor'] = transductor
@@ -191,15 +187,52 @@ class QuarterlyMeasurementViewSet(MeasurementViewSet):
     queryset = QuarterlyMeasurement.objects.none()
     serializer_class = QuarterlyMeasurementSerializer
 
-    def mount_data_list(self, transductor):
-        measurements = self.queryset.values(
-            self.fields[0], 'collection_time'
-        )
+    def get_queryset(self):
+        start_date = self.request.query_params.get('start_date')
+        end_date = self.request.query_params.get('end_date')
 
+        params = [
+            {'name': 'start_date', 'value': start_date},
+            {'name': 'end_date', 'value': end_date}
+        ]
+
+        validations.validate_query_params(params)
+
+        try:
+            self.queryset = self.model.objects.filter(
+                collection_time__gte=start_date,
+                collection_time__lte=end_date
+            ).order_by(
+                'collection_time'
+            )
+        except EnergyTransductor.DoesNotExist:
+            raise APIException(
+                'Serial number field does not match '
+                'any existent EnergyTransductor.'
+            )
+
+        return self.mount_data_list()
+
+    def mount_data_list(self, transductor=[]):
+        total_consumption_per_hour = []
+
+        for field in self.fields:
+            measurements = self.queryset.values(
+                field, 'collection_time'
+            )
+
+            total_consumption_per_hour = self.apply_algorithm(
+                measurements,
+                field
+            )
+
+        return total_consumption_per_hour
+
+    def apply_algorithm(self, measurements, field, transductor=[]):
         measurements_list = (
             [
                 [
-                    measurements[0][self.fields[0]],
+                    measurements[0][field],
                     measurements[0]['collection_time']
                 ]
             ]
@@ -214,9 +247,11 @@ class QuarterlyMeasurementViewSet(MeasurementViewSet):
             else:
                 answer_hour = actual.hour + 1
 
-            if answer_hour == measurements_list[len(measurements_list) - 1][1].hour:
+            last_hour = measurements_list[len(measurements_list) - 1][1].hour
+
+            if answer_hour == last_hour:
                 measurements_list[len(measurements_list) - 1][0] += (
-                    measurements[i][self.fields[0]]
+                    measurements[i][field]
                 )
             else:
                 answer_date = timezone.datetime(
@@ -230,7 +265,7 @@ class QuarterlyMeasurementViewSet(MeasurementViewSet):
                 )
                 measurements_list.append(
                     [
-                        measurements[i][self.fields[0]],
+                        measurements[i][field],
                         answer_date
                     ]
                 )
@@ -241,8 +276,10 @@ class QuarterlyMeasurementViewSet(MeasurementViewSet):
         )
 
         quarterly_measurements = {}
-        quarterly_measurements['transductor'] = transductor
         quarterly_measurements['measurements'] = measurements_list
+
+        if transductor != []:
+            quarterly_measurements['transductor'] = transductor
 
         return [quarterly_measurements]
 
@@ -368,3 +405,8 @@ class GenerationPeakViewSet(QuarterlyMeasurementViewSet):
 class GenerationOffPeakViewSet(QuarterlyMeasurementViewSet):
     serializer_class = QuarterlySerializer
     fields = ['generated_energy_off_peak_time']
+
+
+class TotalConsumtionViewSet(QuarterlyMeasurementViewSet):
+    serializer_class = QuarterlySerializer
+    fields = ['consumption_peak_time', 'consumption_off_peak_time']

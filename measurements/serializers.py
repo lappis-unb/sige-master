@@ -137,6 +137,5 @@ class QuarterlySerializer(QuarterlyMeasurementSerializer):
         model = QuarterlyMeasurement
         fields = (
             'id',
-            'transductor',
             'measurements'
         )
