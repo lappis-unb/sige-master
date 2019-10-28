@@ -119,7 +119,7 @@ class ThreePhaseSerializer(MinutelyMeasurementSerializer):
 
 
 class MeasurementSerializer(MinutelyMeasurementSerializer):
-    measurement = serializers.ListField(default=[])
+    measurements = serializers.ListField(default=[])
 
     class Meta:
         model = MinutelyMeasurement

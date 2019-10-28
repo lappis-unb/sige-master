@@ -1,5 +1,6 @@
 from django.utils import timezone
 import numpy as np
+import os
 from .lttb import downsample
 
 from django.db.models.query import QuerySet
@@ -146,7 +147,7 @@ class MinutelyMeasurementViewSet(MeasurementViewSet):
 
         minutely_measurements = {}
         minutely_measurements['transductor'] = transductor
-        minutely_measurements['measurement'] = list_measurement
+        minutely_measurements['measurements'] = list_measurement
 
         return [minutely_measurements]
 
@@ -166,7 +167,10 @@ class MinutelyMeasurementViewSet(MeasurementViewSet):
             ]
         )
         filtered_values = np.array(filtered_values)
-        filtered_values = downsample(filtered_values, 10)
+        filtered_values = downsample(
+            filtered_values,
+            int(os.getenv('LIMIT_FILTER'))
+        )
         filtered_values = (
             [
                 [
