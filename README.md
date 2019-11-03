@@ -43,3 +43,19 @@ sudo docker-compose up
 ```
 
 And, that's it! You have SMI up and running!
+
+### Register a slave server
+
+You may register a slave server by sending a POST to '/slave/' ([shortcut](http://localhost:8001/slave/)).
+
+If you are running a slave server on the same machine you are running master, you can find the IP address on the slave container by typing:
+
+``` bash
+sudo docker inspect slave-api
+```
+
+### Creating a transductor
+
+You may create a transductor by sending a POST to '/energy_transductors/' ([shortcut](http://localhost:8001/energy_transductors/)). 
+
+A created transductor is only registred locally on master server, for registering it to a slave server, POST to '/energy_transductors/(transductor's serial number)/add_to_server/' and the post's body must contain { "slave_id" : (target slave id) }.
