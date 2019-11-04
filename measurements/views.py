@@ -236,8 +236,8 @@ class QuarterlyMeasurementViewSet(MeasurementViewSet):
         measurements_list = (
             [
                 [
+                    measurements[0]['collection_time'],
                     measurements[0][field],
-                    measurements[0]['collection_time']
                 ]
             ]
         )
@@ -251,10 +251,10 @@ class QuarterlyMeasurementViewSet(MeasurementViewSet):
             else:
                 answer_hour = actual.hour + 1
 
-            last_hour = measurements_list[len(measurements_list) - 1][1].hour
+            last_hour = measurements_list[len(measurements_list) - 1][0].hour
 
             if answer_hour == last_hour:
-                measurements_list[len(measurements_list) - 1][0] += (
+                measurements_list[len(measurements_list) - 1][1] += (
                     measurements[i][field]
                 )
             else:
@@ -263,19 +263,19 @@ class QuarterlyMeasurementViewSet(MeasurementViewSet):
                     actual.day, answer_hour, 0, 0
                 )
 
-                measurements_list[len(measurements_list) - 1][1] = (
-                    measurements_list[len(measurements_list) - 1][1]
+                measurements_list[len(measurements_list) - 1][0] = (
+                    measurements_list[len(measurements_list) - 1][0]
                     .strftime('%m/%d/%Y %H:%M:%S')
                 )
                 measurements_list.append(
                     [
+                        answer_date,
                         measurements[i][field],
-                        answer_date
                     ]
                 )
 
-        measurements_list[len(measurements_list) - 1][1] = (
-            measurements_list[len(measurements_list) - 1][1]
+        measurements_list[len(measurements_list) - 1][0] = (
+            measurements_list[len(measurements_list) - 1][0]
             .strftime('%m/%d/%Y %H:%M:%S')
         )
 
