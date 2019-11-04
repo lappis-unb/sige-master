@@ -111,7 +111,7 @@ class MinutelyMeasurementViewSet(MeasurementViewSet):
             )
             list_a = (
                 [
-                    [element[0], element[1].strftime('%m/%d/%Y %H:%M:%S')]
+                    [element[1].strftime('%m/%d/%Y %H:%M:%S'), element[0]]
                     for element in list_a
                 ]
             )
@@ -120,7 +120,7 @@ class MinutelyMeasurementViewSet(MeasurementViewSet):
             )
             list_b = (
                 [
-                    [element[0], element[1].strftime('%m/%d/%Y %H:%M:%S')]
+                    [element[1].strftime('%m/%d/%Y %H:%M:%S'), element[0]]
                     for element in list_b
                 ]
             )
@@ -129,7 +129,7 @@ class MinutelyMeasurementViewSet(MeasurementViewSet):
             )
             list_c = (
                 [
-                    [element[0], element[1].strftime('%m/%d/%Y %H:%M:%S')]
+                    [element[1].strftime('%m/%d/%Y %H:%M:%S'), element[0]]
                     for element in list_c
                 ]
             )
@@ -174,10 +174,10 @@ class MinutelyMeasurementViewSet(MeasurementViewSet):
         filtered_values = (
             [
                 [
-                    item[1],
                     timezone.datetime
                     .utcfromtimestamp(item[2])
-                    .strftime('%m/%d/%Y %H:%M:%S')
+                    .strftime('%m/%d/%Y %H:%M:%S'),
+                    item[1]
                 ]
                 for item in filtered_values
             ]
