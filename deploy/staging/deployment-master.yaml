@@ -32,7 +32,7 @@ metadata:
 spec:
   ports:
   - port: 80
-    targetPort: 8000
+    targetPort: 8001
     protocol: TCP
     name: http
   selector:
@@ -58,12 +58,12 @@ spec:
       containers:
       - name: smi-master-staging
         image: ${CICD_IMAGE}:${CICD_EXECUTION_SEQUENCE}
-        command: ["sh", "scripts/start.sh"]
+        command: ["sh", "scripts/start-prod.sh"]
         ports:
-        - containerPort: 8000
+        - containerPort: 8001
           protocol: TCP
         env:
-        - name: master_SECRET_KEY
+        - name: MASTER_SECRET_KEY
           valueFrom:
             secretKeyRef:
               name: "master-staging-secrets"
@@ -87,4 +87,6 @@ spec:
         - name: ENVIRONMENT
           value: production
         - name: ALLOWED_HOSTS
-          value: smi-master.dev.lappis.rocks
+          value: "*"
+        - name: SLAVE_PORT
+          value: "80"
