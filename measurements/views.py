@@ -143,7 +143,14 @@ class MinutelyMeasurementViewSet(MeasurementViewSet):
         return [minutely_measurements]
 
     def simple_measurement_collections(self, transductor):
-        list_measurement = self.apply_filter(self.fields[0])
+        is_filtered = self.request.query_params.get('is_filtered')
+
+        if is_filtered == 'True':
+            list_measurement = self.apply_filter(self.fields[0])
+        else:
+            list_measurement = self.queryset.values_list(
+                self.fields[0], 'collection_time'
+            )
 
         minutely_measurements = {}
         minutely_measurements['transductor'] = transductor
@@ -225,10 +232,11 @@ class QuarterlyMeasurementViewSet(MeasurementViewSet):
                 field, 'collection_time'
             )
 
-            total_consumption_per_hour = self.apply_algorithm(
-                measurements,
-                field
-            )
+            if measurements:
+                total_consumption_per_hour = self.apply_algorithm(
+                    measurements,
+                    field
+                )
 
         return total_consumption_per_hour
 
