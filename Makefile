@@ -1,4 +1,11 @@
 up:
+	if docker network ls | grep -q smi-network
+	then
+		echo "network exists";
+	else
+		docker network create smi-network;
+	fi
+
 	docker-compose up -d
 
 stop:
