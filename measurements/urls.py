@@ -87,3 +87,27 @@ graph_router.register(
     MinutelyTotalPowerFactorViewSet,
     basename='minutelytotalpowerfactor'
 )
+
+graph_router.register(
+    r'quarterly_consumption_peak',
+    ConsumptionPeakViewSet,
+    basename='quarterlyconsumptionpeak'
+)
+
+graph_router.register(
+    r'quarterly_consumption_off_peak',
+    ConsumptionOffPeakViewSet,
+    basename='quarterlyconsumptionoffpeak'
+)
+
+graph_router.register(
+    r'quarterly_generated_energy_peak',
+    GenerationPeakViewSet,
+    basename='quarterlygenerationpeak'
+)
+
+graph_router.register(
+    r'quarterly_generated_energy_off_peak',
+    GenerationOffPeakViewSet,
+    basename='quarterlygenerationoffpeak'
+)
