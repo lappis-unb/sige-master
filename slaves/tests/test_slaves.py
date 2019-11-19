@@ -77,12 +77,11 @@ class TestSlavesModels(TestCase):
         self.assertNotEqual(original_location, new_location)
         self.assertNotEqual(original_broken, new_broken)
 
-    def test_should_not_update_a_speficic_slave_with_wrong_ip_address(self):
+    def test_should_update_a_speficic_slave_with_dns(self):
         slave = Slave.objects.get(ip_address="1.1.1.1")
-        slave.ip_address = "some ip adreess"
+        slave.ip_address = "https://api.herokuapp.com/"
 
-        with self.assertRaises(ValidationError):
-            slave.save()
+        self.assertIsNone(slave.save())
 
     def test_should_delete_a_existent_slave(self):
         slave = Slave.objects.get(ip_address="1.1.1.1")
