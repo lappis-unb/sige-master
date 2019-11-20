@@ -10,7 +10,8 @@ variables:
   POSTGRES_PORT: 5432
   POSTGRES_HOST: postgres
   MASTER_SECRET_KEY: some-random-stuff
-  ENVIRONMENT: development
+  ENVIRONMENT: test
+  ALLOWED_HOSTS: '*'
   IMAGE_TAG: lappis/smi-master:$CI_COMMIT_TAG
 
 stages:
