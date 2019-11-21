@@ -52,7 +52,7 @@ To simplify the commands you can use make to run the application. You can lift u
 sudo make up
 ```
 
-*****obs:******** This command creates the smi network if it doesn't exist yet.
+**obs:** This command creates the smi network if it doesn't exist yet.
 
 #### Other commands
 
