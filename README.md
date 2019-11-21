@@ -43,3 +43,25 @@ sudo docker-compose up
 ```
 
 And, that's it! You have SMI up and running!
+
+### Running SMI Master Using Make
+
+To simplify the commands you can use make to run the application. You can lift up you Master environment with:
+
+``` bash
+sudo make up
+```
+
+*****obs:******** This command creates the smi network if it doesn't exist yet.
+
+#### Other commands
+
+``` bash
+sudo make stop # stop all Master containers
+sudo make down # down all Master containers
+sudo make dump # generate a dump with the saved data
+sudo make loaddump # restore dumped data to dump-db.json file
+sudo make fixhstore # fix hstore error
+```
+
+
