@@ -6,11 +6,11 @@ from rest_framework.status import HTTP_409_CONFLICT
 from rest_framework.decorators import api_view
 from rest_framework.decorators import permission_classes
 
-from users import models
-from users import serializers
+from .models import *
+from .serializers import *
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = models.CustomUser.objects.all()
-    serializer_class = serializers.UserSerializer
+    queryset = CustomUser.objects.all()
+    serializer_class = UserSerializer
     permission_classes = (permissions.IsAdminUser,)
