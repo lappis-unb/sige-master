@@ -1,4 +1,4 @@
-from slaves import api
+from .api import *
 from .models import Slave
 from transductors.models import EnergyTransductor
 from datetime import datetime, timedelta
@@ -156,7 +156,7 @@ class DataCollector():
             for transductor in slave.transductors.all():
                 if kwargs.get('minutely', None):
                     # Get response and save it in the master database
-                    minutely_response = api.request_measurements(
+                    minutely_response = request_measurements(
                         slave,
                         transductor,
                         transductor.last_data_collection,
@@ -177,7 +177,7 @@ class DataCollector():
                             pass
 
                 if kwargs.get('quarterly', None):
-                    quarterly_response = api.request_measurements(
+                    quarterly_response = request_measurements(
                         slave,
                         transductor,
                         transductor.last_data_collection,
@@ -197,7 +197,7 @@ class DataCollector():
                             pass
 
                 if kwargs.get('monthly', None):
-                    monthly_response = api.request_measurements(
+                    monthly_response = request_measurements(
                         slave,
                         transductor,
                         transductor.last_data_collection,
