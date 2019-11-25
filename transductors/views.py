@@ -6,7 +6,6 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import serializers, viewsets, permissions
 
-from .api import *
 from slaves.models import Slave
 from .models import EnergyTransductor
 from .serializers import EnergyTransductorSerializer, AddToServerSerializer
