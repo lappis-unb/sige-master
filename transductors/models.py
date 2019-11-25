@@ -1,4 +1,4 @@
-from transductors import api
+from .api import *
 from django.db import models
 from datetime import datetime
 from polymorphic.models import PolymorphicModel
@@ -88,10 +88,10 @@ class Transductor(PolymorphicModel):
         return self.active
 
     def create_on_server(self, slave_server):
-        return api.create_transductor(self, slave_server)
+        return create_transductor(self, slave_server)
 
     def delete_on_server(self, slave_server):
-        return api.delete_transductor(self, slave_server)
+        return delete_transductor(self, slave_server)
 
     def collect_broken_status(self):
         return self.broken
