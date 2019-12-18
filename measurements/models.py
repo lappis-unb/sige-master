@@ -107,7 +107,6 @@ class MonthlyMeasurement(Measurement):
 
 
 class RealTimeMeasurement(Measurement):
-
     voltage_a = models.FloatField(default=0)
     voltage_b = models.FloatField(default=0)
     voltage_c = models.FloatField(default=0)
