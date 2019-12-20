@@ -1,10 +1,19 @@
-from .api import *
-from .models import Slave
-from transductors.models import EnergyTransductor
-from datetime import datetime, timedelta
-import urllib.request
-import json
 import os
+import json
+import urllib.request
+from datetime import datetime
+from datetime import timedelta
+
+from .models import Slave
+from .api import request_all_events
+from .api import request_measurements
+
+from events.models import PhaseDropEvent
+from events.models import CriticalVoltageEvent
+from events.models import FailedConnectionEvent
+from events.models import PrecariousVoltageEvent
+
+from transductors.models import EnergyTransductor
 from measurements.models import MinutelyMeasurement
 from measurements.models import QuarterlyMeasurement
 from measurements.models import MonthlyMeasurement
@@ -149,7 +158,34 @@ class DataCollector():
         )
 
     @staticmethod
+    def save_event_object(event_class, event):
+        """
+        Builds and saves events from a dict to a given class
+        """
+        print(event_class)
+        print(event)
+        pass
+
+    @staticmethod
+    def get_events():
+        """
+        Collects all events previously created on the slave slave servers
+        """
+        slave_servers = Slave.objects.all()
+
+        for slave in slave_servers:
+            event_responses = request_all_events(slave)
+
+            for pairs in event_responses:
+                event_class = globals()[pairs[0]]    # gets class from string
+                event = json.loads(pairs[1].content)
+                DataCollector.save_event_object(event_class, event)
+
+    @staticmethod
     def get_measurements(*args, **kwargs):
+        """
+        Collects a given set of measurements from all slave servers
+        """
         slaves = Slave.objects.all()
 
         for slave in slaves:
