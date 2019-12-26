@@ -10,8 +10,9 @@ from .api import request_measurements
 
 from events.models import PhaseDropEvent
 from events.models import CriticalVoltageEvent
-from events.models import FailedConnectionTransductorEvent
 from events.models import PrecariousVoltageEvent
+from events.models import FailedConnectionSlaveEvent
+from events.models import FailedConnectionTransductorEvent
 
 from transductors.models import EnergyTransductor
 from measurements.models import MinutelyMeasurement
@@ -50,10 +51,12 @@ class CheckTransductorsAndSlaves():
 
                 else:
                     slave.broken = True
+                    FailedConnectionSlaveEvent.save_event(slave)
                     slave.save()
 
             except Exception:
                 slave.broken = True
+                FailedConnectionSlaveEvent.save_event(slave)
                 slave.save()
 
 
