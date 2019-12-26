@@ -10,7 +10,7 @@ from .api import request_measurements
 
 from events.models import PhaseDropEvent
 from events.models import CriticalVoltageEvent
-from events.models import FailedConnectionEvent
+from events.models import FailedConnectionTransductorEvent
 from events.models import PrecariousVoltageEvent
 
 from transductors.models import EnergyTransductor
@@ -158,13 +158,19 @@ class DataCollector():
         )
 
     @staticmethod
-    def save_event_object(event_class, event):
+    def save_event_object(event_class, event_dict):
         """
         Builds and saves events from a dict to a given class
         """
-        print(event_class)
-        print(event)
-        pass
+        if event_class.__name__ == 'FailedConnectionTransductorEvent':
+            FailedConnectionTransductorEvent.objects.create(
+                created_at=event_dict.created_at,
+                transductor=EnergyTransductor.objects.find(
+                    ip_address=event_dict.ip_address
+                )
+            )
+        else:
+            event_class.objects.create(**event_dict)    # creates from dict
 
     @staticmethod
     def get_events():

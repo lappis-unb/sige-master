@@ -43,6 +43,14 @@ class VoltageRelatedEvent(Event):
     phase_b = models.FloatField(default=0)
     phase_c = models.FloatField(default=0)
 
+    def save_event(self, measurement):
+        new_event = self.__class__()
+        new_event.phase_a = measurement.phase_a
+        new_event.phase_b = measurement.phase_b
+        new_event.phase_c = measurement.phase_c
+        new_event.save()
+        return new_event
+
 
 class FailedConnectionTransductorEvent(Event):
     """
