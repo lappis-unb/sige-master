@@ -3,6 +3,7 @@ from django.contrib.postgres.fields import ArrayField
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from transductors.models import EnergyTransductor
+from events.models import FailedConnectionSlaveEvent
 
 '''
     TODO Make get all measurements and list
@@ -48,7 +49,18 @@ class Slave(models.Model):
             self.transductors.remove(transductor)
         return response
 
+    def set_broken(self, value):
+        """
+        Set the broken atribute's value to match the param. If toggled to True,
+        creates a failed connection event
+        """
+        if value:
+            FailedConnectionSlaveEvent.save_event(self)
+        self.broken = value
+        self.save()
+
     # FIXME: Improve this
+
     def __is_success_status(self, status):
         if (status is not None) and (200 <= status < 300):
             return True

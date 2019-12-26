@@ -50,18 +50,14 @@ class CheckTransductorsAndSlaves():
                         transductor_status.save()
 
                 else:
-                    slave.broken = True
-                    FailedConnectionSlaveEvent.save_event(slave)
-                    slave.save()
+                    slave.set_broken(value=True)
 
             except Exception:
-                slave.broken = True
-                FailedConnectionSlaveEvent.save_event(slave)
-                slave.save()
-
+                slave.set_broken(value=True)
 
 # TODO Não sabemos como resolver essa comunicação
 # Transdutores em mais de um slave tem que ser tratados de forma diferente?
+
 
 class DataCollector():
     @staticmethod
