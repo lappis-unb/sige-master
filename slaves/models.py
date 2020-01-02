@@ -2,8 +2,8 @@ from django.db import models
 from django.contrib.postgres.fields import ArrayField
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
+
 from transductors.models import EnergyTransductor
-from events.models import FailedConnectionSlaveEvent
 
 '''
     TODO Make get all measurements and list
@@ -55,6 +55,7 @@ class Slave(models.Model):
         creates a failed connection event
         """
         if value:
+            from events.models import FailedConnectionSlaveEvent
             FailedConnectionSlaveEvent.save_event(self)
         self.broken = value
         self.save()

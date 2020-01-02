@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     'transductors',
     'users',
     'corsheaders',
+    'events',
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True

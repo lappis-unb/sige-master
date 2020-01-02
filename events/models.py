@@ -4,8 +4,8 @@ from django.db import models
 from django.utils import timezone
 from polymorphic.models import PolymorphicModel
 
-from slaves.models import Slave
 from transductors.models import EnergyTransductor
+from slaves.models import Slave
 
 
 class Event(PolymorphicModel):
