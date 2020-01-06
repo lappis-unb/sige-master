@@ -174,7 +174,7 @@ class DataCollector():
     @staticmethod
     def get_events():
         """
-        Collects all events previously created on the slave slave servers
+        Collects all events previously created on the slave servers
         """
         slave_servers = Slave.objects.all()
 
