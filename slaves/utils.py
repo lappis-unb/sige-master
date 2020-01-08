@@ -163,13 +163,14 @@ class DataCollector():
         Builds and saves events from a dict to a given class
         """
         for event_dict in events_array:
-            event_class = globals()[event_dict.type]
+            print(event_dict)
+            event_class = globals()[event_dict['type']]
 
             if event_class.__name__ == 'FailedConnectionTransductorEvent':
                 FailedConnectionTransductorEvent.objects.create(
-                    created_at=event_dict.created_at,
+                    created_at=event_dict['created_at'],
                     transductor=EnergyTransductor.objects.get(
-                        ip_address=event_dict.ip_address
+                        ip_address=event_dict['ip_address']
                     )
                 )
             else:
@@ -191,7 +192,7 @@ class DataCollector():
                 #     event_class = globals()[json(pairs[1].content)]
                 # DataCollector.save_event_object(event_class, event)
                 loaded_events = json.loads(pairs[1].content)
-                DataCollector.save_event_object(loaded_events)
+                DataCollector.save_event_object(loaded_events['results'])
 
     @staticmethod
     def get_measurements(*args, **kwargs):
