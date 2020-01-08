@@ -1,7 +1,8 @@
 from .api import *
 from .models import Slave
 from transductors.models import EnergyTransductor
-from datetime import datetime, timedelta
+from datetime import timedelta
+from django.utils.timezone import datetime
 import urllib.request
 import json
 import os
@@ -166,7 +167,10 @@ class DataCollector():
             measurement.total_reactive_power = msm['total_reactive_power']
             measurement.total_power_factor = msm['total_power_factor']
             measurement.transductor = transductor
-            measurement.collection_time = datetime.now()
+            measurement.collection_time = datetime.strptime(
+                msm['collection_date'], '%Y-%m-%dT%H:%M:%S'
+            )
+
             measurement.save()
         else:
             RealTimeMeasurement.objects.create(
@@ -180,7 +184,9 @@ class DataCollector():
                 total_reactive_power=msm['total_reactive_power'],
                 total_power_factor=msm['total_power_factor'],
                 transductor=transductor,
-                collection_time=datetime.now()
+                collection_time=datetime.strptime(
+                    msm['collection_date'], '%Y-%m-%dT%H:%M:%S'
+                )
             )
 
     @staticmethod
