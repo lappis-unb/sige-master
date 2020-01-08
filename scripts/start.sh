@@ -37,8 +37,8 @@ python3 manage.py makemigrations
 echo '======= RUNNING MIGRATIONS'
 python3 manage.py migrate
 
-echo '======= RUNNING SEED'
-python3 seed_db.py
+# echo '======= RUNNING SEED'
+# python3 seed_db.py
 
 echo '======= STARTING CRON'
 cron
