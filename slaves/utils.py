@@ -157,19 +157,23 @@ class DataCollector():
         )
 
     @staticmethod
-    def save_event_object(event_class, event_dict):
+    def save_event_object(events_array):
+        # def save_event_object(event_class, events_array):
         """
         Builds and saves events from a dict to a given class
         """
-        if event_class.__name__ == 'FailedConnectionTransductorEvent':
-            FailedConnectionTransductorEvent.objects.create(
-                created_at=event_dict.created_at,
-                transductor=EnergyTransductor.objects.find(
-                    ip_address=event_dict.ip_address
+        for event_dict in events_array:
+            event_class = globals()[event_dict.type]
+
+            if event_class.__name__ == 'FailedConnectionTransductorEvent':
+                FailedConnectionTransductorEvent.objects.create(
+                    created_at=event_dict.created_at,
+                    transductor=EnergyTransductor.objects.get(
+                        ip_address=event_dict.ip_address
+                    )
                 )
-            )
-        else:
-            event_class.objects.create(**event_dict)    # creates from dict
+            else:
+                event_class.objects.create(**event_dict)    # creates from dict
 
     @staticmethod
     def get_events():
@@ -182,9 +186,12 @@ class DataCollector():
             event_responses = request_all_events(slave)
 
             for pairs in event_responses:
-                event_class = globals()[pairs[0]]    # gets class from string
-                event = json.loads(pairs[1].content)
-                DataCollector.save_event_object(event_class, event)
+                # event_class = globals()[pairs[0]]    # gets class from string
+                # if event_class.__name__ == 'VoltageRelatedEvent':
+                #     event_class = globals()[json(pairs[1].content)]
+                # DataCollector.save_event_object(event_class, event)
+                loaded_events = json.loads(pairs[1].content)
+                DataCollector.save_event_object(loaded_events)
 
     @staticmethod
     def get_measurements(*args, **kwargs):

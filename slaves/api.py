@@ -41,20 +41,12 @@ def request_all_events(slave):
     """
     responses = [
         (
-            "CriticalVoltageEvent",
-            request_events(slave, 'critical-voltage-event')
-        ),
-        (
             "FailedConnectionTransductorEvent",
-            request_events(slave, 'failed-connection-event')
+            request_events(slave, 'failed-connection-events')
         ),
         (
-            "PrecariousVoltageEvent",
-            request_events(slave, 'precarious-voltage-event')
-        ),
-        (
-            "PhaseDropEvent",
-            request_events(slave, 'phase-drop-event')
+            "VoltageRelatedEvent",
+            request_events(slave, 'voltage-events')
         )
     ]
 

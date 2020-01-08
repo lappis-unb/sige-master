@@ -1,11 +1,13 @@
-from django.conf import settings
-from django.core.validators import RegexValidator
 from django.db import models
+from django.conf import settings
 from django.utils import timezone
+from django.core.validators import RegexValidator
+from django.contrib.postgres.fields import JSONField
+
 from polymorphic.models import PolymorphicModel
 
-from transductors.models import EnergyTransductor
 from slaves.models import Slave
+from transductors.models import EnergyTransductor
 
 
 class Event(PolymorphicModel):
@@ -27,29 +29,23 @@ class Event(PolymorphicModel):
         """
         raise NotImplementedError
 
-    def get_events_from_slave_server(self):
-        raise NotImplementedError
-
 
 class VoltageRelatedEvent(Event):
     """
     Defines a new event related to a voltage metric
     """
-
     class Meta:
         abstract = True
 
-    phase_a = models.FloatField(default=0)
-    phase_b = models.FloatField(default=0)
-    phase_c = models.FloatField(default=0)
+    measures = JSONField()
+    transductor = models.ForeignKey(
+        EnergyTransductor,
+        related_name="%(app_label)s_%(class)s",
+        on_delete=models.CASCADE,
+        blank=False,
+        null=False
+    )
 
-    def save_event(self, measurement):
-        new_event = self.__class__()
-        new_event.phase_a = measurement.phase_a
-        new_event.phase_b = measurement.phase_b
-        new_event.phase_c = measurement.phase_c
-        new_event.save()
-        return new_event
 
 
 class FailedConnectionTransductorEvent(Event):
