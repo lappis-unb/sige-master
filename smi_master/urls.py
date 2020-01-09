@@ -12,6 +12,7 @@ from users import views as users_views
 from .views import login
 
 from measurements import urls as measurements_routes
+from events import urls as events_routes
 
 router = DefaultRouter()
 router.register(r'campi', campi_views.CampusViewSet)
@@ -24,6 +25,7 @@ router.register(
 )
 
 router.registry.extend(measurements_routes.router.registry)
+router.registry.extend(events_routes.router.registry)
 
 urlpatterns = [
     path('admin/', admin.site.urls),

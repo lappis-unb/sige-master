@@ -16,7 +16,9 @@ class VoltageRelatedEventSerializer(serializers.HyperlinkedModelSerializer):
         )
 
 
-class FailedConnectionSlaveEvent(serializers.HyperlinkedModelSerializer):
+class FailedConnectionSlaveEventSerializer(
+        serializers.HyperlinkedModelSerializer
+    ):
     class Meta:
         model = FailedConnectionSlaveEvent
         fields = (
@@ -27,7 +29,9 @@ class FailedConnectionSlaveEvent(serializers.HyperlinkedModelSerializer):
         )
 
 
-class FailedConnectionTransductorEvent(serializers.HyperlinkedModelSerializer):
+class FailedConnectionTransductorEventSerializer(
+        serializers.HyperlinkedModelSerializer
+    ):
     class Meta:
         model = FailedConnectionTransductorEvent
         fields = (
