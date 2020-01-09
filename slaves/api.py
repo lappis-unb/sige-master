@@ -26,6 +26,7 @@ def request_events(slave, event_type):
     """
     protocol = "http://"
     endpoint = "/" + event_type + "/"
+
     params = {}
 
     url = "%s%s:%s%s" % (protocol, slave.ip_address, slave.port, endpoint)

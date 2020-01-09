@@ -47,7 +47,6 @@ class VoltageRelatedEvent(Event):
     )
 
 
-
 class FailedConnectionTransductorEvent(Event):
     """
     Defines a new event related to a failed connection with a transductor
@@ -67,7 +66,6 @@ class FailedConnectionTransductorEvent(Event):
         """
         new_event = FailedConnectionTransductorEvent()
         new_event.transductor = transductor
-
         new_event.save()
         return new_event
 
@@ -91,7 +89,6 @@ class FailedConnectionSlaveEvent(Event):
         """
         new_event = FailedConnectionSlaveEvent()
         new_event.slave = slave
-
         new_event.save()
         return new_event
 

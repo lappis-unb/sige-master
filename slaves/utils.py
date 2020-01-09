@@ -158,7 +158,6 @@ class DataCollector():
 
     @staticmethod
     def save_event_object(events_array):
-        # def save_event_object(event_class, events_array):
         """
         Builds and saves events from a dict to a given class
         """
@@ -187,10 +186,6 @@ class DataCollector():
             event_responses = request_all_events(slave)
 
             for pairs in event_responses:
-                # event_class = globals()[pairs[0]]    # gets class from string
-                # if event_class.__name__ == 'VoltageRelatedEvent':
-                #     event_class = globals()[json(pairs[1].content)]
-                # DataCollector.save_event_object(event_class, event)
                 loaded_events = json.loads(pairs[1].content)
                 DataCollector.save_event_object(loaded_events['results'])
 
