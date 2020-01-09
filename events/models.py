@@ -34,9 +34,6 @@ class VoltageRelatedEvent(Event):
     """
     Defines a new event related to a voltage metric
     """
-    class Meta:
-        abstract = True
-
     measures = JSONField()
     transductor = models.ForeignKey(
         EnergyTransductor,
