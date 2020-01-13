@@ -15,6 +15,7 @@ class Event(PolymorphicModel):
     Defines a new event object
     """
     settings.USE_TZ = False
+    ended_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
 
     class Meta:

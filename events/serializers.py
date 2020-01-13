@@ -6,13 +6,14 @@ from .models import VoltageRelatedEvent
 
 
 class VoltageRelatedEventSerializer(serializers.HyperlinkedModelSerializer):
-
     class Meta:
         model = VoltageRelatedEvent
         fields = (
             'id',
             'measures',
-            'transductor',
+            'created_at',
+            'ended_at',
+            'transductor'
         )
 
 
