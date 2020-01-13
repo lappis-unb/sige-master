@@ -3,6 +3,7 @@ from django.db import models
 from datetime import datetime
 from polymorphic.models import PolymorphicModel
 from django.core.exceptions import ValidationError
+from django.core.validators import RegexValidator
 
 
 class Transductor(PolymorphicModel):
@@ -13,16 +14,27 @@ class Transductor(PolymorphicModel):
         blank=False,
         null=False
     )
-    ip_address = models.CharField(max_length=15, blank=False, default='0.0.0.0')
-    location = models.CharField(max_length=256, blank=True)
-    latitude = models.FloatField(null=True, blank=True)
-    longitude = models.FloatField(null=True, blank=True)
+    ip_address = models.CharField(
+        max_length=15,
+        unique=True,
+        default='0.0.0.0',
+        validators=[
+            RegexValidator(
+                regex='^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$',
+                message='Incorrect IP address format',
+                code='invalid_ip_address'
+            ),
+        ]
+    )
+    physical_location = models.CharField(max_length=256, blank=True)
+    geolocation_latitude = models.FloatField(null=True, blank=True)
+    geolocation_longitude = models.FloatField(null=True, blank=True)
+    firmware_version = models.CharField(max_length=20)
     name = models.CharField(max_length=256, blank=True)
     broken = models.BooleanField(default=True)
     active = models.BooleanField(default=False)
     creation_date = models.DateTimeField(null=True, blank=True)
     calibration_date = models.DateTimeField(null=True, blank=True)
-    last_data_collection = models.DateTimeField(null=True, blank=True)
 
     model = models.CharField(
         max_length=256,

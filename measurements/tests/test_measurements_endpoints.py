@@ -22,6 +22,7 @@ class MeasurementsEndPointsTestCase(TestCase):
         self.transductor = EnergyTransductor.objects.create(
             serial_number="12345678",
             ip_address="1.1.1.1",
+            firmware_version="0.1",
             model="EnergyTransductorModel"
         )
 

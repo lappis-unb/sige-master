@@ -13,15 +13,15 @@ class TransductorTestCase(TestCase):
         self.sample_energy_transductor = EnergyTransductor.objects.create(
             serial_number='87654321',
             ip_address='192.168.1.1',
-            location="MESP",
-            latitude=20.1,
-            longitude=37.9,
+            physical_location="MESP",
+            geolocation_latitude=20.1,
+            geolocation_longitude=37.9,
             name="MESP 1",
             broken=True,
             active=False,
             creation_date=timezone.now(),
             calibration_date=timezone.now(),
-            last_data_collection=timezone.now(),
+            firmware_version='0.1',
             model='EnergyTransductorModel'
         )
 
@@ -37,15 +37,15 @@ class TransductorTestCase(TestCase):
         transductor = EnergyTransductor.objects.create(
             serial_number='12345678',
             ip_address='192.168.10.10',
-            location="MESP",
-            latitude=20.1,
-            longitude=37.9,
+            physical_location="MESP",
+            geolocation_latitude=20.1,
+            geolocation_longitude=37.9,
             name="MESP 2",
             broken=False,
             active=True,
             creation_date=timezone.now(),
             calibration_date=timezone.now(),
-            last_data_collection=timezone.now(),
+            firmware_version='0.1',
             model='EnergyTransductorModel'
         )
 
@@ -62,15 +62,15 @@ class TransductorTestCase(TestCase):
             transductor = EnergyTransductor.objects.create(
                 serial_number='87654321',
                 ip_address='192.168.10.10',
-                location="MESP",
-                latitude=20.1,
-                longitude=37.9,
+                physical_location="MESP",
+                geolocation_latitude=20.1,
+                geolocation_longitude=37.9,
                 name="MESP 2",
                 broken=False,
                 active=True,
                 creation_date=timezone.now(),
                 calibration_date=timezone.now(),
-                last_data_collection=timezone.now(),
+                firmware_version='0.1',
                 model='EnergyTransductorModel'
             )
 
@@ -82,15 +82,15 @@ class TransductorTestCase(TestCase):
         with self.assertRaises(ValidationError):
             transductor = EnergyTransductor.objects.create(
                 ip_address='192.168.10.10',
-                location="MESP",
-                latitude=20.1,
-                longitude=37.9,
+                physical_location="MESP",
+                geolocation_latitude=20.1,
+                geolocation_longitude=37.9,
                 name="MESP 2",
                 broken=False,
                 active=True,
                 creation_date=timezone.now(),
                 calibration_date=timezone.now(),
-                last_data_collection=timezone.now(),
+                firmware_version='0.1',
                 model='EnergyTransductorModel'
             )
 
@@ -103,15 +103,15 @@ class TransductorTestCase(TestCase):
             transductor = EnergyTransductor.objects.create(
                 serial_number='87554321',
                 ip_address='192.168.10.10',
-                location="MESP",
-                latitude=20.1,
-                longitude=37.9,
+                physical_location="MESP",
+                geolocation_latitude=20.1,
+                geolocation_longitude=37.9,
                 name="MESP 2",
                 broken=False,
                 active=True,
                 creation_date=timezone.now(),
-                calibration_date=timezone.now(),
-                last_data_collection=timezone.now()
+                firmware_version='0.1',
+                calibration_date=timezone.now()
             )
 
         self.assertEqual(size, len(EnergyTransductor.objects.all()))
@@ -130,15 +130,15 @@ class TransductorTestCase(TestCase):
             transductor.update(
                 serial_number='88888888',
                 ip_address='192.168.10.12',
-                location="UED",
-                latitude=20.2,
-                longitude=37.0,
+                physical_location="UED",
+                geolocation_latitude=20.2,
+                geolocation_longitude=37.0,
                 name="UED 1",
                 broken=True,
                 active=False,
                 creation_date=timezone.now(),
-                calibration_date=timezone.now(),
-                last_data_collection=timezone.now()
+                firmware_version='0.1',
+                calibration_date=timezone.now()
             )
         )
 
@@ -146,15 +146,15 @@ class TransductorTestCase(TestCase):
         EnergyTransductor.objects.create(
             serial_number='12345678',
             ip_address='192.168.10.10',
-            location="MESP",
-            latitude=20.1,
-            longitude=37.9,
+            physical_location="MESP",
+            geolocation_latitude=20.1,
+            geolocation_longitude=37.9,
             name="MESP 2",
             broken=False,
             active=True,
             creation_date=timezone.now(),
             calibration_date=timezone.now(),
-            last_data_collection=timezone.now(),
+            firmware_version='0.1',
             model='EnergyTransductorModel'
         )
 
@@ -164,15 +164,15 @@ class TransductorTestCase(TestCase):
             transductor.update(
                 serial_number='12345678',
                 ip_address='192.168.10.12',
-                location="UED",
-                latitude=20.2,
-                longitude=37.0,
+                physical_location="UED",
+                geolocation_latitude=20.2,
+                geolocation_longitude=37.0,
                 name="UED 1",
                 broken=True,
                 active=False,
                 creation_date=timezone.now(),
-                calibration_date=timezone.now(),
-                last_data_collection=timezone.now()
+                firmware_version='0.1',
+                calibration_date=timezone.now()
             )
 
     def test_retrieve_one_transductors(self):
