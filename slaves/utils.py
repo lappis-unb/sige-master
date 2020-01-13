@@ -162,7 +162,6 @@ class DataCollector():
         Builds and saves events from a dict to a given class
         """
         for event_dict in events_array:
-            print(event_dict)
             event_class = globals()[event_dict['type']]
 
             if event_class.__name__ == 'FailedConnectionTransductorEvent':
@@ -217,7 +216,6 @@ class DataCollector():
                             )
                             transductor.last_data_collection = datetime.now()
                         except Exception as exception:
-                            print(exception)
                             pass
 
                 if kwargs.get('quarterly', None):

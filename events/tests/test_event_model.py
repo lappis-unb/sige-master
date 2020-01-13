@@ -3,9 +3,9 @@ from datetime import datetime
 from django.core.exceptions import ObjectDoesNotExist
 from django.test import TestCase
 from django.utils import timezone
-from measurement.models import (MinutelyMeasurement, MonthlyMeasurement,
+from measurements.models import (MinutelyMeasurement, MonthlyMeasurement,
                                 QuarterlyMeasurement)
-from transductor.models import EnergyTransductor
+from transductors.models import EnergyTransductor
 from events.models import *
 
 
@@ -16,7 +16,7 @@ class EventTestCase(TestCase):
             ip_address='111.101.111.11',
             broken=False,
             active=True,
-            model="TR4020",
+            model='TR4020',
             firmware_version='12.1.3215',
             physical_location='predio 2 sala 44',
             geolocation_longitude=-24.4556,
