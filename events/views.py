@@ -21,9 +21,9 @@ from django.utils import timezone
 
 
 class EventViewSet(mixins.RetrieveModelMixin,
-              mixins.DestroyModelMixin,
-              mixins.ListModelMixin,
-              viewsets.GenericViewSet):
+                   mixins.DestroyModelMixin,
+                   mixins.ListModelMixin,
+                   viewsets.GenericViewSet):
     queryset = None
     model = None
 
