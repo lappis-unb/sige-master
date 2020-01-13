@@ -220,7 +220,6 @@ class DataCollector():
                     minutely_response = request_measurements(
                         slave,
                         transductor,
-                        transductor.last_data_collection,
                         "minutely_measurements"
                     )
 
@@ -232,7 +231,6 @@ class DataCollector():
                             DataCollector.build_minutely_measurements(
                                 msm, transductor
                             )
-                            transductor.last_data_collection = datetime.now()
                             transductor.save()
                         except Exception as exception:
                             print(exception)
@@ -242,7 +240,6 @@ class DataCollector():
                     quarterly_response = request_measurements(
                         slave,
                         transductor,
-                        transductor.last_data_collection,
                         "quarterly_measurements"
                     )
 
@@ -254,7 +251,6 @@ class DataCollector():
                             DataCollector.build_quarterly_measurements(
                                 msm, transductor
                             )
-                            transductor.last_data_collection = datetime.now()
                             transductor.save()
                         except Exception:
                             pass
@@ -263,7 +259,6 @@ class DataCollector():
                     monthly_response = request_measurements(
                         slave,
                         transductor,
-                        transductor.last_data_collection,
                         "monthly_measurements"
                     )
 
@@ -275,7 +270,6 @@ class DataCollector():
                             DataCollector.build_monthly_measurements(
                                 msm, transductor
                             )
-                            transductor.last_data_collection = datetime.now()
                             transductor.save()
                         except Exception:
                             pass
