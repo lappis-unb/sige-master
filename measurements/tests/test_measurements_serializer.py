@@ -77,7 +77,7 @@ class MeasurementsTestCase(TestCase):
     def test_should_get_active_power(self):
         self.assertEqual(
             self.client.get(
-                '/graph/minutely_active_power/'
+                '/graph/minutely-active-power/'
                 '?serial_number=12345678'
                 '&start_date=2000-01-01 00:00'
                 '&end_date=2000-01-01 23:59'

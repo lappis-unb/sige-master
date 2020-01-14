@@ -16,7 +16,7 @@ class MeasurementsEndPointsTestCase(TestCase):
         self.__credentials = ("admin", "admin")
         self.__api_client = APIClient()
         self.__minutely_three_phase = (
-            "/graph/minutely_threephase_voltage/"
+            "/graph/minutely-threephase-voltage/"
         )
 
         self.transductor = EnergyTransductor.objects.create(
