@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.postgres.fields import ArrayField
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist
 
 from transductors.models import EnergyTransductor
 
@@ -11,7 +12,6 @@ from transductors.models import EnergyTransductor
 '''
 
 
-# Create your models here.
 class Slave(models.Model):
 
     ip_address = models.CharField(
@@ -49,18 +49,33 @@ class Slave(models.Model):
             self.transductors.remove(transductor)
         return response
 
-    def set_broken(self, value):
+    def set_broken(self, new_status):
         """
-        Set the broken atribute's value to match the param. If toggled to True,
+        Set the broken atribute's new status to match the param. If toggled to True,
         creates a failed connection event
         """
-        if value:
-            from events.models import FailedConnectionSlaveEvent
-            FailedConnectionSlaveEvent.save_event(self)
-        self.broken = value
-        self.save()
+        from events.models import FailedConnectionSlaveEvent
 
-    # FIXME: Improve this
+        old_status = self.broken
+
+        if old_status is True and new_status is False:
+            try:
+                related_event = FailedConnectionSlaveEvent.objects.filter(
+                    transductor=self,
+                    ended_at__isnull=True
+                ).last()
+                related_event.ended_at = timezone.now()
+                related_event.save()
+
+            except FailedConnectionSlaveEvent.DoesNotExist as e:
+                pass
+
+        elif old_status is False and new_status is True:
+            evt = FailedConnectionSlaveEvent()
+            evt.save_event(self)
+
+        self.broken = new_status
+        self.save(update_fields=['broken'])
 
     def __is_success_status(self, status):
         if (status is not None) and (200 <= status < 300):
