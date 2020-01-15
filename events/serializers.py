@@ -40,15 +40,15 @@ class FailedConnectionTransductorEventSerializer(s.HyperlinkedModelSerializer):
         )
 
 
-class AllEventSerializer(serializers.HyperlinkedModelSerializer):
-    communication_fail = serializers.ListField(child=serializers.DictField())
-    critical_tension = serializers.ListField(child=serializers.DictField())
-    precarious_tension = serializers.ListField(child=serializers.DictField())
-    phase_drop = serializers.ListField(child=serializers.DictField())
-    # energy_drop = serializers.ListField(child=serializers.DictField())
-    consumption_peak = serializers.ListField(child=serializers.DictField())
-    consumption_above_contract = serializers.ListField(
-        child=serializers.DictField()
+class AllEventSerializer(s.HyperlinkedModelSerializer):
+    communication_fail = s.ListField(child=s.DictField())
+    critical_tension = s.ListField(child=s.DictField())
+    precarious_tension = s.ListField(child=s.DictField())
+    phase_drop = s.ListField(child=s.DictField())
+    # energy_drop = s.ListField(child=s.DictField())
+    consumption_peak = s.ListField(child=s.DictField())
+    consumption_above_contract = s.ListField(
+        child=s.DictField()
     )
 
     class Meta:
