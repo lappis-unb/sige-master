@@ -1,0 +1,20 @@
+stages:
+- name: Publish image
+  steps:
+  - publishImageConfig:
+      dockerfilePath: ./Dockerfile
+      buildContext: .
+      tag: smi-master:${CICD_EXECUTION_SEQUENCE}
+      pushRemote: true
+      registry: registry.lappis.rocks
+
+- name: Deploy Staging
+  when:
+    branch: development
+  steps:
+  - applyYamlConfig:
+      path: ./deploy/staging/deployment-master.yaml
+
+branch:
+  include: [ master, development ]
+notification: {}

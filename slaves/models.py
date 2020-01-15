@@ -13,14 +13,8 @@ from transductors.models import EnergyTransductor
 # Create your models here.
 class Slave(models.Model):
 
-    ip_validator = RegexValidator(
-        r'^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$',
-        'Incorrect IP address format'
-    )
-
     ip_address = models.CharField(
-        max_length=15,
-        validators=[ip_validator],
+        max_length=50,
     )
 
     port = models.CharField(

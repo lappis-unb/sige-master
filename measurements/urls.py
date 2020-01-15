@@ -9,6 +9,7 @@ router = routers.DefaultRouter()
 router.register(r'minutely_measurements', MinutelyMeasurementViewSet)
 router.register(r'quarterly_measurements', QuarterlyMeasurementViewSet)
 router.register(r'monthly_measurements', MonthlyMeasurementViewSet)
+router.register(r'realtime_measurements', RealTimeMeasurementViewSet)
 
 graph_router = routers.DefaultRouter()
 
@@ -86,4 +87,28 @@ graph_router.register(
     r'minutely_total_power_factor',
     MinutelyTotalPowerFactorViewSet,
     basename='minutelytotalpowerfactor'
+)
+
+graph_router.register(
+    r'quarterly_consumption_peak',
+    ConsumptionPeakViewSet,
+    basename='quarterlyconsumptionpeak'
+)
+
+graph_router.register(
+    r'quarterly_consumption_off_peak',
+    ConsumptionOffPeakViewSet,
+    basename='quarterlyconsumptionoffpeak'
+)
+
+graph_router.register(
+    r'quarterly_generated_energy_peak',
+    GenerationPeakViewSet,
+    basename='quarterlygenerationpeak'
+)
+
+graph_router.register(
+    r'quarterly_generated_energy_off_peak',
+    GenerationOffPeakViewSet,
+    basename='quarterlygenerationoffpeak'
 )

@@ -26,15 +26,15 @@ class TestSlavesModels(TestCase):
         self.energy_transductor = EnergyTransductor.objects.create(
             serial_number='87654321',
             ip_address='192.168.1.1',
-            location="MESP",
-            latitude=20.1,
-            longitude=37.9,
+            physical_location="MESP",
+            geolocation_latitude=20.1,
+            geolocation_longitude=37.9,
             name="MESP 1",
             broken=True,
             active=False,
             creation_date=timezone.now(),
             calibration_date=timezone.now(),
-            last_data_collection=timezone.now(),
+            firmware_version='0.1',
             model='EnergyTransductorModel'
         )
 
@@ -77,12 +77,11 @@ class TestSlavesModels(TestCase):
         self.assertNotEqual(original_location, new_location)
         self.assertNotEqual(original_broken, new_broken)
 
-    def test_should_not_update_a_speficic_slave_with_wrong_ip_address(self):
+    def test_should_update_a_speficic_slave_with_dns(self):
         slave = Slave.objects.get(ip_address="1.1.1.1")
-        slave.ip_address = "some ip adreess"
+        slave.ip_address = "https://api.herokuapp.com/"
 
-        with self.assertRaises(ValidationError):
-            slave.save()
+        self.assertIsNone(slave.save())
 
     def test_should_delete_a_existent_slave(self):
         slave = Slave.objects.get(ip_address="1.1.1.1")

@@ -41,7 +41,7 @@ LOGGING = {
     },
 }
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [env('ALLOWED_HOSTS')]
 
 
 # Application definition
@@ -64,7 +64,7 @@ INSTALLED_APPS = [
     'measurements',
     'transductors',
     'users',
-    'corsheaders'
+    'corsheaders',
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
@@ -79,6 +79,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+CORS_ORIGIN_ALLOW_ALL = True
 
 ROOT_URLCONF = 'smi_master.urls'
 
@@ -165,7 +166,7 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+# USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)

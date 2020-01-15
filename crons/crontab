@@ -1,3 +1,4 @@
 * * * * * export $(cat /root/env | xargs) && python /smi-master/manage.py runcrons slaves.cronjob.CheckTransductorBrokenCronJob >> /home/transductors_broken.log 2>&1
 0 * * * * export $(cat /root/env | xargs) && python /smi-master/manage.py runcrons slaves.cronjob.GetAllMeasurementsCronJob >> /home/all_measurements.log 2>&1
+* * * * * export $(cat /root/env | xargs) && python /smi-master/manage.py runcrons slaves.cronjob.GetRealTimeMeasurementsCronJob >> /home/realtime_measurements.log 2>&1
 # Necessary line at end of file to make cron valid
