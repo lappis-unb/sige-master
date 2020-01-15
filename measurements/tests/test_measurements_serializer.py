@@ -27,7 +27,8 @@ class MeasurementsTestCase(TestCase):
         self.transductor = EnergyTransductor.objects.create(
             serial_number="12345678",
             ip_address="1.1.1.1",
-            model="MD30"
+            model="MD30",
+            firmware_version="0.1"
         )
 
         self.transductor.slave_servers.add(self.slave)

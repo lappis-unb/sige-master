@@ -104,3 +104,17 @@ class MonthlyMeasurement(Measurement):
     reactive_max_power_list_off_peak_time = ArrayField(
         HStoreField(), default=None
     )
+
+
+class RealTimeMeasurement(Measurement):
+    voltage_a = models.FloatField(default=0)
+    voltage_b = models.FloatField(default=0)
+    voltage_c = models.FloatField(default=0)
+
+    current_a = models.FloatField(default=0)
+    current_b = models.FloatField(default=0)
+    current_c = models.FloatField(default=0)
+
+    total_active_power = models.FloatField(default=0)
+    total_reactive_power = models.FloatField(default=0)
+    total_power_factor = models.FloatField(default=0)

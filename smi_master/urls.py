@@ -20,7 +20,7 @@ router.register(r'buildings', buildings_views.BuildingViewset)
 router.register(r'slave', slaves_views.SlaveViewSet)
 router.register(r'users', users_views.UserViewSet)
 router.register(
-    r'energy_transductors',
+    r'energy-transductors',
     energy_transductor_views.EnergyTransductorViewSet
 )
 

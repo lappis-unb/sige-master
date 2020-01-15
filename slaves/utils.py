@@ -1,8 +1,8 @@
 import os
 import json
 import urllib.request
-from datetime import datetime
 from datetime import timedelta
+from django.utils.timezone import datetime
 
 from .models import Slave
 from .api import request_all_events
@@ -18,6 +18,7 @@ from transductors.models import EnergyTransductor
 from measurements.models import MinutelyMeasurement
 from measurements.models import QuarterlyMeasurement
 from measurements.models import MonthlyMeasurement
+from measurements.models import RealTimeMeasurement
 
 
 class CheckTransductorsAndSlaves():
@@ -190,6 +191,45 @@ class DataCollector():
                 DataCollector.save_event_object(loaded_events['results'])
 
     @staticmethod
+    def build_realtime_measurements(msm, transductor):
+        print(RealTimeMeasurement.objects.filter(transductor=transductor))
+        if RealTimeMeasurement.objects.filter(transductor=transductor):
+            measurement = RealTimeMeasurement.objects.get(
+                transductor=transductor
+            )
+            measurement.voltage_a = msm['voltage_a']
+            measurement.voltage_b = msm['voltage_b']
+            measurement.voltage_c = msm['voltage_c']
+            measurement.current_a = msm['current_a']
+            measurement.current_b = msm['current_b']
+            measurement.current_c = msm['current_c']
+            measurement.total_active_power = msm['total_active_power']
+            measurement.total_reactive_power = msm['total_reactive_power']
+            measurement.total_power_factor = msm['total_power_factor']
+            measurement.transductor = transductor
+            measurement.collection_time = datetime.strptime(
+                msm['collection_date'], '%Y-%m-%dT%H:%M:%S'
+            )
+
+            measurement.save()
+        else:
+            RealTimeMeasurement.objects.create(
+                voltage_a=msm['voltage_a'],
+                voltage_b=msm['voltage_b'],
+                voltage_c=msm['voltage_c'],
+                current_a=msm['current_a'],
+                current_b=msm['current_b'],
+                current_c=msm['current_c'],
+                total_active_power=msm['total_active_power'],
+                total_reactive_power=msm['total_reactive_power'],
+                total_power_factor=msm['total_power_factor'],
+                transductor=transductor,
+                collection_time=datetime.strptime(
+                    msm['collection_date'], '%Y-%m-%dT%H:%M:%S'
+                )
+            )
+
+    @staticmethod
     def get_measurements(*args, **kwargs):
         """
         Collects a given set of measurements from all slave servers
@@ -197,14 +237,33 @@ class DataCollector():
         slaves = Slave.objects.all()
 
         for slave in slaves:
+            if kwargs.get('realtime', None):
+                realtime_response = request_measurements(
+                    slave,
+                    None,
+                    None,
+                    'realtime_measurements'
+                )
+
+                measurement = json.loads(realtime_response.content)['results']
+                for transductor_data in measurement:
+                    try:
+                        transductor = EnergyTransductor.objects.get(
+                            serial_number=transductor_data['transductor_id']
+                        )
+                        DataCollector.build_realtime_measurements(
+                            transductor_data, transductor
+                        )
+                    except Exception as exception:
+                        print(exception)
+
             for transductor in slave.transductors.all():
                 if kwargs.get('minutely', None):
                     # Get response and save it in the master database
                     minutely_response = request_measurements(
                         slave,
                         transductor,
-                        transductor.last_data_collection,
-                        "minutely"
+                        "minutely_measurements"
                     )
 
                     measurements = json.loads(minutely_response.content)
@@ -215,7 +274,7 @@ class DataCollector():
                             DataCollector.build_minutely_measurements(
                                 msm, transductor
                             )
-                            transductor.last_data_collection = datetime.now()
+                            transductor.save()
                         except Exception as exception:
                             print(exception)
                             pass
@@ -224,8 +283,7 @@ class DataCollector():
                     quarterly_response = request_measurements(
                         slave,
                         transductor,
-                        transductor.last_data_collection,
-                        "quarterly"
+                        "quarterly_measurements"
                     )
 
                     measurements = json.loads(quarterly_response.content)
@@ -236,7 +294,7 @@ class DataCollector():
                             DataCollector.build_quarterly_measurements(
                                 msm, transductor
                             )
-                            transductor.last_data_collection = datetime.now()
+                            transductor.save()
                         except Exception:
                             pass
 
@@ -244,8 +302,7 @@ class DataCollector():
                     monthly_response = request_measurements(
                         slave,
                         transductor,
-                        transductor.last_data_collection,
-                        "monthly"
+                        "monthly_measurements"
                     )
 
                     measurements = json.loads(monthly_response.content)
@@ -256,6 +313,6 @@ class DataCollector():
                             DataCollector.build_monthly_measurements(
                                 msm, transductor
                             )
-                            transductor.last_data_collection = datetime.now()
+                            transductor.save()
                         except Exception:
                             pass

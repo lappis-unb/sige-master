@@ -44,14 +44,20 @@ def delete_transductor(transductor, slave_server):
 
 
 def __get_transductor_data(transductor, slave_server):
-    lat = transductor.latitude if transductor.latitude is not None else 0.0
-    long = transductor.longitude if transductor.longitude is not None else 0.0
+    lat = (
+        transductor.geolocation_latitude
+        if transductor.geolocation_latitude is not None else 0.0
+    )
+    long = (
+        transductor.geolocation_longitude
+        if transductor.geolocation_longitude is not None else 0.0
+    )
 
     return {
         "model": transductor.model,
         "serial_number": transductor.serial_number,
         "ip_address": transductor.ip_address,
-        "physical_location": transductor.location,
+        "physical_location": transductor.physical_location,
         "geolocation_latitude": lat,
         "geolocation_longitude": long,
         "measurement_minutelymeasurement": [],
