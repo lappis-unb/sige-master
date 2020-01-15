@@ -26,15 +26,15 @@ class TestSlavesModels(TestCase):
         self.energy_transductor = EnergyTransductor.objects.create(
             serial_number='87654321',
             ip_address='192.168.1.1',
-            location="MESP",
-            latitude=20.1,
-            longitude=37.9,
+            physical_location="MESP",
+            geolocation_latitude=20.1,
+            geolocation_longitude=37.9,
             name="MESP 1",
             broken=True,
             active=False,
             creation_date=timezone.now(),
             calibration_date=timezone.now(),
-            last_data_collection=timezone.now(),
+            firmware_version='0.1',
             model='EnergyTransductorModel'
         )
 

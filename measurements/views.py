@@ -19,6 +19,7 @@ from .models import Measurement
 from .models import MinutelyMeasurement
 from .models import QuarterlyMeasurement
 from .models import MonthlyMeasurement
+from .models import RealTimeMeasurement
 from .models import EnergyTransductor
 
 from .serializers import MeasurementSerializer
@@ -27,6 +28,7 @@ from .serializers import MinutelyMeasurementSerializer
 from .serializers import QuarterlyMeasurementSerializer
 from .serializers import MonthlyMeasurementSerializer
 from .serializers import QuarterlySerializer
+from .serializers import RealTimeMeasurementSerializer
 
 from .pagination import PostLimitOffsetPagination
 from .pagination import PostPageNumberPagination
@@ -422,3 +424,8 @@ class GenerationOffPeakViewSet(QuarterlyMeasurementViewSet):
 class TotalConsumtionViewSet(QuarterlyMeasurementViewSet):
     serializer_class = QuarterlySerializer
     fields = ['consumption_peak_time', 'consumption_off_peak_time']
+
+
+class RealTimeMeasurementViewSet(MeasurementViewSet):
+    serializer_class = RealTimeMeasurementSerializer
+    queryset = RealTimeMeasurement.objects.select_related('transductor').all()
