@@ -18,9 +18,6 @@ class Event(PolymorphicModel):
     ended_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
 
-    class Meta:
-        abstract = True
-
     def __str__(self):
         return '%s@%s' % (self.__class__.__name__, self.created_at)
 
@@ -106,4 +103,24 @@ class PrecariousVoltageEvent(VoltageRelatedEvent):
 class PhaseDropEvent(VoltageRelatedEvent):
     """
     Defines a new event related to a drop on the triphasic voltage measurement
+    """
+
+
+class ConsumptionRelatedEvent(Event):
+    """
+    Defines a generic event related to consumption event types
+    """
+    consumption = models.FloatField(default=0.0)
+
+
+class ConsumptionPeakEvent(ConsumptionRelatedEvent):
+    """
+    Defines a new event related to a higher peak on transductor measurements
+    """
+
+
+class ConsumptionAboveContract(ConsumptionRelatedEvent):
+    """
+    Defines a new event related to a moment at the consumptions surpasses the
+    consumption contracted
     """

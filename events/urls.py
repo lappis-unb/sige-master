@@ -19,3 +19,8 @@ router.register(
     FailedConnectionTransductorEventViewSet,
     basename='failed_connection_transductor_events'
 )
+router.register(
+    r'occurences',
+    AllEventsViewSet,
+    basename='occurences'
+)

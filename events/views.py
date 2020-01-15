@@ -16,6 +16,7 @@ from .models import *
 from .serializers import VoltageRelatedEventSerializer
 from .serializers import FailedConnectionSlaveEventSerializer
 from .serializers import FailedConnectionTransductorEventSerializer
+from .serializers import AllEventSerializer
 
 from django.utils import timezone
 
@@ -113,3 +114,50 @@ class FailedConnectionTransductorEventViewSet(EventViewSet):
             raise APIException(
                 'Serial number does not match with any transductor.'
             )
+
+
+class AllEventsViewSet(mixins.RetrieveModelMixin,
+              mixins.DestroyModelMixin,
+              mixins.ListModelMixin,
+              viewsets.GenericViewSet):
+    queryset = None
+    serializer_class = AllEventSerializer
+    types = {
+        'FailedConnectionTransductorEvent': FailedConnectionTransductorEvent,
+        'CriticalVoltageEvent': CriticalVoltageEvent,
+        'PrecariousVoltageEvent': PrecariousVoltageEvent,
+        'PhaseDropEvent': PhaseDropEvent,
+        'FailedConnectionSlaveEvent': FailedConnectionSlaveEvent,
+        # 'EnergyDropEvent': EnergyDropEvent,
+        'ConsumptionPeakEvent': ConsumptionPeakEvent,
+        'ConsumptionAboveContract': ConsumptionAboveContract
+    }
+    events = {
+        'CriticalVoltageEvent': 'critical_tension',
+        'PrecariousVoltageEvent': 'precarious_tension',
+        'PhaseDropEvent': 'phase_drop',
+        'FailedConnectionTransductorEvent': 'communication_fail',
+        'FailedConnectionSlaveEvent': 'communication_fail',
+        # 'EnergyDropEvent': 'energy_drop',
+        'ConsumptionPeakEvent': 'consumption_peak',
+        'ConsumptionAboveContract': 'consumption_above_contract'
+    }
+
+    def get_queryset(self):
+        self.queryset = Event.objects.filter(
+            ended_at__isnull=True
+        )
+
+        events = {}
+
+        for type in self.types:
+            events[self.events[type]] = []
+
+            for element in self.queryset.instance_of(self.types[type]):
+                event = element.__dict__
+                events[self.events[type]].append(events)
+
+        response = APIException(events)
+        response.status_code = 200
+
+        raise response
