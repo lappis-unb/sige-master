@@ -48,6 +48,10 @@ def request_all_events(slave):
         (
             "VoltageRelatedEvent",
             request_events(slave, 'voltage-events')
+        ),
+        (
+            "ConsumptionRelatedEvent",
+            request_events(slave, 'consumption-events')
         )
     ]
 
