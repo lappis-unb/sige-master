@@ -3,7 +3,7 @@ import requests
 
 def create_transductor(transductor, slave_server):
     protocol = "http://"
-    endpoint = "/energy_transductors/"
+    endpoint = "/energy-transductors/"
     address = protocol\
         + slave_server.ip_address\
         + ":"\
@@ -16,7 +16,7 @@ def create_transductor(transductor, slave_server):
 
 def update_transductor(transductor, slave_server):
     protocol = "http://"
-    endpoint = "/energy_transductors/"
+    endpoint = "/energy-transductors/"
     address = protocol\
         + slave_server.ip_address\
         + ":"\
@@ -31,7 +31,7 @@ def update_transductor(transductor, slave_server):
 
 def delete_transductor(transductor, slave_server):
     protocol = "http://"
-    endpoint = "/energy_transductors/"
+    endpoint = "/energy-transductors/"
     address = protocol\
         + slave_server.ip_address\
         + ":"\
