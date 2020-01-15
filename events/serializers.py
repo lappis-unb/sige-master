@@ -1,11 +1,11 @@
-from rest_framework import serializers
+from rest_framework import serializers as s
 
 from .models import FailedConnectionSlaveEvent
 from .models import FailedConnectionTransductorEvent
 from .models import VoltageRelatedEvent
 
 
-class VoltageRelatedEventSerializer(serializers.HyperlinkedModelSerializer):
+class VoltageRelatedEventSerializer(s.HyperlinkedModelSerializer):
     class Meta:
         model = VoltageRelatedEvent
         fields = (
@@ -17,9 +17,7 @@ class VoltageRelatedEventSerializer(serializers.HyperlinkedModelSerializer):
         )
 
 
-class FailedConnectionSlaveEventSerializer(
-        serializers.HyperlinkedModelSerializer
-    ):
+class FailedConnectionSlaveEventSerializer(s.HyperlinkedModelSerializer):
     class Meta:
         model = FailedConnectionSlaveEvent
         fields = (
@@ -30,9 +28,7 @@ class FailedConnectionSlaveEventSerializer(
         )
 
 
-class FailedConnectionTransductorEventSerializer(
-        serializers.HyperlinkedModelSerializer
-    ):
+class FailedConnectionTransductorEventSerializer(s.HyperlinkedModelSerializer):
     class Meta:
         model = FailedConnectionTransductorEvent
         fields = (

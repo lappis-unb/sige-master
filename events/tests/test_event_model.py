@@ -3,10 +3,12 @@ from datetime import datetime
 from django.core.exceptions import ObjectDoesNotExist
 from django.test import TestCase
 from django.utils import timezone
-from measurements.models import (MinutelyMeasurement, MonthlyMeasurement,
-                                QuarterlyMeasurement)
-from transductors.models import EnergyTransductor
+
 from events.models import *
+from transductors.models import EnergyTransductor
+from measurements.models import MonthlyMeasurement
+from measurements.models import MinutelyMeasurement
+from measurements.models import QuarterlyMeasurement
 
 
 class EventTestCase(TestCase):
