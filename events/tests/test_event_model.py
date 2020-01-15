@@ -41,14 +41,15 @@ class EventTestCase(TestCase):
         self.slave.set_broken(True)
         event = FailedConnectionSlaveEvent.objects.last()
 
-        self.assertEqual(before + 1, len(FailedConnectionSlaveEvent.objects.all()))
+        self.assertEqual(
+            before + 1, len(FailedConnectionSlaveEvent.objects.all()))
         self.assertEqual(self.slave.ip_address, event.slave.ip_address)
 
-    def test_connection_with_slave_endpoint_for__event(self):
-        pass
+    # def test_connection_with_slave_endpoint_for__event(self):
+    #     pass
 
-    def test_connection_with_slave_endpoint_for_transductor_comms_event(self):
-        pass
+    # def test_connection_with_slave_endpoint_for_transductor_comms_event(self):
+    #     pass
 
-    def test_connection_with_slave_endpoint_for_voltage_event(self):
-        pass
+    # def test_connection_with_slave_endpoint_for_voltage_event(self):
+    #     pass
