@@ -6,6 +6,10 @@ from utils import phone_validator
 
 
 class Campus(models.Model):
+
+    class Meta:
+        verbose_name_plural = "Campus"
+
     name = models.CharField(max_length=50, unique=True)
     acronym = models.CharField(max_length=50, unique=True)
     phone = models.CharField(
