@@ -31,7 +31,7 @@ class EventTestCase(TestCase):
         self.slave = Slave.objects.create(
             ip_address='666.666.666.666',
             port=80,
-            location='somewhere near Vïsklav - Czech Repuplic',
+            location='Somewhere near Wkïskh - Czech Republic',
             broken=False
         )
 
@@ -44,12 +44,3 @@ class EventTestCase(TestCase):
         self.assertEqual(
             before + 1, len(FailedConnectionSlaveEvent.objects.all()))
         self.assertEqual(self.slave.ip_address, event.slave.ip_address)
-
-    # def test_connection_with_slave_endpoint_for__event(self):
-    #     pass
-
-    # def test_connection_with_slave_endpoint_for_transductor_comms_event(self):
-    #     pass
-
-    # def test_connection_with_slave_endpoint_for_voltage_event(self):
-    #     pass
