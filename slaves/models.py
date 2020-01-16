@@ -51,8 +51,8 @@ class Slave(models.Model):
 
     def set_broken(self, new_status):
         """
-        Set the broken atribute's new status to match the param. If toggled to True,
-        creates a failed connection event
+        Set the broken atribute's new status to match the param.
+        If toggled to True, creates a failed connection event
         """
         from events.models import FailedConnectionSlaveEvent
 
