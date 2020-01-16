@@ -10,10 +10,20 @@ from django.contrib.auth.models import Group
 
 
 class CustomUserAdmin(UserAdmin):
-    add_form = forms.CustomUserCreationForm
-    form = forms.CustomUserChangeForm
-    model = models.CustomUser
-    list_display = ['email', 'username', 'user_type']
+    list_display = ['email', 'username', 'name', 'user_type']
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': (
+                'email',
+                'username',
+                'name',
+                'password1',
+                'password2'
+            ),
+        }),
+    )
+    search_fields = ('email', 'username')
 
 
 admin.site.register(models.CustomUser, CustomUserAdmin)
