@@ -5,19 +5,19 @@ from rest_framework import routers
 router = routers.DefaultRouter()
 
 router.register(
-    r'voltage_related_events',
+    r'voltage-related-events',
     VoltageRelatedEventViewSet,
-    basename='voltage_related_events'
+    basename='voltage-related-events'
 )
 router.register(
-    r'failed_connection_slave_events',
+    r'failed-connection-slave-events',
     FailedConnectionSlaveEventViewSet,
-    basename='failed_connection_slave_events'
+    basename='failed-connection-slave-events'
 )
 router.register(
-    r'failed_connection_transductor_events',
+    r'failed-connection-transductor-events',
     FailedConnectionTransductorEventViewSet,
-    basename='failed_connection_transductor_events'
+    basename='failed-connection-transductor-events'
 )
 router.register(
     r'occurences',

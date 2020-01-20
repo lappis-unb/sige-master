@@ -1,13 +1,8 @@
-from measurements.models import RealTimeMeasurement
-from measurements.models import MonthlyMeasurement
-from measurements.models import QuarterlyMeasurement
-from measurements.models import MinutelyMeasurement
-from django.utils.timezone import datetime
 import os
 import json
 import urllib.request
-from datetime import datetime
 from datetime import timedelta
+from django.utils.timezone import datetime
 
 from .models import Slave
 from .api import request_all_events
@@ -20,6 +15,11 @@ from events.models import FailedConnectionSlaveEvent
 from events.models import FailedConnectionTransductorEvent
 
 from transductors.models import EnergyTransductor
+
+from measurements.models import MinutelyMeasurement
+from measurements.models import QuarterlyMeasurement
+from measurements.models import MonthlyMeasurement
+from measurements.models import RealTimeMeasurement
 
 
 class CheckTransductorsAndSlaves():
@@ -190,6 +190,7 @@ class DataCollector():
                 loaded_events = json.loads(pairs[1].content)
                 DataCollector.save_event_object(loaded_events['results'])
 
+    @staticmethod
     def build_realtime_measurements(msm, transductor):
         print(RealTimeMeasurement.objects.filter(transductor=transductor))
         if RealTimeMeasurement.objects.filter(transductor=transductor):
