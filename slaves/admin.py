@@ -1,3 +1,16 @@
 from django.contrib import admin
+from . import models
 
-# Register your models here.
+
+@admin.register(models.Slave)
+class SlaveAdmin(admin.ModelAdmin):
+    list_display = (
+        'ip_address',
+        'port',
+        'location',
+        'broken',
+    )
+
+    list_filter = (
+        'broken',
+    )
