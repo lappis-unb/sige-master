@@ -52,6 +52,8 @@ class EventViewSet(mixins.RetrieveModelMixin,
         else:
             self.queryset = self.model.objects.all()
 
+        self.specific_query()
+
         return self.queryset
 
     def specific_query(self):
@@ -127,20 +129,14 @@ class AllEventsViewSet(mixins.RetrieveModelMixin,
         'CriticalVoltageEvent': CriticalVoltageEvent,
         'PrecariousVoltageEvent': PrecariousVoltageEvent,
         'PhaseDropEvent': PhaseDropEvent,
-        'FailedConnectionSlaveEvent': FailedConnectionSlaveEvent,
-        # 'EnergyDropEvent': EnergyDropEvent,
-        'ConsumptionPeakEvent': ConsumptionPeakEvent,
-        'ConsumptionAboveContract': ConsumptionAboveContract
+        'FailedConnectionSlaveEvent': FailedConnectionSlaveEvent
     }
     events = {
         'CriticalVoltageEvent': 'critical_tension',
         'PrecariousVoltageEvent': 'precarious_tension',
         'PhaseDropEvent': 'phase_drop',
-        'FailedConnectionTransductorEvent': 'communication_fail',
-        'FailedConnectionSlaveEvent': 'communication_fail',
-        # 'EnergyDropEvent': 'energy_drop',
-        'ConsumptionPeakEvent': 'consumption_peak',
-        'ConsumptionAboveContract': 'consumption_above_contract'
+        'FailedConnectionTransductorEvent': 'transductor_connection_fail',
+        'FailedConnectionSlaveEvent': 'slave_connection_fail'
     }
 
     def get_queryset(self):
@@ -152,10 +148,24 @@ class AllEventsViewSet(mixins.RetrieveModelMixin,
 
         for type in self.types:
             events[self.events[type]] = []
+            elements = self.queryset.instance_of(self.types[type])
+            for element in elements:
+                event = {}
+                event['id'] = element.pk
+                event['location'] = element.transductor.physical_location
+                event['campus'] = element.transductor.campus.acronym
+                event['data'] = element.data
 
-            for element in self.queryset.instance_of(self.types[type]):
-                event = element.__dict__
-                events[self.events[type]].append(events)
+                time = (
+                    timezone.now() -
+                    timezone.timedelta(
+                        hours=element.created_at.hour,
+                        minutes=element.created_at.minute,
+                        seconds=element.created_at.second
+                    )
+                )
+                event['time'] = (time.hour * 60) + (time.minute)
+                events[self.events[type]].append(event)
 
         response = APIException(events)
         response.status_code = 200

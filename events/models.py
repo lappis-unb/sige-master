@@ -17,6 +17,7 @@ class Event(PolymorphicModel):
     settings.USE_TZ = False
     ended_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
+    data = JSONField(default=dict)
 
     def __str__(self):
         return '%s@%s' % (self.__class__.__name__, self.created_at)
@@ -32,7 +33,7 @@ class VoltageRelatedEvent(Event):
     """
     Defines a new event related to a voltage metric
     """
-    measures = JSONField()
+
     transductor = models.ForeignKey(
         EnergyTransductor,
         related_name="%(app_label)s_%(class)s",

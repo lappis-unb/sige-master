@@ -11,7 +11,7 @@ class VoltageRelatedEventSerializer(s.HyperlinkedModelSerializer):
         model = VoltageRelatedEvent
         fields = (
             'id',
-            'measures',
+            'data',
             'created_at',
             'ended_at',
             'transductor'
@@ -23,6 +23,7 @@ class FailedConnectionSlaveEventSerializer(s.HyperlinkedModelSerializer):
         model = FailedConnectionSlaveEvent
         fields = (
             'id',
+            'data',
             'created_at',
             'ended_at',
             'slave'
@@ -34,6 +35,7 @@ class FailedConnectionTransductorEventSerializer(s.HyperlinkedModelSerializer):
         model = FailedConnectionTransductorEvent
         fields = (
             'id',
+            'data',
             'created_at',
             'ended_at',
             'transductor'
@@ -41,13 +43,11 @@ class FailedConnectionTransductorEventSerializer(s.HyperlinkedModelSerializer):
 
 
 class AllEventSerializer(s.HyperlinkedModelSerializer):
-    communication_fail = s.ListField(child=s.DictField())
+    slave_connection_fail = s.ListField(child=s.DictField())
+    transductor_connection_fail = s.ListField(child=s.DictField())
     critical_tension = s.ListField(child=s.DictField())
     precarious_tension = s.ListField(child=s.DictField())
     phase_drop = s.ListField(child=s.DictField())
-    # energy_drop = s.ListField(child=s.DictField())
-    consumption_peak = s.ListField(child=s.DictField())
-    consumption_above_contract = s.ListField(child=s.DictField())
 
     class Meta:
         model = Event
@@ -55,8 +55,6 @@ class AllEventSerializer(s.HyperlinkedModelSerializer):
             'critical_tension',
             'precarious_tension',
             'phase_drop',
-            'communication_fail',
-            # 'energy_drop',
-            'consumption_peak',
-            'consumption_above_contract'
+            'slave_connection_fail',
+            'transductor_connection_fail'
         )
