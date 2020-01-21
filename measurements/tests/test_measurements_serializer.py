@@ -9,6 +9,7 @@ from measurements.models import MonthlyMeasurement
 from measurements.serializers import ThreePhaseSerializer
 from slaves.models import Slave
 from transductors.models import EnergyTransductor
+from campi.models import Campus
 from datetime import datetime
 import sys
 from rest_framework.request import Request
@@ -24,11 +25,20 @@ class MeasurementsTestCase(TestCase):
             ip_address="1.1.1.1", location="UED FGA", broken=False
         )
 
+        self.campus = Campus.objects.create(
+            name='UnB - Faculdade Gama',
+            acronym='FGA',
+            phone='(61) 3107-8901',
+            address='Área Especial de Indústria Projeção A',
+            website_address='http://fga.unb.br/'
+        )
+
         self.transductor = EnergyTransductor.objects.create(
             serial_number="12345678",
             ip_address="1.1.1.1",
             model="MD30",
-            firmware_version="0.1"
+            firmware_version="0.1",
+            campus=self.campus
         )
 
         self.transductor.slave_servers.add(self.slave)

@@ -3,6 +3,7 @@ from rest_framework.test import APIClient
 from users.models import CustomUser
 from rest_framework import status
 from measurements.models import EnergyTransductor
+from campi.models import Campus
 
 
 class MeasurementsEndPointsTestCase(TestCase):
@@ -19,11 +20,20 @@ class MeasurementsEndPointsTestCase(TestCase):
             "/graph/minutely-threephase-voltage/"
         )
 
+        self.campus = Campus.objects.create(
+            name='UnB - Faculdade Gama',
+            acronym='FGA',
+            phone='(61) 3107-8901',
+            address='Área Especial de Indústria Projeção A',
+            website_address='http://fga.unb.br/'
+        )
+
         self.transductor = EnergyTransductor.objects.create(
             serial_number="12345678",
             ip_address="1.1.1.1",
             firmware_version="0.1",
-            model="EnergyTransductorModel"
+            model="EnergyTransductorModel",
+            campus=self.campus
         )
 
     def test_get_with_auth_minutely_three_phase(self):

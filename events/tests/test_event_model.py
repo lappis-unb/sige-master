@@ -5,6 +5,7 @@ from django.test import TestCase
 from django.utils import timezone
 
 from events.models import *
+from campi.models import Campus
 
 from transductors.models import EnergyTransductor
 
@@ -17,15 +18,25 @@ from measurements.models import QuarterlyMeasurement
 
 class EventTestCase(TestCase):
     def setUp(self):
+        self.campus = Campus.objects.create(
+            name='UnB - Faculdade Gama',
+            acronym='FGA',
+            phone='(61) 3107-8901',
+            address='Área Especial de Indústria Projeção A',
+            website_address='http://fga.unb.br/'
+        )
+
         self.transductor = EnergyTransductor.objects.create(
             serial_number='8764321',
             ip_address='111.101.111.11',
             broken=False,
             active=True,
             model='TR4020',
-            location='predio 2 sala 44',
-            longitude=-24.4556,
-            latitude=-24.45996
+            physical_location='predio 2 sala 44',
+            geolocation_longitude=-24.4556,
+            geolocation_latitude=-24.45996,
+            firmware_version='0.1',
+            campus=self.campus
         )
 
         self.slave = Slave.objects.create(

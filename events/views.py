@@ -120,10 +120,6 @@ class FailedConnectionTransductorEventViewSet(EventViewSet):
 
 
 class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
-# class AllEventsViewSet(mixins.RetrieveModelMixin,
-#                        mixins.DestroyModelMixin,
-#                        mixins.ListModelMixin,
-#                        viewsets.GenericViewSet):
     queryset = None
     serializer_class = AllEventSerializer
     types = {
