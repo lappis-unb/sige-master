@@ -4,6 +4,7 @@ from datetime import datetime
 from polymorphic.models import PolymorphicModel
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
+from campi.models import Campus
 
 
 class Transductor(PolymorphicModel):
@@ -35,6 +36,7 @@ class Transductor(PolymorphicModel):
     active = models.BooleanField(default=False)
     creation_date = models.DateTimeField(null=True, blank=True)
     calibration_date = models.DateTimeField(null=True, blank=True)
+    campus = models.ForeignKey(Campus, on_delete=models.CASCADE)
 
     model = models.CharField(
         max_length=256,

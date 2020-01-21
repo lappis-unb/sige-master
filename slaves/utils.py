@@ -165,16 +165,17 @@ class DataCollector():
         """
         for event_dict in events_array:
             event_class = globals()[event_dict['type']]
-
-            if event_class.__name__ == 'FailedConnectionTransductorEvent':
-                FailedConnectionTransductorEvent.objects.create(
-                    created_at=event_dict['created_at'],
-                    transductor=EnergyTransductor.objects.get(
-                        ip_address=event_dict['ip_address']
-                    )
-                )
-            else:
-                event_class.objects.create(**event_dict)    # creates from dict
+            print(event_dict)
+            print('*'*100)
+            # if event_class.__name__ == 'FailedConnectionTransductorEvent':
+            #     FailedConnectionTransductorEvent.objects.create(
+            #         created_at=event_dict['created_at'],
+            #         transductor=EnergyTransductor.objects.get(
+            #             ip_address=event_dict['ip_address']
+            #         )
+            #     )
+            # else:
+            event_class.objects.create(**event_dict)    # creates from dict
 
     @staticmethod
     def get_events():
@@ -188,7 +189,7 @@ class DataCollector():
 
             for pairs in event_responses:
                 loaded_events = json.loads(pairs[1].content)
-                DataCollector.save_event_object(loaded_events['results'])
+                DataCollector.save_event_object(loaded_events)
 
     @staticmethod
     def build_realtime_measurements(msm, transductor):
@@ -268,7 +269,7 @@ class DataCollector():
 
                     measurements = json.loads(minutely_response.content)
 
-                    for msm in measurements['results']:
+                    for msm in measurements:
                         # Create MinutelyMeasurement object
                         try:
                             DataCollector.build_minutely_measurements(
@@ -287,7 +288,7 @@ class DataCollector():
 
                     measurements = json.loads(quarterly_response.content)
 
-                    for msm in measurements['results']:
+                    for msm in measurements:
                         # Create QuarterlyMeasurement object
                         try:
                             DataCollector.build_quarterly_measurements(
@@ -306,7 +307,7 @@ class DataCollector():
 
                     measurements = json.loads(monthly_response.content)
 
-                    for msm in measurements['results']:
+                    for msm in measurements:
                         # Create MonthlyMeasurement object
                         try:
                             DataCollector.build_monthly_measurements(
