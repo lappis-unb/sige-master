@@ -24,7 +24,7 @@ class CheckTransductorsAndSlaves():
 
             # to work in dev dont forget to insert the port
             url = 'http://' + slave.ip_address + ":" + \
-                os.getenv('SLAVE_PORT') + '/broken_transductors'
+                os.getenv('SLAVE_PORT') + '/broken-transductors'
             try:
                 web_request = urllib.request.urlopen(url)
 
@@ -199,7 +199,7 @@ class DataCollector():
                     slave,
                     None,
                     None,
-                    'realtime_measurements'
+                    'realtime-measurements'
                 )
 
                 measurement = json.loads(realtime_response.content)['results']
@@ -220,7 +220,7 @@ class DataCollector():
                     minutely_response = request_measurements(
                         slave,
                         transductor,
-                        "minutely_measurements"
+                        "minutely-measurements"
                     )
 
                     measurements = json.loads(minutely_response.content)
@@ -240,7 +240,7 @@ class DataCollector():
                     quarterly_response = request_measurements(
                         slave,
                         transductor,
-                        "quarterly_measurements"
+                        "quarterly-measurements"
                     )
 
                     measurements = json.loads(quarterly_response.content)
@@ -259,7 +259,7 @@ class DataCollector():
                     monthly_response = request_measurements(
                         slave,
                         transductor,
-                        "monthly_measurements"
+                        "monthly-measurements"
                     )
 
                     measurements = json.loads(monthly_response.content)
