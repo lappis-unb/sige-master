@@ -1,9 +1,10 @@
-from django.utils import timezone
-import numpy as np
 import os
+import numpy as np
 
+from django.utils import timezone
 from django.db.models.query import QuerySet
 
+from rest_framework.response import Response
 from rest_framework import serializers
 from rest_framework import viewsets
 from rest_framework import mixins
@@ -118,10 +119,11 @@ class FailedConnectionTransductorEventViewSet(EventViewSet):
             )
 
 
-class AllEventsViewSet(mixins.RetrieveModelMixin,
-                       mixins.DestroyModelMixin,
-                       mixins.ListModelMixin,
-                       viewsets.GenericViewSet):
+class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
+# class AllEventsViewSet(mixins.RetrieveModelMixin,
+#                        mixins.DestroyModelMixin,
+#                        mixins.ListModelMixin,
+#                        viewsets.GenericViewSet):
     queryset = None
     serializer_class = AllEventSerializer
     types = {
@@ -139,7 +141,7 @@ class AllEventsViewSet(mixins.RetrieveModelMixin,
         'FailedConnectionSlaveEvent': 'slave_connection_fail'
     }
 
-    def get_queryset(self):
+    def list(self, request):
         self.queryset = Event.objects.filter(
             ended_at__isnull=True
         )
@@ -166,7 +168,4 @@ class AllEventsViewSet(mixins.RetrieveModelMixin,
                 event['time'] = (time.hour * 60) + (time.minute)
                 events[self.events[type]].append(event)
 
-        response = APIException(events)
-        response.status_code = 200
-
-        raise response
+        return Response(events, status=200)
