@@ -157,8 +157,7 @@ class AllEventsViewSet(mixins.RetrieveModelMixin,
                 event['data'] = element.data
 
                 time = (
-                    timezone.now() -
-                    timezone.timedelta(
+                    timezone.now() - timezone.timedelta(
                         hours=element.created_at.hour,
                         minutes=element.created_at.minute,
                         seconds=element.created_at.second

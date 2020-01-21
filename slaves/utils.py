@@ -166,7 +166,7 @@ class DataCollector():
         for event_dict in events_array:
             event_class = globals()[event_dict['type']]
             print(event_dict)
-            print('*'*100)
+            print('*' * 100)
             # if event_class.__name__ == 'FailedConnectionTransductorEvent':
             #     FailedConnectionTransductorEvent.objects.create(
             #         created_at=event_dict['created_at'],
