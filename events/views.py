@@ -126,21 +126,40 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
         'FailedConnectionTransductorEvent': FailedConnectionTransductorEvent,
         'CriticalVoltageEvent': CriticalVoltageEvent,
         'PrecariousVoltageEvent': PrecariousVoltageEvent,
-        'PhaseDropEvent': PhaseDropEvent,
-        'FailedConnectionSlaveEvent': FailedConnectionSlaveEvent
+        'PhaseDropEvent': PhaseDropEvent
     }
     events = {
         'CriticalVoltageEvent': 'critical_tension',
         'PrecariousVoltageEvent': 'precarious_tension',
         'PhaseDropEvent': 'phase_drop',
-        'FailedConnectionTransductorEvent': 'transductor_connection_fail',
-        'FailedConnectionSlaveEvent': 'slave_connection_fail'
+        'FailedConnectionTransductorEvent': 'transductor_connection_fail'
     }
 
     def list(self, request):
-        self.queryset = Event.objects.filter(
-            ended_at__isnull=True
+        serial_number = request.data.get('serial_number')
+
+        self.queryset = (
+            Event.objects
+            .select_related('transductor')
+            .select_related('campus')
+            .filter(
+                ended_at__isnull=True
+            )
         )
+
+        if serial_number:
+            try:
+                self.queryset = self.queryset.filter(
+                    transductor=EnergyTransductor.objects.get(
+                        serial_number=serial_number
+                    )
+                )
+            except EnergyTransductor.DoesNotExist:
+                exception = APIException(
+                    'Serial number does not match with any EnergyTransductor'
+                )
+                exception.status_code = 404
+                raise exception
 
         events = {}
 
@@ -163,5 +182,32 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
                 )
                 event['time'] = (time.hour * 60) + (time.minute)
                 events[self.events[type]].append(event)
+
+        elements = self.queryset.instance_of(FailedConnectionSlaveEvent)
+
+        slave_events = []
+
+        transductors = element.slave.transductors.select_related('campus').all()
+
+        for element in elements:
+            for transductor in transductors:
+                event = {}
+                event['id'] = element.pk
+                event['location'] = transductor.physical_location
+                event['campus'] = transductor.campus.acronym
+                event['data'] = element.data
+
+                time = (
+                    timezone.now() - timezone.timedelta(
+                        hours=element.created_at.hour,
+                        minutes=element.created_at.minute,
+                        seconds=element.created_at.second
+                    )
+                )
+
+                event['time'] = (time.hour * 60) + (time.minute)
+                slave_events.append(event)
+
+        events['slave_connection_fail'] = slave_events
 
         return Response(events, status=200)

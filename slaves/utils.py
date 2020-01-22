@@ -52,10 +52,10 @@ class CheckTransductorsAndSlaves():
                         transductor_status.save()
 
                 else:
-                    slave.set_broken(value=True)
+                    slave.set_broken(True)
 
             except Exception:
-                slave.set_broken(value=True)
+                slave.set_broken(True)
 
 # TODO Não sabemos como resolver essa comunicação
 # Transdutores em mais de um slave tem que ser tratados de forma diferente?
