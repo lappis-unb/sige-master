@@ -165,17 +165,14 @@ class DataCollector():
         """
         for event_dict in events_array:
             event_class = globals()[event_dict['type']]
-            print(event_dict)
-            print('*' * 100)
-            # if event_class.__name__ == 'FailedConnectionTransductorEvent':
-            #     FailedConnectionTransductorEvent.objects.create(
-            #         created_at=event_dict['created_at'],
-            #         transductor=EnergyTransductor.objects.get(
-            #             ip_address=event_dict['ip_address']
-            #         )
-            #     )
-            # else:
-            event_class.objects.create(**event_dict)    # creates from dict
+            event_class.objects.create(
+                transductor=EnergyTransductor.objects.get(
+                    ip_address=event_dict['ip_address']
+                ),
+                data=event_dict['data'],
+                created_at=event_dict['created_at'],
+                ended_at=event_dict['ended_at']
+            )
 
     @staticmethod
     def get_events():
