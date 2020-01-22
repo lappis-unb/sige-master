@@ -126,15 +126,13 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
         'FailedConnectionTransductorEvent': FailedConnectionTransductorEvent,
         'CriticalVoltageEvent': CriticalVoltageEvent,
         'PrecariousVoltageEvent': PrecariousVoltageEvent,
-        'PhaseDropEvent': PhaseDropEvent,
-        'FailedConnectionSlaveEvent': FailedConnectionSlaveEvent
+        'PhaseDropEvent': PhaseDropEvent
     }
     events = {
         'CriticalVoltageEvent': 'critical_tension',
         'PrecariousVoltageEvent': 'precarious_tension',
         'PhaseDropEvent': 'phase_drop',
-        'FailedConnectionTransductorEvent': 'transductor_connection_fail',
-        'FailedConnectionSlaveEvent': 'slave_connection_fail'
+        'FailedConnectionTransductorEvent': 'transductor_connection_fail'
     }
 
     def list(self, request):
@@ -163,5 +161,30 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
                 )
                 event['time'] = (time.hour * 60) + (time.minute)
                 events[self.events[type]].append(event)
+
+        elements = self.queryset.instance_of(FailedConnectionSlaveEvent)
+
+        slave_events = []
+
+        for element in elements:
+            for transductor in element.slave.transductors.all():
+                event = {}
+                event['id'] = element.pk
+                event['location'] = transductor.physical_location
+                event['campus'] = transductor.campus.acronym
+                event['data'] = element.data
+
+                time = (
+                    timezone.now() - timezone.timedelta(
+                        hours=element.created_at.hour,
+                        minutes=element.created_at.minute,
+                        seconds=element.created_at.second
+                    )
+                )
+
+                event['time'] = (time.hour * 60) + (time.minute)
+                slave_events.append(event)
+
+        events['slave_connection_fail'] = slave_events
 
         return Response(events, status=200)
