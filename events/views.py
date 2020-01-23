@@ -187,9 +187,11 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
 
         slave_events = []
 
-        transductors = element.slave.transductors.select_related('campus').all()
 
         for element in elements:
+            transductors = (
+                element.slave.transductors.select_related('campus').all()
+            )
             for transductor in transductors:
                 event = {}
                 event['id'] = element.pk
