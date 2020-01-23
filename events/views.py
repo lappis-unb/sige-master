@@ -138,13 +138,8 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
     def list(self, request):
         serial_number = request.data.get('serial_number')
 
-        self.queryset = (
-            Event.objects
-            .select_related('transductor')
-            .select_related('campus')
-            .filter(
-                ended_at__isnull=True
-            )
+        self.queryset = Event.objects.filter(
+            ended_at__isnull=True
         )
 
         if serial_number:
@@ -186,7 +181,6 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
         elements = self.queryset.instance_of(FailedConnectionSlaveEvent)
 
         slave_events = []
-
 
         for element in elements:
             transductors = (
