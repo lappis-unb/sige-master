@@ -184,23 +184,23 @@ from django.utils.translation import gettext_lazy as _
 
 MATERIAL_ADMIN_SITE = {
     'HEADER': _('Your site header'),  # Admin site header
-    # 'TITLE': _('Your site title'),  # Admin site title
+    'TITLE': _('Your site title'),  # Admin site title
     # # Admin site favicon (path to static should be specified)
     # 'FAVICON': 'path/to/favicon',
-    'MAIN_BG_COLOR': '#000000',  # Admin site main color, css color should be specified
+    # 'MAIN_BG_COLOR': '#FFFFFF',  # Admin site main color, css color should be specified
     # # Admin site main hover color, css color should be specified
-    # 'MAIN_HOVER_COLOR': 'color',
+    # 'MAIN_HOVER_COLOR': '#FFFFFF',
     # # Admin site profile picture (path to static should be specified)
-    # 'PROFILE_PICTURE': 'path/to/image',
+    'PROFILE_PICTURE': '/img/proj_trans_l.png',
     # # Admin site profile background (path to static should be specified)
     # 'PROFILE_BG': 'path/to/image',
     # # Admin site logo on login page (path to static should be specified)
     # 'LOGIN_LOGO': 'path/to/image',
     # # Admin site background on login/logout pages (path to static should be specified)
     # 'LOGOUT_BG': 'path/to/image',
-    # 'SHOW_THEMES': True,  # Show default admin themes button
-    # 'TRAY_REVERSE': False,  # Hide object-tools and additional-submit-line by default
-    'NAVBAR_REVERSE': False,  # Hide side navbar by default
+    'SHOW_THEMES': True,  # Show default admin themes button
+    'TRAY_REVERSE': True,  # Hide object-tools and additional-submit-line by default
+    'NAVBAR_REVERSE': True,  # Hide side navbar by default
     # 'SHOW_COUNTS': True,  # Show instances counts for each model
     # 'APP_ICONS': {  # Set icons for applications(lowercase), including 3rd party apps, {'application_name': 'material_icon_name', ...}
     #     'sites': 'send',
