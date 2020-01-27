@@ -63,7 +63,7 @@ INSTALLED_APPS = [
     'slaves',
     'measurements',
     'transductors',
-    'users',
+    # 'users',
     'corsheaders',
 ]
 
@@ -176,7 +176,7 @@ USE_L10N = True
 
 STATIC_URL = '/static/'
 
-AUTH_USER_MODEL = 'users.CustomUser'
+# AUTH_USER_MODEL = 'users.CustomUser'
 
 LOCALE_PATHS = (PROJECT_DIR + '/locale', )
 
