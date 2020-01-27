@@ -1,11 +1,21 @@
-from .api import *
-from .models import Slave
-from transductors.models import EnergyTransductor
+import os
+import json
+import urllib.request
 from datetime import timedelta
 from django.utils.timezone import datetime
-import urllib.request
-import json
-import os
+
+from .models import Slave
+from .api import request_all_events
+from .api import request_measurements
+
+from events.models import PhaseDropEvent
+from events.models import CriticalVoltageEvent
+from events.models import PrecariousVoltageEvent
+from events.models import FailedConnectionSlaveEvent
+from events.models import FailedConnectionTransductorEvent
+
+from transductors.models import EnergyTransductor
+
 from measurements.models import MinutelyMeasurement
 from measurements.models import QuarterlyMeasurement
 from measurements.models import MonthlyMeasurement
@@ -42,16 +52,14 @@ class CheckTransductorsAndSlaves():
                         transductor_status.save()
 
                 else:
-                    slave.broken = True
-                    slave.save()
+                    slave.set_broken(True)
 
             except Exception:
-                slave.broken = True
-                slave.save()
-
+                slave.set_broken(True)
 
 # TODO Não sabemos como resolver essa comunicação
 # Transdutores em mais de um slave tem que ser tratados de forma diferente?
+
 
 class DataCollector():
     @staticmethod
@@ -151,6 +159,36 @@ class DataCollector():
         )
 
     @staticmethod
+    def save_event_object(events_array):
+        """
+        Builds and saves events from a dict to a given class
+        """
+        for event_dict in events_array:
+            event_class = globals()[event_dict['type']]
+            event_class.objects.create(
+                transductor=EnergyTransductor.objects.get(
+                    ip_address=event_dict['ip_address']
+                ),
+                data=event_dict['data'],
+                created_at=event_dict['created_at'],
+                ended_at=event_dict['ended_at']
+            )
+
+    @staticmethod
+    def get_events():
+        """
+        Collects all events previously created on the slave servers
+        """
+        slave_servers = Slave.objects.all()
+
+        for slave in slave_servers:
+            event_responses = request_all_events(slave)
+
+            for pairs in event_responses:
+                loaded_events = json.loads(pairs[1].content)
+                DataCollector.save_event_object(loaded_events)
+
+    @staticmethod
     def build_realtime_measurements(msm, transductor):
         print(RealTimeMeasurement.objects.filter(transductor=transductor))
         if RealTimeMeasurement.objects.filter(transductor=transductor):
@@ -191,6 +229,9 @@ class DataCollector():
 
     @staticmethod
     def get_measurements(*args, **kwargs):
+        """
+        Collects a given set of measurements from all slave servers
+        """
         slaves = Slave.objects.all()
 
         for slave in slaves:
@@ -225,7 +266,7 @@ class DataCollector():
 
                     measurements = json.loads(minutely_response.content)
 
-                    for msm in measurements['results']:
+                    for msm in measurements:
                         # Create MinutelyMeasurement object
                         try:
                             DataCollector.build_minutely_measurements(
@@ -233,7 +274,6 @@ class DataCollector():
                             )
                             transductor.save()
                         except Exception as exception:
-                            print(exception)
                             pass
 
                 if kwargs.get('quarterly', None):
@@ -245,7 +285,7 @@ class DataCollector():
 
                     measurements = json.loads(quarterly_response.content)
 
-                    for msm in measurements['results']:
+                    for msm in measurements:
                         # Create QuarterlyMeasurement object
                         try:
                             DataCollector.build_quarterly_measurements(
@@ -264,7 +304,7 @@ class DataCollector():
 
                     measurements = json.loads(monthly_response.content)
 
-                    for msm in measurements['results']:
+                    for msm in measurements:
                         # Create MonthlyMeasurement object
                         try:
                             DataCollector.build_monthly_measurements(

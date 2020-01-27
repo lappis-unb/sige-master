@@ -14,6 +14,7 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
             'geolocation_latitude',
             'geolocation_longitude',
             'firmware_version',
+            'campus',
             'name',
             'broken',
             'active',

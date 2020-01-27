@@ -5,11 +5,20 @@ from django.db.utils import IntegrityError
 from django.core.exceptions import ValidationError
 
 from slaves.models import Slave
+from campi.models import Campus
 from transductors.models import Transductor, EnergyTransductor
 
 
 class TransductorTestCase(TestCase):
     def setUp(self):
+        self.campus = Campus.objects.create(
+            name='UnB - Faculdade Gama',
+            acronym='FGA',
+            phone='(61) 3107-8901',
+            address='Área Especial de Indústria Projeção A',
+            website_address='http://fga.unb.br/'
+        )
+
         self.sample_energy_transductor = EnergyTransductor.objects.create(
             serial_number='87654321',
             ip_address='192.168.1.1',
@@ -22,7 +31,8 @@ class TransductorTestCase(TestCase):
             creation_date=timezone.now(),
             calibration_date=timezone.now(),
             firmware_version='0.1',
-            model='EnergyTransductorModel'
+            model='EnergyTransductorModel',
+            campus=self.campus
         )
 
         self.sample_slave_server = Slave.objects.create(
@@ -46,7 +56,8 @@ class TransductorTestCase(TestCase):
             creation_date=timezone.now(),
             calibration_date=timezone.now(),
             firmware_version='0.1',
-            model='EnergyTransductorModel'
+            model='EnergyTransductorModel',
+            campus=self.campus
         )
 
         self.assertIs(
@@ -71,7 +82,8 @@ class TransductorTestCase(TestCase):
                 creation_date=timezone.now(),
                 calibration_date=timezone.now(),
                 firmware_version='0.1',
-                model='EnergyTransductorModel'
+                model='EnergyTransductorModel',
+                campus=self.campus
             )
 
         self.assertEqual(size, len(EnergyTransductor.objects.all()))
@@ -91,7 +103,8 @@ class TransductorTestCase(TestCase):
                 creation_date=timezone.now(),
                 calibration_date=timezone.now(),
                 firmware_version='0.1',
-                model='EnergyTransductorModel'
+                model='EnergyTransductorModel',
+                campus=self.campus
             )
 
         self.assertEqual(size, len(EnergyTransductor.objects.all()))
@@ -111,7 +124,8 @@ class TransductorTestCase(TestCase):
                 active=True,
                 creation_date=timezone.now(),
                 firmware_version='0.1',
-                calibration_date=timezone.now()
+                calibration_date=timezone.now(),
+                campus=self.campus
             )
 
         self.assertEqual(size, len(EnergyTransductor.objects.all()))
@@ -138,7 +152,8 @@ class TransductorTestCase(TestCase):
                 active=False,
                 creation_date=timezone.now(),
                 firmware_version='0.1',
-                calibration_date=timezone.now()
+                calibration_date=timezone.now(),
+                campus=self.campus
             )
         )
 
@@ -155,7 +170,8 @@ class TransductorTestCase(TestCase):
             creation_date=timezone.now(),
             calibration_date=timezone.now(),
             firmware_version='0.1',
-            model='EnergyTransductorModel'
+            model='EnergyTransductorModel',
+            campus=self.campus
         )
 
         transductor = EnergyTransductor.objects.filter(serial_number='87654321')
@@ -172,7 +188,8 @@ class TransductorTestCase(TestCase):
                 active=False,
                 creation_date=timezone.now(),
                 firmware_version='0.1',
-                calibration_date=timezone.now()
+                calibration_date=timezone.now(),
+                campus=self.campus
             )
 
     def test_retrieve_one_transductors(self):

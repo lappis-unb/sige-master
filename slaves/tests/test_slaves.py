@@ -3,6 +3,7 @@ from django.utils import timezone
 
 from slaves.models import Slave
 from transductors.models import EnergyTransductor
+from campi.models import Campus
 
 from django.db import IntegrityError
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
@@ -23,6 +24,14 @@ class TestSlavesModels(TestCase):
             broken=False
         )
 
+        self.campus = Campus.objects.create(
+            name='UnB - Faculdade Gama',
+            acronym='FGA',
+            phone='(61) 3107-8901',
+            address='Área Especial de Indústria Projeção A',
+            website_address='http://fga.unb.br/'
+        )
+
         self.energy_transductor = EnergyTransductor.objects.create(
             serial_number='87654321',
             ip_address='192.168.1.1',
@@ -35,7 +44,8 @@ class TestSlavesModels(TestCase):
             creation_date=timezone.now(),
             calibration_date=timezone.now(),
             firmware_version='0.1',
-            model='EnergyTransductorModel'
+            model='EnergyTransductorModel',
+            campus=self.campus
         )
 
         self.slave_1.transductors.add(self.energy_transductor)

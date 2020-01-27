@@ -12,6 +12,7 @@ from users import views as users_views
 from .views import login
 
 from measurements import urls as measurements_routes
+from events import urls as events_routes
 
 router = DefaultRouter()
 router.register(r'campi', campi_views.CampusViewSet)
@@ -19,11 +20,12 @@ router.register(r'buildings', buildings_views.BuildingViewset)
 router.register(r'slave', slaves_views.SlaveViewSet)
 router.register(r'users', users_views.UserViewSet)
 router.register(
-    r'energy_transductors',
+    r'energy-transductors',
     energy_transductor_views.EnergyTransductorViewSet
 )
 
 router.registry.extend(measurements_routes.router.registry)
+router.registry.extend(events_routes.router.registry)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
