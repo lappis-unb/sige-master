@@ -73,9 +73,6 @@ class Transductor(PolymorphicModel):
             # FIXME: Raise exception
             print("Couldn't update this transductor in all Slave Servers")
 
-    def validate_grouping(self):
-        pass
-
     def delete(self, *args, **kwargs):
         self.active = False
 
