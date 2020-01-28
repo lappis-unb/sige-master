@@ -20,7 +20,6 @@ class GroupType(models.Model):
                 'Please, delete all transductors associated '
                 'with this group.'
             )
-            exception.status_code = 406
             raise exception
 
 
@@ -43,5 +42,4 @@ class Group(models.Model):
                 'Please, delete all groups associated '
                 'with this group type.'
             )
-            exception.status_code = 406
             raise exception
