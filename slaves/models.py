@@ -1,7 +1,8 @@
 from django.db import models
-from django.contrib.postgres.fields import ArrayField
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
+from django.contrib.postgres.fields import ArrayField
+
 from transductors.models import EnergyTransductor
 
 '''
@@ -10,24 +11,37 @@ from transductors.models import EnergyTransductor
 '''
 
 
-# Create your models here.
 class Slave(models.Model):
 
     ip_address = models.CharField(
         max_length=50,
+        verbose_name=_('IP address')
     )
 
     port = models.CharField(
         max_length=5,
-        default="80"
+        default="80",
+        verbose_name=_('IP access port')
     )
 
-    location = models.CharField(max_length=50)
-    broken = models.BooleanField(default=True)
+    location = models.CharField(
+        max_length=50,
+        verbose_name=_('Location')
+    )
+
+    broken = models.BooleanField(
+        default=False,
+        verbose_name=_('Broken')
+    )
 
     transductors = models.ManyToManyField(
-        EnergyTransductor, related_name='slave_servers'
+        EnergyTransductor,
+        related_name='slave_servers',
+        verbose_name=_('Meters')
     )
+
+    class Meta:
+        verbose_name = _('Slave server')
 
     def __str__(self):
         return self.ip_address
