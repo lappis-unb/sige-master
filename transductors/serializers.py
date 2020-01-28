@@ -21,6 +21,7 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
             'creation_date',
             'calibration_date',
             'model',
+            'grouping',
             'url'
         )
         read_only_fields = ('active', 'broken')

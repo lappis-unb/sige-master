@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     'users',
     'corsheaders',
     'events',
+    'groups',
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True

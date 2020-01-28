@@ -5,6 +5,7 @@ from polymorphic.models import PolymorphicModel
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from campi.models import Campus
+from groups.models import Group
 
 
 class Transductor(PolymorphicModel):
@@ -37,6 +38,7 @@ class Transductor(PolymorphicModel):
     creation_date = models.DateTimeField(null=True, blank=True)
     calibration_date = models.DateTimeField(null=True, blank=True)
     campus = models.ForeignKey(Campus, on_delete=models.CASCADE)
+    grouping = models.ManyToManyField(Group)
 
     model = models.CharField(
         max_length=256,
@@ -70,6 +72,9 @@ class Transductor(PolymorphicModel):
         else:
             # FIXME: Raise exception
             print("Couldn't update this transductor in all Slave Servers")
+
+    def validate_grouping(self):
+        pass
 
     def delete(self, *args, **kwargs):
         self.active = False
