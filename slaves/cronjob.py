@@ -2,6 +2,7 @@ from django_cron import CronJobBase, Schedule
 from datetime import datetime
 from .utils import CheckTransductorsAndSlaves
 from .utils import DataCollector
+from django.utils.translation import gettext_lazy as _
 
 
 class CheckTransductorBrokenCronJob(CronJobBase):
