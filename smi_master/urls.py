@@ -1,17 +1,19 @@
+from django.urls import path
+from django.urls import include
 from django.contrib import admin
-from django.urls import path, include
+from django.conf.urls import url
+from django.utils.translation import gettext_lazy as _
+
 from rest_framework.routers import DefaultRouter
 
-from django.conf.urls import url
-
-from buildings import views as buildings_views
-from slaves import views as slaves_views
-from campi import views as campi_views
-from transductors import views as energy_transductor_views
-from users import views as users_views
 from .views import login
-
+from campi import views as campi_views
+from users import views as users_views
+from slaves import views as slaves_views
+from buildings import views as buildings_views
+from transductors import views as energy_transductor_views
 from measurements import urls as measurements_routes
+
 
 router = DefaultRouter()
 router.register(r'campi', campi_views.CampusViewSet)
@@ -24,6 +26,11 @@ router.register(
 )
 
 router.registry.extend(measurements_routes.router.registry)
+
+# django-admin custom titles
+# admin.site.index_title = _('')
+admin.site.site_header = _('SMI Site Administration')
+admin.site.site_title = _('Energy monitoring system')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
