@@ -42,6 +42,12 @@ class Transductor(PolymorphicModel):
         help_text=_('This field is required')
     )
 
+    port = models.IntegerField(
+        default=1001,
+        help_text=_('This field is required'),
+        verbose_name=_('port')
+    )
+
     geolocation_latitude = models.FloatField(
         null=True,
         blank=True,

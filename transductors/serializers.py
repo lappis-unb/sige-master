@@ -10,6 +10,7 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
         fields = (
             'serial_number',
             'ip_address',
+            'port',
             'geolocation_latitude',
             'geolocation_longitude',
             'campus',

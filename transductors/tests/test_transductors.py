@@ -42,6 +42,7 @@ class TransductorTestCase(TestCase):
         transductor = EnergyTransductor.objects.create(
             serial_number='12345678',
             ip_address='192.168.10.10',
+            port=1001,
             geolocation_latitude=20.1,
             geolocation_longitude=37.9,
             name="MESP 2",

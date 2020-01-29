@@ -8,6 +8,7 @@ class EnergyTransductorAdmin(admin.ModelAdmin):
         'name',
         'model',
         'ip_address',
+        'port',
         'serial_number',
         'active',
         'broken',
