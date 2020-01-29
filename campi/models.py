@@ -16,12 +16,14 @@ class Campus(models.Model):
     name = models.CharField(
         max_length=50,
         unique=True,
-        verbose_name=_('Name')
+        verbose_name=_('Name'),
+        help_text=_('This field is required')
     )
     acronym = models.CharField(
         max_length=50,
         unique=True,
-        verbose_name=_('Acronym')
+        verbose_name=_('Acronym'),
+        help_text=_('This field is required')
     )
 
     def __str__(self):

@@ -23,11 +23,12 @@ class Event(PolymorphicModel):
     )
     created_at = models.DateTimeField(
         default=timezone.now,
-        verbose_name=_('created at')
+        verbose_name=_('created at'),
     )
     data = JSONField(
         default=dict,
-        verbose_name=_('details')
+        verbose_name=_('details'),
+        help_text=_('This field is required')
     )
 
     class Meta:
@@ -54,7 +55,8 @@ class VoltageRelatedEvent(Event):
         on_delete=models.CASCADE,
         blank=False,
         null=False,
-        verbose_name=_('meter')
+        verbose_name=_('meter'),
+        help_text=_('This field is required')
     )
 
     class Meta:
@@ -71,7 +73,8 @@ class FailedConnectionTransductorEvent(Event):
         on_delete=models.CASCADE,
         blank=False,
         null=False,
-        verbose_name=_('meter')
+        verbose_name=_('meter'),
+        help_text=_('This field is required')
     )
 
     class Meta:
@@ -98,7 +101,8 @@ class FailedConnectionSlaveEvent(Event):
         on_delete=models.CASCADE,
         blank=False,
         null=False,
-        verbose_name=_('slave')
+        verbose_name=_('slave'),
+        help_text=_('This field is required')
     )
 
     class Meta:

@@ -17,7 +17,8 @@ class Slave(models.Model):
 
     ip_address = models.CharField(
         max_length=50,
-        verbose_name=_('IP address')
+        verbose_name=_('IP address'),
+        help_text=_('This field is required')
     )
 
     port = models.CharField(
@@ -28,7 +29,8 @@ class Slave(models.Model):
 
     location = models.CharField(
         max_length=50,
-        verbose_name=_('Location')
+        verbose_name=_('Location'),
+        help_text=_('This field is required')
     )
 
     broken = models.BooleanField(
@@ -39,7 +41,8 @@ class Slave(models.Model):
     transductors = models.ManyToManyField(
         EnergyTransductor,
         related_name='slave_servers',
-        verbose_name=_('Meters')
+        verbose_name=_('Meters'),
+        help_text=_('This field is required')
     )
 
     class Meta:

@@ -9,7 +9,8 @@ class Measurement(PolymorphicModel):
     collection_time = models.DateTimeField(
         blank=False,
         null=False,
-        verbose_name=_('Collection time')
+        verbose_name=_('Collection time'),
+        help_text=_('This field is required')
     )
     transductor = models.ForeignKey(
         EnergyTransductor,
@@ -17,7 +18,8 @@ class Measurement(PolymorphicModel):
         on_delete=models.CASCADE,
         blank=False,
         null=False,
-        verbose_name=_('Energy meter')
+        verbose_name=_('Energy meter'),
+        help_text=_('This field is required')
     )
 
     def __str__(self):

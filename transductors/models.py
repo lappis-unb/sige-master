@@ -24,7 +24,8 @@ class Transductor(PolymorphicModel):
     name = models.CharField(
         max_length=256,
         blank=True,
-        verbose_name=_('name')
+        verbose_name=_('name'),
+        help_text=_('This field is required')
     )
     ip_address = models.CharField(
         max_length=15,
@@ -37,7 +38,8 @@ class Transductor(PolymorphicModel):
                 code='invalid_ip_address'
             ),
         ],
-        verbose_name=_('IP address')
+        verbose_name=_('IP address'),
+        help_text=_('This field is required')
     )
 
     geolocation_latitude = models.FloatField(
@@ -57,12 +59,14 @@ class Transductor(PolymorphicModel):
         max_length=8,
         blank=False,
         null=False,
-        verbose_name=_('serial number')
+        verbose_name=_('serial number'),
+        help_text=_('This field is required')
     )
 
     firmware_version = models.CharField(
         max_length=20,
-        verbose_name=_('firmware version')
+        verbose_name=_('firmware version'),
+        help_text=_('This field is required')
     )
 
     creation_date = models.DateTimeField(
@@ -73,14 +77,16 @@ class Transductor(PolymorphicModel):
     campus = models.ForeignKey(
         Campus,
         on_delete=models.CASCADE,
-        verbose_name=_('campus')
+        verbose_name=_('campus'),
+        help_text=_('This field is required')
     )
 
     model = models.CharField(
         max_length=256,
         blank=False,
         null=False,
-        verbose_name=_('model')
+        verbose_name=_('model'),
+        help_text=_('This field is required')
     )
 
     class Meta:
