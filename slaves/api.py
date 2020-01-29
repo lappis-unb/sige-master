@@ -11,17 +11,16 @@ def request_measurements(slave, transductor, start_date, measurement_type):
         + slave.port\
         + endpoint
 
-    try:
+    if transductor is not None and start_date is not None:
         params = {
             "serial_number": transductor.serial_number,
             "start_date": start_date,
             "end_date": datetime.now()
         }
-    except Exception as exception:
-        print(exception)
+    else:
         params = {}
 
-    return requests.get(address)
+    return requests.get(address, params=params)
 
 
 def request_events(slave, event_type):
