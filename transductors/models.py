@@ -1,4 +1,5 @@
 from datetime import datetime
+from django.utils import timezone
 
 from django.db import models
 from django.core.exceptions import ValidationError
@@ -18,6 +19,7 @@ class Transductor(PolymorphicModel):
         null=False,
         verbose_name=_('serial number')
     )
+
     ip_address = models.CharField(
         max_length=15,
         unique=True,
@@ -31,47 +33,43 @@ class Transductor(PolymorphicModel):
         ],
         verbose_name=_('IP address')
     )
-    physical_location = models.CharField(
-        max_length=256,
-        blank=True,
-        verbose_name=_('Physical location')
-    )
+
     geolocation_latitude = models.FloatField(
         null=True,
         blank=True,
         verbose_name=_('latitude')
     )
+
     geolocation_longitude = models.FloatField(
         null=True,
         blank=True,
         verbose_name=_('longitude')
     )
+
     firmware_version = models.CharField(
         max_length=20,
         verbose_name=_('firmware version')
     )
+
     name = models.CharField(
         max_length=256,
         blank=True,
         verbose_name=_('name')
     )
+
     broken = models.BooleanField(
-        default=True,
+        default=False,
         verbose_name=_('unreachable')
     )
+
     active = models.BooleanField(
-        default=False,
+        default=True,
         verbose_name=_('active')
     )
+
     creation_date = models.DateTimeField(
-        null=True,
-        blank=True,
+        default=timezone.now(),
         verbose_name=_('created at')
-    )
-    calibration_date = models.DateTimeField(
-        null=True,
-        blank=True,
-        verbose_name=_('calibrated at')
     )
 
     model = models.CharField(
@@ -83,6 +81,7 @@ class Transductor(PolymorphicModel):
 
     class Meta:
         abstract = True
+        verbose_name = _('Meter')
 
     def __str__(self):
         raise NotImplementedError
@@ -163,11 +162,11 @@ class Transductor(PolymorphicModel):
 
 
 class EnergyTransductor(Transductor):
+    class Meta:
+        verbose_name = _('Energy meter')
+
     def __str__(self):
-        return 'Energy Transductor: '
-        + self.name
-        + ' Serial number #'
-        + self.serial_number
+        return 'Energy meter: %s Serial #%s' % (self.name, self.serial_number)
 
     # There aren't measurements yet
     def get_measurements(self, datetime):
