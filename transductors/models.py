@@ -11,15 +11,19 @@ from polymorphic.models import PolymorphicModel
 
 
 class Transductor(PolymorphicModel):
-    serial_number = models.CharField(
-        primary_key=True,
-        unique=True,
-        max_length=8,
-        blank=False,
-        null=False,
-        verbose_name=_('serial number')
+    active = models.BooleanField(
+        default=True,
+        verbose_name=_('active')
     )
-
+    broken = models.BooleanField(
+        default=False,
+        verbose_name=_('unreachable')
+    )
+    name = models.CharField(
+        max_length=256,
+        blank=True,
+        verbose_name=_('name')
+    )
     ip_address = models.CharField(
         max_length=15,
         unique=True,
@@ -45,26 +49,18 @@ class Transductor(PolymorphicModel):
         blank=True,
         verbose_name=_('longitude')
     )
+    serial_number = models.CharField(
+        primary_key=True,
+        unique=True,
+        max_length=8,
+        blank=False,
+        null=False,
+        verbose_name=_('serial number')
+    )
 
     firmware_version = models.CharField(
         max_length=20,
         verbose_name=_('firmware version')
-    )
-
-    name = models.CharField(
-        max_length=256,
-        blank=True,
-        verbose_name=_('name')
-    )
-
-    broken = models.BooleanField(
-        default=False,
-        verbose_name=_('unreachable')
-    )
-
-    active = models.BooleanField(
-        default=True,
-        verbose_name=_('active')
     )
 
     creation_date = models.DateTimeField(
