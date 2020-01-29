@@ -16,12 +16,10 @@ class BuildingsTestCase(TestCase):
         self.campus_01 = Campus.objects.create(
             name='Faculdade Gama',
             acronym='FGa',
-            address="Setor Leste - Gama"
         )
         self.campus_02 = Campus.objects.create(
             name='Faculdade Ceilandia',
             acronym='FCe',
-            address="Ceilandia"
         )
         self.building_01 = Building.objects.create(
             name='pantheon',
@@ -68,7 +66,7 @@ class BuildingsTestCase(TestCase):
 
         with self.assertRaises(ValidationError):
             building.save()
-    
+
     def test_not_create_two_buildings_with_the_same_name_in_a_campus(self):
         building = Building()
         building.name = 'pantheon'

@@ -66,7 +66,7 @@ class Transductor(PolymorphicModel):
     )
 
     creation_date = models.DateTimeField(
-        default=timezone.now(),
+        default=timezone.now,
         verbose_name=_('created at')
     )
 
