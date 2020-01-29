@@ -60,7 +60,7 @@ class VoltageRelatedEvent(Event):
     )
 
     class Meta:
-        verbose_name = _('voltage related event')
+        verbose_name = _('voltage related')
 
 
 class FailedConnectionTransductorEvent(Event):
@@ -78,7 +78,7 @@ class FailedConnectionTransductorEvent(Event):
     )
 
     class Meta:
-        verbose_name = _('failed connection with meter event')
+        verbose_name = _('failed connection with meter')
 
     @staticmethod
     def save_event(transductor):
@@ -106,7 +106,7 @@ class FailedConnectionSlaveEvent(Event):
     )
 
     class Meta:
-        verbose_name = _('failed connection with slave server event')
+        verbose_name = _('failed connection with slave server')
 
     @staticmethod
     def save_event(slave):
@@ -125,7 +125,7 @@ class CriticalVoltageEvent(VoltageRelatedEvent):
     """
 
     class Meta:
-        verbose_name = _('critical voltage event')
+        verbose_name = _('critical voltage')
 
 
 class PrecariousVoltageEvent(VoltageRelatedEvent):
@@ -134,7 +134,7 @@ class PrecariousVoltageEvent(VoltageRelatedEvent):
     """
 
     class Meta:
-        verbose_name = _('precarious voltage event')
+        verbose_name = _('precarious voltage')
 
 
 class PhaseDropEvent(VoltageRelatedEvent):
@@ -143,7 +143,7 @@ class PhaseDropEvent(VoltageRelatedEvent):
     """
 
     class Meta:
-        verbose_name = _('phase drop event')
+        verbose_name = _('phase drop')
 
 
 class ConsumptionRelatedEvent(Event):
@@ -152,7 +152,7 @@ class ConsumptionRelatedEvent(Event):
     """
     consumption = models.FloatField(
         default=0.0,
-        verbose_name=_('consumption related event')
+        verbose_name=_('consumption related')
     )
 
 
@@ -162,7 +162,7 @@ class ConsumptionPeakEvent(ConsumptionRelatedEvent):
     """
 
     class Meta:
-        verbose_name = _('consumption peak event')
+        verbose_name = _('consumption peak')
 
 
 class ConsumptionAboveContract(ConsumptionRelatedEvent):
@@ -172,4 +172,4 @@ class ConsumptionAboveContract(ConsumptionRelatedEvent):
     """
 
     class Meta:
-        verbose_name = _('consumption above contracted threshold event')
+        verbose_name = _('consumption above contracted threshold')
