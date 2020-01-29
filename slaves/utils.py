@@ -261,6 +261,7 @@ class DataCollector():
                     minutely_response = request_measurements(
                         slave,
                         transductor,
+                        None,
                         "minutely-measurements"
                     )
 
@@ -280,6 +281,7 @@ class DataCollector():
                     quarterly_response = request_measurements(
                         slave,
                         transductor,
+                        None,
                         "quarterly-measurements"
                     )
 
@@ -299,6 +301,7 @@ class DataCollector():
                     monthly_response = request_measurements(
                         slave,
                         transductor,
+                        None,
                         "monthly-measurements"
                     )
 
