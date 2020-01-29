@@ -58,7 +58,6 @@ class Transductor(PolymorphicModel):
 
     def update(self, *args, **kwargs):
         self.full_clean()
-
         failed = False
 
         for slave in self.slave_servers.all():
