@@ -12,6 +12,7 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
             'ip_address',
             'geolocation_latitude',
             'geolocation_longitude',
+            'campus',
             'name',
             'broken',
             'active',

@@ -13,6 +13,7 @@ from slaves import views as slaves_views
 from buildings import views as buildings_views
 from transductors import views as energy_transductor_views
 from measurements import urls as measurements_routes
+from events import urls as events_routes
 
 
 router = DefaultRouter()
@@ -21,11 +22,12 @@ router.register(r'buildings', buildings_views.BuildingViewset)
 router.register(r'slave', slaves_views.SlaveViewSet)
 router.register(r'users', users_views.UserViewSet)
 router.register(
-    r'energy_transductors',
+    r'energy-transductors',
     energy_transductor_views.EnergyTransductorViewSet
 )
 
 router.registry.extend(measurements_routes.router.registry)
+router.registry.extend(events_routes.router.registry)
 
 # django-admin custom titles
 # admin.site.index_title = _('')

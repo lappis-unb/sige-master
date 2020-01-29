@@ -6,8 +6,10 @@ from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.utils.translation import gettext_lazy as _
 
-from .api import *
 from polymorphic.models import PolymorphicModel
+
+from .api import *
+from campi.models import Campus
 
 
 class Transductor(PolymorphicModel):
@@ -66,6 +68,12 @@ class Transductor(PolymorphicModel):
     creation_date = models.DateTimeField(
         default=timezone.now(),
         verbose_name=_('created at')
+    )
+
+    campus = models.ForeignKey(
+        Campus,
+        on_delete=models.CASCADE,
+        verbose_name=_('campus')
     )
 
     model = models.CharField(

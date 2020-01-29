@@ -3,6 +3,7 @@ from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from django.contrib.postgres.fields import ArrayField
 from django.utils.translation import gettext_lazy as _
+from django.core.exceptions import ObjectDoesNotExist
 
 from transductors.models import EnergyTransductor
 
@@ -63,7 +64,34 @@ class Slave(models.Model):
             self.transductors.remove(transductor)
         return response
 
-    # FIXME: Improve this
+    def set_broken(self, new_status):
+        """
+        Set the broken atribute's new status to match the param.
+        If toggled to True, creates a failed connection event
+        """
+        from events.models import FailedConnectionSlaveEvent
+
+        old_status = self.broken
+
+        if old_status is True and new_status is False:
+            try:
+                related_event = FailedConnectionSlaveEvent.objects.filter(
+                    transductor=self,
+                    ended_at__isnull=True
+                ).last()
+                related_event.ended_at = timezone.now()
+                related_event.save()
+
+            except FailedConnectionSlaveEvent.DoesNotExist as e:
+                pass
+
+        elif old_status is False and new_status is True:
+            evt = FailedConnectionSlaveEvent()
+            evt.save_event(self)
+
+        self.broken = new_status
+        self.save(update_fields=['broken'])
+
     def __is_success_status(self, status):
         if (status is not None) and (200 <= status < 300):
             return True

@@ -30,9 +30,6 @@ from .serializers import MonthlyMeasurementSerializer
 from .serializers import QuarterlySerializer
 from .serializers import RealTimeMeasurementSerializer
 
-from .pagination import PostLimitOffsetPagination
-from .pagination import PostPageNumberPagination
-
 
 #  this viewset don't inherits from viewsets.ModelViewSet because it
 #  can't have update and create methods so it only inherits from parts of it
@@ -42,7 +39,6 @@ class MeasurementViewSet(mixins.RetrieveModelMixin,
                          viewsets.GenericViewSet):
     queryset = None
     model = None
-    pagination_class = PostLimitOffsetPagination
     fields = []
 
 

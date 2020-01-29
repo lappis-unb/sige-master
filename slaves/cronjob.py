@@ -35,6 +35,18 @@ class GetAllMeasurementsCronJob(CronJobBase):
         print("Collecting measurements at {}".format(now))
 
 
+class GetAllEventsCronJob(CronJobBase):
+    RUN_EVERY_MINS = 0
+    schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
+    code = 'slaves.cronjob.GetAllEvents'
+
+    def do(self):
+        now = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+        collector = DataCollector()
+        collector.get_events()
+        print("Getting events at {}".format(now))
+
+
 class GetRealTimeMeasurementsCronJob(CronJobBase):
     RUN_EVERY_MINS = 0
     schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
