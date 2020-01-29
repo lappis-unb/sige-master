@@ -261,6 +261,7 @@ class DataCollector():
                     minutely_response = request_measurements(
                         slave,
                         transductor,
+                        None,
                         "minutely-measurements"
                     )
 
