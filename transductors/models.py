@@ -1,9 +1,12 @@
-from .api import *
-from django.db import models
 from datetime import datetime
-from polymorphic.models import PolymorphicModel
+
+from django.db import models
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
+from django.utils.translation import gettext_lazy as _
+
+from .api import *
+from polymorphic.models import PolymorphicModel
 
 
 class Transductor(PolymorphicModel):
@@ -12,7 +15,8 @@ class Transductor(PolymorphicModel):
         unique=True,
         max_length=8,
         blank=False,
-        null=False
+        null=False,
+        verbose_name=_('serial number')
     )
     ip_address = models.CharField(
         max_length=15,
@@ -24,22 +28,57 @@ class Transductor(PolymorphicModel):
                 message='Incorrect IP address format',
                 code='invalid_ip_address'
             ),
-        ]
+        ],
+        verbose_name=_('IP address')
     )
-    physical_location = models.CharField(max_length=256, blank=True)
-    geolocation_latitude = models.FloatField(null=True, blank=True)
-    geolocation_longitude = models.FloatField(null=True, blank=True)
-    firmware_version = models.CharField(max_length=20)
-    name = models.CharField(max_length=256, blank=True)
-    broken = models.BooleanField(default=True)
-    active = models.BooleanField(default=False)
-    creation_date = models.DateTimeField(null=True, blank=True)
-    calibration_date = models.DateTimeField(null=True, blank=True)
+    physical_location = models.CharField(
+        max_length=256,
+        blank=True,
+        verbose_name=_('Physical location')
+    )
+    geolocation_latitude = models.FloatField(
+        null=True,
+        blank=True,
+        verbose_name=_('latitude')
+    )
+    geolocation_longitude = models.FloatField(
+        null=True,
+        blank=True,
+        verbose_name=_('longitude')
+    )
+    firmware_version = models.CharField(
+        max_length=20,
+        verbose_name=_('firmware version')
+    )
+    name = models.CharField(
+        max_length=256,
+        blank=True,
+        verbose_name=_('name')
+    )
+    broken = models.BooleanField(
+        default=True,
+        verbose_name=_('unreachable')
+    )
+    active = models.BooleanField(
+        default=False,
+        verbose_name=_('active')
+    )
+    creation_date = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name=_('created at')
+    )
+    calibration_date = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name=_('calibrated at')
+    )
 
     model = models.CharField(
         max_length=256,
         blank=False,
         null=False,
+        verbose_name=_('model')
     )
 
     class Meta:
