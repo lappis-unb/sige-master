@@ -13,6 +13,7 @@ class GroupAdmin(admin.ModelAdmin):
         'type'
     )
 
+
 @admin.register(models.GroupType)
 class GroupTypeAdmin(admin.ModelAdmin):
     list_display = (

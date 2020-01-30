@@ -41,7 +41,7 @@ class Transductor(PolymorphicModel):
     campus = models.ForeignKey(Campus, on_delete=models.CASCADE)
     grouping = models.ManyToManyField(
         Group,
-        verbose_name = _('Grouping'),
+        verbose_name=_('Grouping'),
         help_text=_('This field is required')
     )
 
