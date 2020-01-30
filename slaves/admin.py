@@ -8,6 +8,7 @@ from django.contrib.auth.models import Group
 admin.site.unregister(CronJobLog)
 admin.site.unregister(authtoken.models.Token)
 
+
 @admin.register(models.Slave)
 class SlaveAdmin(admin.ModelAdmin):
     list_display = (

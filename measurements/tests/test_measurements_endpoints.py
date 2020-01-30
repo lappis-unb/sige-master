@@ -11,8 +11,8 @@ from campi.models import Campus
 class MeasurementsEndPointsTestCase(TestCase):
     def setUp(self):
         self.__user = User.objects.create(username="admin",
-                                                email="admin@admin.com",
-                                                password="admin")
+                                          email="admin@admin.com",
+                                          password="admin")
         self.__user.save()
         self.__credentials = ("admin", "admin")
         self.__api_client = APIClient()
