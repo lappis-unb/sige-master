@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from campi.models import Campus
 from groups.models import Group
+from django.utils.translation import gettext_lazy as _
 
 
 class Transductor(PolymorphicModel):
@@ -38,7 +39,11 @@ class Transductor(PolymorphicModel):
     creation_date = models.DateTimeField(null=True, blank=True)
     calibration_date = models.DateTimeField(null=True, blank=True)
     campus = models.ForeignKey(Campus, on_delete=models.CASCADE)
-    grouping = models.ManyToManyField(Group)
+    grouping = models.ManyToManyField(
+        Group,
+        verbose_name = _('Grouping'),
+        help_text=_('This field is required')
+    )
 
     model = models.CharField(
         max_length=256,
