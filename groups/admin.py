@@ -10,7 +10,7 @@ class GroupAdmin(admin.ModelAdmin):
     )
 
     list_filter = (
-        'type'
+        'type',
     )
 
 

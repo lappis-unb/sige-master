@@ -1,18 +1,22 @@
 import pytest
 from django.test import TestCase
+from rest_framework.test import APIRequestFactory
 
-from transductors.models import EnergyTransductor
 from campi.models import Campus
 from groups.models import Group
 from groups.models import GroupType
-from transductors.serializers import EnergyTransductorSerializer
+from transductors.models import EnergyTransductor
+
 from groups.serializers import GroupSerializer
 from campi.serializers import CampusSerializer
+from transductors.serializers import EnergyTransductorSerializer
+
 from rest_framework.exceptions import NotAcceptable
+
 from transductors.views import EnergyTransductorViewSet
 
 from rest_framework.request import Request
-from rest_framework.test import APIRequestFactory
+
 import pytz
 
 
