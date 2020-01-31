@@ -34,6 +34,7 @@ admin.site.site_title = _('Energy monitoring system')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('rosetta/', include('rosetta.urls')),
     path('login/', login),
     path('', include(router.urls)),
     path('graph/', include(measurements_routes.graph_router.urls))
