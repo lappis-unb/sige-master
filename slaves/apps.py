@@ -3,7 +3,7 @@ from django.utils.translation import gettext_lazy as _
 
 
 class SlavesConfig(AppConfig):
-    name = 'slaves'
+    name = _('slaves')
     verbose_name = _('Slave server module')
     api = None
 
