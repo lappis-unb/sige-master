@@ -159,20 +159,34 @@ class DataCollector():
         )
 
     @staticmethod
-    def save_event_object(events_array):
+    def save_event_object(event_dict):
         """
         Builds and saves events from a dict to a given class
         """
-        for event_dict in events_array:
-            event_class = globals()[event_dict['type']]
-            event_class.objects.create(
-                transductor=EnergyTransductor.objects.get(
-                    ip_address=event_dict['ip_address']
-                ),
-                data=event_dict['data'],
-                created_at=event_dict['created_at'],
-                ended_at=event_dict['ended_at']
-            )
+        event_class = globals()[event_dict['type']]
+        transductor = EnergyTransductor.objects.get(
+            ip_address=event_dict['ip_address']
+        )
+        last_event = event_class.objects.filter(
+            transductor=transductor,
+            ended_at__isnull=True
+        ).last()
+        if last_event:
+            if not event_dict['ended_at']:
+                last_event.data = event_dict['data']
+                last_event.save()
+            else:
+                last_event.data = event_dict['data']
+                last_event.ended_at = event_dict['ended_at']
+                last_event.save()
+        else:
+            if not event_dict['ended_at']:
+                event_class.objects.create(
+                    transductor=transductor,
+                    data=event_dict['data'],
+                    created_at=event_dict['created_at'],
+                    ended_at=event_dict['ended_at']
+                )
 
     @staticmethod
     def get_events():
@@ -190,7 +204,6 @@ class DataCollector():
 
     @staticmethod
     def build_realtime_measurements(msm, transductor):
-        print(RealTimeMeasurement.objects.filter(transductor=transductor))
         if RealTimeMeasurement.objects.filter(transductor=transductor):
             measurement = RealTimeMeasurement.objects.get(
                 transductor=transductor
@@ -243,7 +256,7 @@ class DataCollector():
                     'realtime-measurements'
                 )
 
-                measurement = json.loads(realtime_response.content)['results']
+                measurement = json.loads(realtime_response.content)
                 for transductor_data in measurement:
                     try:
                         transductor = EnergyTransductor.objects.get(
