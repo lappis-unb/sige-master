@@ -46,7 +46,8 @@ ALLOWED_HOSTS = [env('ALLOWED_HOSTS')]
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
+    'material.admin',
+    'material.admin.default',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -158,7 +159,9 @@ REST_FRAMEWORK = {
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+# LANGUAGE_CODE = 'en-us'
+LOCALE_NAME = 'pt_BR'
+LANGUAGE_CODE = 'pt-br'
 
 TIME_ZONE = 'America/Sao_Paulo'
 
@@ -184,3 +187,35 @@ USE_L10N = True
 STATIC_URL = '/static/'
 
 AUTH_USER_MODEL = 'users.CustomUser'
+
+LOCALE_PATHS = (PROJECT_DIR + '/locale', )
+
+from django.utils.translation import gettext_lazy as _
+
+MATERIAL_ADMIN_SITE = {
+    'HEADER': _('Your site header'),  # Admin site header
+    'TITLE': _('Your site title'),  # Admin site title
+    # # Admin site favicon (path to static should be specified)
+    # 'FAVICON': 'path/to/favicon',
+    # 'MAIN_BG_COLOR': '#FFFFFF',  # Admin site main color, css color should be specified
+    # # Admin site main hover color, css color should be specified
+    # 'MAIN_HOVER_COLOR': '#FFFFFF',
+    # # Admin site profile picture (path to static should be specified)
+    'PROFILE_PICTURE': '/img/proj_trans_l.png',
+    # # Admin site profile background (path to static should be specified)
+    # 'PROFILE_BG': 'path/to/image',
+    # # Admin site logo on login page (path to static should be specified)
+    # 'LOGIN_LOGO': 'path/to/image',
+    # # Admin site background on login/logout pages (path to static should be specified)
+    # 'LOGOUT_BG': 'path/to/image',
+    'SHOW_THEMES': True,  # Show default admin themes button
+    'TRAY_REVERSE': True,  # Hide object-tools and additional-submit-line by default
+    'NAVBAR_REVERSE': True,  # Hide side navbar by default
+    # 'SHOW_COUNTS': True,  # Show instances counts for each model
+    # 'APP_ICONS': {  # Set icons for applications(lowercase), including 3rd party apps, {'application_name': 'material_icon_name', ...}
+    #     'sites': 'send',
+    # },
+    # 'MODEL_ICONS': {  # Set icons for models(lowercase), including 3rd party models, {'model_name': 'material_icon_name', ...}
+    #     'site': 'contact_mail',
+    # }
+}
