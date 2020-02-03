@@ -1,9 +1,11 @@
 import os
-import environ
 
+import environ
+from django.utils.translation import gettext_lazy as _
 from unipath import Path
 
 env = environ.Env()
+env.read_env('dev-env')
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -63,7 +65,7 @@ INSTALLED_APPS = [
     'slaves',
     'measurements',
     'transductors',
-    'users',
+    # 'users',
     'corsheaders',
     'events',
 ]
@@ -177,11 +179,10 @@ USE_L10N = True
 
 STATIC_URL = '/static/'
 
-AUTH_USER_MODEL = 'users.CustomUser'
+# AUTH_USER_MODEL = 'users.CustomUser'
 
 LOCALE_PATHS = (PROJECT_DIR + '/locale', )
 
-from django.utils.translation import gettext_lazy as _
 
 MATERIAL_ADMIN_SITE = {
     'HEADER': _('Your site header'),  # Admin site header
@@ -210,3 +211,6 @@ MATERIAL_ADMIN_SITE = {
     #     'site': 'contact_mail',
     # }
 }
+
+# debug configuration to view how emails are being sent
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
