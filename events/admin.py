@@ -8,8 +8,26 @@ from events.models import FailedConnectionSlaveEvent
 from events.models import FailedConnectionTransductorEvent
 
 
-admin.site.register(PhaseDropEvent)
-admin.site.register(CriticalVoltageEvent)
-admin.site.register(PrecariousVoltageEvent)
-admin.site.register(FailedConnectionSlaveEvent)
-admin.site.register(FailedConnectionTransductorEvent)
+@admin.register(PhaseDropEvent)
+class PhaseDropEventAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(CriticalVoltageEvent)
+class CriticalVoltageEventAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(PrecariousVoltageEvent)
+class PrecariousVoltageEventAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(FailedConnectionSlaveEvent)
+class FailedConnectionSlaveEventAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(FailedConnectionTransductorEvent)
+class FailedConnectionTransductorEventAdmin(admin.ModelAdmin):
+    pass

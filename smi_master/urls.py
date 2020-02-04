@@ -1,23 +1,25 @@
-from django.conf.urls import url
+from django.urls import path
+from django.urls import include
 from django.contrib import admin
+from django.conf.urls import url
+from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import views as auth_views
-from django.urls import include, path
+
 from rest_framework.routers import DefaultRouter
 
-from buildings import views as buildings_views
 from campi import views as campi_views
-from events import urls as events_routes
-from measurements import urls as measurements_routes
-from slaves import views as slaves_views
-from transductors import views as energy_transductor_views
 from users import views as users_views
+from events import urls as events_routes
+from transductors import views as energy_transductor_views
+
+from slaves import views as slaves_views
+from measurements import urls as measurements_routes
 
 from .views import login
 
 
 router = DefaultRouter()
 router.register(r'campi', campi_views.CampusViewSet)
-router.register(r'buildings', buildings_views.BuildingViewset)
 router.register(r'slave', slaves_views.SlaveViewSet)
 router.register(r'users', users_views.UserViewSet)
 router.register(
@@ -28,8 +30,14 @@ router.register(
 router.registry.extend(measurements_routes.router.registry)
 router.registry.extend(events_routes.router.registry)
 
+# django-admin custom titles
+# admin.site.index_title = _('')
+admin.site.site_header = _('SMI Site Administration')
+admin.site.site_title = _('Energy monitoring system')
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('rosetta/', include('rosetta.urls')),
     path('login/', login),
     path(
         'password_reset/',

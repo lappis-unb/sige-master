@@ -1,0 +1,485 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-01-31 15:15-0300\n"
+"PO-Revision-Date: 2020-02-04 10:10-0306\n"
+"Last-Translator: b'  <administrator@underworld.com>'\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Translated-Using: django-rosetta 0.9.3\n"
+
+#: campi/apps.py:6
+#| msgid "Campi"
+msgid "campi"
+msgstr "Campi"
+
+#: campi/apps.py:7
+msgid "Campi module"
+msgstr "Módulo Campi"
+
+#: campi/models.py:13
+msgid "Campus"
+msgstr "Campus"
+
+#: campi/models.py:14
+msgid "Campi"
+msgstr "Campi"
+
+#: campi/models.py:19
+msgid "Name"
+msgstr "Nome"
+
+#: campi/models.py:20 campi/models.py:26 events/models.py:31
+#: events/models.py:59 events/models.py:77 events/models.py:105
+#: measurements/models.py:13 measurements/models.py:22 slaves/models.py:21
+#: slaves/models.py:33 slaves/models.py:45 transductors/models.py:28
+#: transductors/models.py:42 transductors/models.py:47
+#: transductors/models.py:69 transductors/models.py:75
+#: transductors/models.py:87 transductors/models.py:95
+msgid "This field is required"
+msgstr "Este campo é obrigatório"
+
+#: campi/models.py:25
+msgid "Acronym"
+msgstr "Acrônimo"
+
+#: events/apps.py:6
+#| msgid "event"
+msgid "events"
+msgstr "eventos"
+
+#: events/models.py:22
+msgid "ended at"
+msgstr "finalizado às"
+
+#: events/models.py:26 transductors/models.py:80
+msgid "created at"
+msgstr "começou às"
+
+#: events/models.py:30
+msgid "details"
+msgstr "detalhes"
+
+#: events/models.py:35
+msgid "event"
+msgstr "evento"
+
+#: events/models.py:58 events/models.py:76
+msgid "meter"
+msgstr "medidor"
+
+#: events/models.py:63
+msgid "voltage related"
+msgstr "relacionado à tensão"
+
+#: events/models.py:81
+msgid "failed connection with meter"
+msgstr "falha na conexão com o medidor"
+
+#: events/models.py:104
+msgid "slave"
+msgstr "servidor local"
+
+#: events/models.py:109
+msgid "failed connection with slave server"
+msgstr "falha na conexão com o servidor local"
+
+#: events/models.py:128
+msgid "critical voltage"
+msgstr "tensão crítica"
+
+#: events/models.py:137
+msgid "precarious voltage"
+msgstr "tensão precária"
+
+#: events/models.py:146
+msgid "phase drop"
+msgstr "queda de fase"
+
+#: events/models.py:155
+msgid "consumption related"
+msgstr "consumo relacionado"
+
+#: events/models.py:165
+msgid "consumption peak"
+msgstr "pico de consumo"
+
+#: events/models.py:175
+msgid "consumption above contracted threshold"
+msgstr "consumo acima do limite contratado"
+
+#: measurements/apps.py:6
+#| msgid "Measurement"
+msgid "measurements"
+msgstr "medidas"
+
+#: measurements/apps.py:7
+msgid "Measurements module"
+msgstr "Módulo de medidas"
+
+#: measurements/models.py:12
+msgid "Collection time"
+msgstr "Tempo de coleta"
+
+#: measurements/models.py:21 transductors/models.py:182
+msgid "Energy meter"
+msgstr "Medidor de energia"
+
+#: measurements/models.py:30
+msgid "Measurement"
+msgstr "Medição"
+
+#: measurements/models.py:35
+msgid "Minutely measurement"
+msgstr "Medição de minuto a minuto"
+
+#: measurements/models.py:39
+msgid "Frequency"
+msgstr "Frequência"
+
+#: measurements/models.py:44
+msgid "Voltage at phase A"
+msgstr "Tensão na fase A"
+
+#: measurements/models.py:49
+msgid "Voltage at phase B"
+msgstr "Tensão na fase B"
+
+#: measurements/models.py:54
+msgid "Voltage at phase C"
+msgstr "Tensão na fase C"
+
+#: measurements/models.py:59
+msgid "Current at phase A"
+msgstr "Corrente na fase A"
+
+#: measurements/models.py:64
+msgid "Current at phase B"
+msgstr "Corrente na fase B"
+
+#: measurements/models.py:69
+msgid "Current at phase C"
+msgstr "Corrente na fase C"
+
+#: measurements/models.py:74
+msgid "Active power at phase A"
+msgstr "Potência ativa na fase A"
+
+#: measurements/models.py:79
+msgid "Active power at phase B"
+msgstr "Potência ativa na fase B"
+
+#: measurements/models.py:84
+msgid "Active power at phase C"
+msgstr "Potência ativa na fase C"
+
+#: measurements/models.py:89 measurements/models.py:354
+msgid "Total active power"
+msgstr "Potência ativa total"
+
+#: measurements/models.py:94
+msgid "Reactive power phase A"
+msgstr "Fase de potência reativa A"
+
+#: measurements/models.py:99
+msgid "Reactive power phase B"
+msgstr "Fase de potência reativa B"
+
+#: measurements/models.py:104
+msgid "Reactive power phase C"
+msgstr "Fase de potência reativa C"
+
+#: measurements/models.py:109 measurements/models.py:359
+msgid "Total reactive power"
+msgstr "Potência reativa total"
+
+#: measurements/models.py:114
+msgid "Apparent power on phase A"
+msgstr "Potência aparente na fase A"
+
+#: measurements/models.py:119
+msgid "Apparent power on phase B"
+msgstr "Potência aparente na fase B"
+
+#: measurements/models.py:124
+msgid "Apparent power on phase C"
+msgstr "Potência aparente na fase C"
+
+#: measurements/models.py:129
+msgid "Total apparent power"
+msgstr "Potência aparente total"
+
+#: measurements/models.py:134
+msgid "Power factor on phase A"
+msgstr "Fator de potência na fase A"
+
+#: measurements/models.py:139
+msgid "Power factor on phase B"
+msgstr "Fator de potência na fase B"
+
+#: measurements/models.py:144
+msgid "Power factor on phase C"
+msgstr "Fator de potência na fase C"
+
+#: measurements/models.py:149 measurements/models.py:364
+msgid "Total power factor"
+msgstr "Fator de potência total"
+
+#: measurements/models.py:154
+msgid "DHT voltage on phase A"
+msgstr "Tensão DHT na fase A"
+
+#: measurements/models.py:159
+msgid "DHT voltage on phase B"
+msgstr "Tensão DHT na fase B"
+
+#: measurements/models.py:164
+msgid "DHT voltage on phase C"
+msgstr "Tensão DHT na fase C"
+
+#: measurements/models.py:169
+msgid "DHT current on phase A"
+msgstr "Corrente DHT na fase A"
+
+#: measurements/models.py:174
+msgid "DHT current on phase B"
+msgstr "Corrente DHT na fase B"
+
+#: measurements/models.py:179
+msgid "DHT current on phase C"
+msgstr "Corrente DHT na fase C"
+
+#: measurements/models.py:185
+msgid "Quartely measurement"
+msgstr "Medida de 15 minutos"
+
+#: measurements/models.py:189 measurements/models.py:234
+msgid "Generated energy on peak hours"
+msgstr "Energia gerada nos horários de pico"
+
+#: measurements/models.py:194 measurements/models.py:239
+msgid "Generated energy not on peak hours"
+msgstr "Energia gerada fora do horário de pico"
+
+#: measurements/models.py:199 measurements/models.py:244
+msgid "Consumption on peak hours"
+msgstr "Consumo nos horários de pico"
+
+#: measurements/models.py:204 measurements/models.py:249
+msgid "Consumption not on peak hours"
+msgstr "Consumo fora do horário de pico"
+
+#: measurements/models.py:209 measurements/models.py:254
+msgid "Inductive power on peak hours"
+msgstr "Potência indutiva nos horários de pico"
+
+#: measurements/models.py:214 measurements/models.py:259
+msgid "Inductive power not on peak hours"
+msgstr "Potência indutiva fora do horário de pico"
+
+#: measurements/models.py:219 measurements/models.py:264
+msgid "Capacitive power on peak hours"
+msgstr "Potência capacitiva nos horários de pico"
+
+#: measurements/models.py:224 measurements/models.py:269
+msgid "Capacitive power not on peak hours"
+msgstr "Potência capacitiva fora do horário de pico"
+
+#: measurements/models.py:230
+msgid "Monthly measurement"
+msgstr "Medição mensal"
+
+#: measurements/models.py:274
+msgid "Active max power on peak hours"
+msgstr "Potência máxima ativa nos horários de pico"
+
+#: measurements/models.py:279
+msgid "Active max power not on peak hours"
+msgstr "Potência máxima ativa fora do horário de pico"
+
+#: measurements/models.py:284
+msgid "Reactive max power on peak hours"
+msgstr "Potência máxima reativa nos horários de pico"
+
+#: measurements/models.py:289
+msgid "Reactive max power not on peak hours"
+msgstr "Potência máxima reativa fora do horário de pico"
+
+#: measurements/models.py:296
+msgid "Active max power list on peak hours"
+msgstr "Lista de potência máxima ativa nos horários de pico"
+
+#: measurements/models.py:302
+msgid "Active max power list not on peak hours"
+msgstr "Lista de potência máxima ativa fora do horário de pico"
+
+#: measurements/models.py:308
+msgid "Reactive max power list on peak hours"
+msgstr "Lista de potência máxima reativa nos horários de pico"
+
+#: measurements/models.py:314
+msgid "Reactive max power list not on peak hours"
+msgstr "Lista de potência máxima reativa fora do horário de pico"
+
+#: measurements/models.py:320
+msgid "Real time measurement"
+msgstr "Medição em tempo real"
+
+#: measurements/models.py:324
+msgid "Voltage on phase A"
+msgstr "Tensão na fase A"
+
+#: measurements/models.py:329
+msgid "Voltage on phase B"
+msgstr "Tensão na fase B"
+
+#: measurements/models.py:334
+msgid "Voltage on phase C"
+msgstr "Tensão na fase C"
+
+#: measurements/models.py:339
+msgid "Current on phase A"
+msgstr "Corrente na fase A"
+
+#: measurements/models.py:344
+msgid "Current on phase B"
+msgstr "Corrente na fase B"
+
+#: measurements/models.py:349
+msgid "Current on phase C"
+msgstr "Corrente na fase C"
+
+#: measurements/utils.py:6
+msgid "It must have a serial_number argument"
+msgstr "Deve possuir um número serial"
+
+#: measurements/utils.py:7
+msgid "It must have a start_date argument"
+msgstr "Deve possuir uma data de início"
+
+#: measurements/utils.py:8
+msgid "It must have an end_date argument"
+msgstr "Deve possuir uma data de fim"
+
+#: slaves/apps.py:6
+msgid "slaves"
+msgstr "servidores locais"
+
+#: slaves/apps.py:7
+msgid "Slave server module"
+msgstr "Módulo servidor local"
+
+#: slaves/cronjob.py:14
+msgid "Check meters cronjob"
+msgstr "Cronjob de verificação de medidores"
+
+#: slaves/cronjob.py:29
+msgid "Get all measurements cronjob"
+msgstr "Cronjob coletor de todas as medidas"
+
+#: slaves/cronjob.py:56
+msgid "Get real time measurements cronjob"
+msgstr "Cronjob de obtenção de medidas em tempo real"
+
+#: slaves/models.py:20 transductors/models.py:41
+msgid "IP address"
+msgstr "endereço IP"
+
+#: slaves/models.py:27
+msgid "IP access port"
+msgstr "Porta de acesso IP"
+
+#: slaves/models.py:32
+msgid "Location"
+msgstr "Localização"
+
+#: slaves/models.py:38
+msgid "Broken"
+msgstr "Incomunicável"
+
+#: slaves/models.py:44
+msgid "Meters"
+msgstr "Medidor"
+
+#: slaves/models.py:49
+msgid "Slave server"
+msgstr "Servidor local"
+
+#: smi_master/urls.py:32
+msgid "SMI Site Administration"
+msgstr "Administração do site SMI"
+
+#: smi_master/urls.py:33
+msgid "Energy monitoring system"
+msgstr "Sistema de monitoramento de energia"
+
+#: transductors/apps.py:6
+msgid "transductors"
+msgstr "medidores"
+
+#: transductors/apps.py:7
+msgid "Meters module"
+msgstr "Modulo de medidores"
+
+#: transductors/models.py:18
+msgid "active"
+msgstr "ativo"
+
+#: transductors/models.py:22
+msgid "unreachable"
+msgstr "inacessível"
+
+#: transductors/models.py:27
+msgid "name"
+msgstr "nome"
+
+#: transductors/models.py:48
+msgid "port"
+msgstr "porta"
+
+#: transductors/models.py:54
+msgid "latitude"
+msgstr "latitude"
+
+#: transductors/models.py:60
+msgid "longitude"
+msgstr "longitude"
+
+#: transductors/models.py:68
+msgid "serial number"
+msgstr "número de série"
+
+#: transductors/models.py:74
+msgid "firmware version"
+msgstr "versão do firmware"
+
+#: transductors/models.py:86
+msgid "campus"
+msgstr "campus"
+
+#: transductors/models.py:94
+msgid "model"
+msgstr "modelo"
+
+#: transductors/models.py:100
+msgid "Meter"
+msgstr "medidor"
+
+#: users/apps.py:6
+msgid "users"
+msgstr "usuários"
+
+#: users/apps.py:7
+msgid "Users module"
+msgstr "Módulo de usuários"

@@ -5,18 +5,16 @@ from . import models
 @admin.register(models.EnergyTransductor)
 class EnergyTransductorAdmin(admin.ModelAdmin):
     list_display = (
-        'serial_number',
-        'ip_address',
-        'physical_location',
-        'firmware_version',
         'name',
-        'broken',
+        'model',
+        'ip_address',
+        'port',
+        'serial_number',
         'active',
-        'calibration_date',
+        'broken',
     )
 
     list_filter = (
         'broken',
         'active',
-        'firmware_version',
     )

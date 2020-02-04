@@ -3,6 +3,7 @@ from django.conf import settings
 from django.utils import timezone
 from django.core.validators import RegexValidator
 from django.contrib.postgres.fields import JSONField
+from django.utils.translation import gettext_lazy as _
 
 from polymorphic.models import PolymorphicModel
 
@@ -15,9 +16,23 @@ class Event(PolymorphicModel):
     Defines a new event object
     """
     settings.USE_TZ = False
-    ended_at = models.DateTimeField(null=True, blank=True)
-    created_at = models.DateTimeField(default=timezone.now)
-    data = JSONField(default=dict)
+    ended_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name=_('ended at')
+    )
+    created_at = models.DateTimeField(
+        default=timezone.now,
+        verbose_name=_('created at'),
+    )
+    data = JSONField(
+        default=dict,
+        verbose_name=_('details'),
+        help_text=_('This field is required')
+    )
+
+    class Meta:
+        verbose_name = _('event')
 
     def __str__(self):
         return '%s@%s' % (self.__class__.__name__, self.created_at)
@@ -39,8 +54,13 @@ class VoltageRelatedEvent(Event):
         related_name="%(app_label)s_%(class)s",
         on_delete=models.CASCADE,
         blank=False,
-        null=False
+        null=False,
+        verbose_name=_('meter'),
+        help_text=_('This field is required')
     )
+
+    class Meta:
+        verbose_name = _('voltage related')
 
 
 class FailedConnectionTransductorEvent(Event):
@@ -52,8 +72,13 @@ class FailedConnectionTransductorEvent(Event):
         related_name="%(app_label)s_%(class)s",
         on_delete=models.CASCADE,
         blank=False,
-        null=False
+        null=False,
+        verbose_name=_('meter'),
+        help_text=_('This field is required')
     )
+
+    class Meta:
+        verbose_name = _('failed connection with meter')
 
     @staticmethod
     def save_event(transductor):
@@ -75,8 +100,13 @@ class FailedConnectionSlaveEvent(Event):
         related_name="%(app_label)s_%(class)s",
         on_delete=models.CASCADE,
         blank=False,
-        null=False
+        null=False,
+        verbose_name=_('slave'),
+        help_text=_('This field is required')
     )
+
+    class Meta:
+        verbose_name = _('failed connection with slave server')
 
     @staticmethod
     def save_event(slave):
@@ -94,11 +124,17 @@ class CriticalVoltageEvent(VoltageRelatedEvent):
     Defines a new event related to a critical voltage measurement
     """
 
+    class Meta:
+        verbose_name = _('critical voltage')
+
 
 class PrecariousVoltageEvent(VoltageRelatedEvent):
     """
     Defines a new event related to a precarious voltage measurement
     """
+
+    class Meta:
+        verbose_name = _('precarious voltage')
 
 
 class PhaseDropEvent(VoltageRelatedEvent):
@@ -106,12 +142,18 @@ class PhaseDropEvent(VoltageRelatedEvent):
     Defines a new event related to a drop on the triphasic voltage measurement
     """
 
+    class Meta:
+        verbose_name = _('phase drop')
+
 
 class ConsumptionRelatedEvent(Event):
     """
     Defines a generic event related to consumption event types
     """
-    consumption = models.FloatField(default=0.0)
+    consumption = models.FloatField(
+        default=0.0,
+        verbose_name=_('consumption related')
+    )
 
 
 class ConsumptionPeakEvent(ConsumptionRelatedEvent):
@@ -119,9 +161,15 @@ class ConsumptionPeakEvent(ConsumptionRelatedEvent):
     Defines a new event related to a higher peak on transductor measurements
     """
 
+    class Meta:
+        verbose_name = _('consumption peak')
+
 
 class ConsumptionAboveContract(ConsumptionRelatedEvent):
     """
     Defines a new event related to a moment at the consumptions surpasses the
     consumption contracted
     """
+
+    class Meta:
+        verbose_name = _('consumption above contracted threshold')
