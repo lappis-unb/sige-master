@@ -23,9 +23,6 @@ class MeasurementsEndPointsTestCase(TestCase):
         self.campus = Campus.objects.create(
             name='UnB - Faculdade Gama',
             acronym='FGA',
-            phone='(61) 3107-8901',
-            address='Área Especial de Indústria Projeção A',
-            website_address='http://fga.unb.br/'
         )
 
         self.transductor = EnergyTransductor.objects.create(
@@ -43,8 +40,11 @@ class MeasurementsEndPointsTestCase(TestCase):
             "2019-01-01 23:59"
         )
         endpoint = self.__minutely_three_phase + params
+
         self.__api_client.login(username="admin", password="admin")
+
         response = self.__api_client.get(endpoint)
+
         self.__api_client.logout()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -54,14 +54,18 @@ class MeasurementsEndPointsTestCase(TestCase):
             "2019-01-01 00:00",
             "2019-01-01 23:59"
         )
+
         endpoint = self.__minutely_three_phase + params
         response = self.__api_client.get(endpoint)
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_post_with_auth_minutely_three_phase(self):
         self.__api_client.login(username="admin", password="admin")
+
         response = self.__api_client.post(
             self.__minutely_three_phase)
+
         self.__api_client.logout()
         self.assertEqual(response.status_code,
                          status.HTTP_401_UNAUTHORIZED)
@@ -69,13 +73,16 @@ class MeasurementsEndPointsTestCase(TestCase):
     def test_post_without_auth_minutely_three_phase(self):
         response = self.__api_client.post(
             self.__minutely_three_phase)
+
         self.assertEqual(response.status_code,
                          status.HTTP_401_UNAUTHORIZED)
 
     def test_put_with_auth_minutely_three_phase(self):
         self.__api_client.login(username="admin", password="admin")
+
         response = self.__api_client.put(
             self.__minutely_three_phase)
+
         self.__api_client.logout()
         self.assertEqual(response.status_code,
                          status.HTTP_401_UNAUTHORIZED)
@@ -83,13 +90,16 @@ class MeasurementsEndPointsTestCase(TestCase):
     def test_put_without_auth_minutely_three_phase(self):
         response = self.__api_client.put(
             self.__minutely_three_phase)
+
         self.assertEqual(response.status_code,
                          status.HTTP_401_UNAUTHORIZED)
 
     def test_delete_with_auth_minutely_three_phase(self):
         self.__api_client.login(username="admin", password="admin")
+
         response = self.__api_client.delete(
             self.__minutely_three_phase)
+
         self.__api_client.logout()
         self.assertEqual(response.status_code,
                          status.HTTP_401_UNAUTHORIZED)
@@ -97,5 +107,6 @@ class MeasurementsEndPointsTestCase(TestCase):
     def test_delete_without_auth_minutely_three_phase(self):
         response = self.__api_client.delete(
             self.__minutely_three_phase)
+
         self.assertEqual(response.status_code,
                          status.HTTP_401_UNAUTHORIZED)

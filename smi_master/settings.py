@@ -61,13 +61,13 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'campi',
-    'buildings',
     'slaves',
     'measurements',
     'transductors',
     # 'users',
     'corsheaders',
     'events',
+    'rosetta',
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
@@ -168,11 +168,20 @@ LANGUAGE_CODE = 'pt-br'
 TIME_ZONE = 'America/Sao_Paulo'
 
 USE_I18N = True
+LANGUAGES = (
+    ('en', u'English'),
+    ('pt-br', u'Português'),
+)
+# LOCALE_PATHS = (
+#     os.path.join(os.path.dirname(__file__), "locale"),
+# )
+
+LOCALE_PATHS = (os.path.join(BASE_DIR, 'locale/'),)
+
 
 USE_L10N = True
 
 # USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/

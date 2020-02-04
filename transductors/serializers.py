@@ -10,20 +10,23 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
         fields = (
             'serial_number',
             'ip_address',
-            'physical_location',
+            'port',
             'geolocation_latitude',
             'geolocation_longitude',
-            'firmware_version',
             'campus',
             'name',
             'broken',
             'active',
             'creation_date',
-            'calibration_date',
             'model',
             'url'
         )
-        read_only_fields = ('active', 'broken')
+        read_only_fields = (
+            'creation_date',
+            'serial_number',
+            'active',
+            'broken'
+        )
 
     def update(self, instance, validated_data):
         for attr, value in validated_data.items():
