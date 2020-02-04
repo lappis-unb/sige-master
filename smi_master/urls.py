@@ -3,16 +3,20 @@ from django.urls import include
 from django.contrib import admin
 from django.conf.urls import url
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth import views as auth_views
 
 from rest_framework.routers import DefaultRouter
 
-from .views import login
 from campi import views as campi_views
 from users import views as users_views
-from slaves import views as slaves_views
-from transductors import views as energy_transductor_views
-from measurements import urls as measurements_routes
 from events import urls as events_routes
+from transductors import views as energy_transductor_views
+
+from slaves import views as slaves_views
+from measurements import urls as measurements_routes
+
+from .views import login
+
 
 
 router = DefaultRouter()
@@ -36,6 +40,26 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('rosetta/', include('rosetta.urls')),
     path('login/', login),
+    path(
+        'password_reset/',
+        auth_views.PasswordResetView.as_view(),
+        name='password_reset'
+    ),
+    path(
+        'password_reset/done/',
+        auth_views.PasswordResetDoneView.as_view(),
+        name='password_reset_done'
+    ),
+    path(
+        'reset/<uidb64>/<token>/',
+        auth_views.PasswordResetConfirmView.as_view(),
+        name='password_reset_confirm'
+    ),
+    path(
+        'reset/done/',
+        auth_views.PasswordResetCompleteView.as_view(),
+        name='password_reset_complete'
+    ),
     path('', include(router.urls)),
     path('graph/', include(measurements_routes.graph_router.urls))
 ]

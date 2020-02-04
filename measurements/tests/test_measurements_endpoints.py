@@ -1,18 +1,18 @@
 from django.test import TestCase
+from django.contrib.auth.models import User
+
 from rest_framework.test import APIClient
-from users.models import CustomUser
 from rest_framework import status
+
 from measurements.models import EnergyTransductor
 from campi.models import Campus
 
 
 class MeasurementsEndPointsTestCase(TestCase):
     def setUp(self):
-        self.__user = CustomUser.objects.create(username="admin",
-                                                email="admin@admin.com",
-                                                name="Admin's name",
-                                                user_type="adm",
-                                                password="admin")
+        self.__user = User.objects.create(username="admin",
+                                          email="admin@admin.com",
+                                          password="admin")
         self.__user.save()
         self.__credentials = ("admin", "admin")
         self.__api_client = APIClient()
