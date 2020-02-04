@@ -18,7 +18,6 @@ from measurements import urls as measurements_routes
 from .views import login
 
 
-
 router = DefaultRouter()
 router.register(r'campi', campi_views.CampusViewSet)
 router.register(r'slave', slaves_views.SlaveViewSet)
