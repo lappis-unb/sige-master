@@ -9,8 +9,8 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-01-31 15:15-0300\n"
-"PO-Revision-Date: 2020-01-31 15:16-0306\n"
-"Last-Translator: b'  <durval@durval.com>'\n"
+"PO-Revision-Date: 2020-02-04 10:10-0306\n"
+"Last-Translator: b'  <administrator@underworld.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
@@ -20,7 +20,6 @@ msgstr ""
 "X-Translated-Using: django-rosetta 0.9.3\n"
 
 #: campi/apps.py:6
-#, fuzzy
 #| msgid "Campi"
 msgid "campi"
 msgstr "Campi"
@@ -31,7 +30,7 @@ msgstr "Módulo Campi"
 
 #: campi/models.py:13
 msgid "Campus"
-msgstr "Câmpus"
+msgstr "Campus"
 
 #: campi/models.py:14
 msgid "Campi"
@@ -56,14 +55,13 @@ msgid "Acronym"
 msgstr "Acrônimo"
 
 #: events/apps.py:6
-#, fuzzy
 #| msgid "event"
 msgid "events"
-msgstr "evento"
+msgstr "eventos"
 
 #: events/models.py:22
 msgid "ended at"
-msgstr "terminou às"
+msgstr "finalizado às"
 
 #: events/models.py:26 transductors/models.py:80
 msgid "created at"
@@ -83,7 +81,7 @@ msgstr "medidor"
 
 #: events/models.py:63
 msgid "voltage related"
-msgstr "tensão relacionada"
+msgstr "relacionado à tensão"
 
 #: events/models.py:81
 msgid "failed connection with meter"
@@ -91,11 +89,11 @@ msgstr "falha na conexão com o medidor"
 
 #: events/models.py:104
 msgid "slave"
-msgstr ""
+msgstr "servidor local"
 
 #: events/models.py:109
 msgid "failed connection with slave server"
-msgstr "falha na conexão com o servidor escravo"
+msgstr "falha na conexão com o servidor local"
 
 #: events/models.py:128
 msgid "critical voltage"
@@ -122,14 +120,13 @@ msgid "consumption above contracted threshold"
 msgstr "consumo acima do limite contratado"
 
 #: measurements/apps.py:6
-#, fuzzy
 #| msgid "Measurement"
 msgid "measurements"
-msgstr "Medição"
+msgstr "medidas"
 
 #: measurements/apps.py:7
 msgid "Measurements module"
-msgstr "Módulo de medições"
+msgstr "Módulo de medidas"
 
 #: measurements/models.py:12
 msgid "Collection time"
@@ -265,7 +262,7 @@ msgstr "Corrente DHT na fase C"
 
 #: measurements/models.py:185
 msgid "Quartely measurement"
-msgstr ""
+msgstr "Medida de 15 minutos"
 
 #: measurements/models.py:189 measurements/models.py:234
 msgid "Generated energy on peak hours"
@@ -365,35 +362,35 @@ msgstr "Corrente na fase C"
 
 #: measurements/utils.py:6
 msgid "It must have a serial_number argument"
-msgstr ""
+msgstr "Deve possuir um número serial"
 
 #: measurements/utils.py:7
 msgid "It must have a start_date argument"
-msgstr ""
+msgstr "Deve possuir uma data de início"
 
 #: measurements/utils.py:8
 msgid "It must have an end_date argument"
-msgstr ""
+msgstr "Deve possuir uma data de fim"
 
 #: slaves/apps.py:6
 msgid "slaves"
-msgstr ""
+msgstr "servidores locais"
 
 #: slaves/apps.py:7
 msgid "Slave server module"
-msgstr "Módulo servidor escravo"
+msgstr "Módulo servidor local"
 
 #: slaves/cronjob.py:14
 msgid "Check meters cronjob"
-msgstr "Verificar medições do cronjob"
+msgstr "Cronjob de verificação de medidores"
 
 #: slaves/cronjob.py:29
 msgid "Get all measurements cronjob"
-msgstr "Obter todas as medidas cronjob"
+msgstr "Cronjob coletor de todas as medidas"
 
 #: slaves/cronjob.py:56
 msgid "Get real time measurements cronjob"
-msgstr "Obter medições em tempo real do cronjob"
+msgstr "Cronjob de obtenção de medidas em tempo real"
 
 #: slaves/models.py:20 transductors/models.py:41
 msgid "IP address"
@@ -409,7 +406,7 @@ msgstr "Localização"
 
 #: slaves/models.py:38
 msgid "Broken"
-msgstr "Quebrado"
+msgstr "Incomunicável"
 
 #: slaves/models.py:44
 msgid "Meters"
@@ -417,7 +414,7 @@ msgstr "Medidor"
 
 #: slaves/models.py:49
 msgid "Slave server"
-msgstr "Servidor escravo"
+msgstr "Servidor local"
 
 #: smi_master/urls.py:32
 msgid "SMI Site Administration"
@@ -429,11 +426,11 @@ msgstr "Sistema de monitoramento de energia"
 
 #: transductors/apps.py:6
 msgid "transductors"
-msgstr "transdutores"
+msgstr "medidores"
 
 #: transductors/apps.py:7
 msgid "Meters module"
-msgstr "Modulo do medidor"
+msgstr "Modulo de medidores"
 
 #: transductors/models.py:18
 msgid "active"
@@ -485,4 +482,4 @@ msgstr "usuários"
 
 #: users/apps.py:7
 msgid "Users module"
-msgstr ""
+msgstr "Módulo de usuários"
