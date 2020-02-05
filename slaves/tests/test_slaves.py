@@ -27,27 +27,23 @@ class TestSlavesModels(TestCase):
         self.campus = Campus.objects.create(
             name='UnB - Faculdade Gama',
             acronym='FGA',
-            phone='(61) 3107-8901',
-            address='Área Especial de Indústria Projeção A',
-            website_address='http://fga.unb.br/'
         )
 
         self.energy_transductor = EnergyTransductor.objects.create(
             serial_number='87654321',
             ip_address='192.168.1.1',
-            physical_location="MESP",
             geolocation_latitude=20.1,
             geolocation_longitude=37.9,
             name="MESP 1",
             broken=True,
             active=False,
             creation_date=timezone.now(),
-            calibration_date=timezone.now(),
             firmware_version='0.1',
             model='EnergyTransductorModel',
             campus=self.campus
         )
 
+        # Jango Fett would be proud
         self.slave_1.transductors.add(self.energy_transductor)
 
     def test_should_create_new_slave(self):

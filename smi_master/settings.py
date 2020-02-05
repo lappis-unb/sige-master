@@ -1,9 +1,11 @@
 import os
-import environ
 
+import environ
+from django.utils.translation import gettext_lazy as _
 from unipath import Path
 
 env = environ.Env()
+env.read_env('dev-env')
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -59,13 +61,13 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'campi',
-    'buildings',
     'slaves',
     'measurements',
     'transductors',
-    'users',
+    # 'users',
     'corsheaders',
     'events',
+    'rosetta',
     'groups',
 ]
 
@@ -167,22 +169,30 @@ LANGUAGE_CODE = 'pt-br'
 TIME_ZONE = 'America/Sao_Paulo'
 
 USE_I18N = True
+LANGUAGES = (
+    ('en', u'English'),
+    ('pt-br', u'Português'),
+)
+# LOCALE_PATHS = (
+#     os.path.join(os.path.dirname(__file__), "locale"),
+# )
+
+LOCALE_PATHS = (os.path.join(BASE_DIR, 'locale/'),)
+
 
 USE_L10N = True
 
 # USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
 
-AUTH_USER_MODEL = 'users.CustomUser'
+# AUTH_USER_MODEL = 'users.CustomUser'
 
 LOCALE_PATHS = (PROJECT_DIR + '/locale', )
 
-from django.utils.translation import gettext_lazy as _
 
 MATERIAL_ADMIN_SITE = {
     'HEADER': _('Your site header'),  # Admin site header
@@ -211,3 +221,6 @@ MATERIAL_ADMIN_SITE = {
     #     'site': 'contact_mail',
     # }
 }
+
+# debug configuration to view how emails are being sent
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

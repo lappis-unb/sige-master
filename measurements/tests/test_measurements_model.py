@@ -25,9 +25,6 @@ class MeasurementsTestCase(TestCase):
         self.campus = Campus.objects.create(
             name='UnB - Faculdade Gama',
             acronym='FGA',
-            phone='(61) 3107-8901',
-            address='Área Especial de Indústria Projeção A',
-            website_address='http://fga.unb.br/'
         )
 
         self.transductor = EnergyTransductor.objects.create(
