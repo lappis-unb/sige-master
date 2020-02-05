@@ -17,14 +17,13 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
             'name',
             'broken',
             'active',
-            'creation_date',
             'model',
             'grouping',
+            'firmware_version',
             'url'
         )
+
         read_only_fields = (
-            'creation_date',
-            'serial_number',
             'active',
             'broken'
         )
@@ -44,12 +43,9 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
             transductor = EnergyTransductor.objects.create(
                 serial_number=validated_data.get('serial_number'),
                 ip_address=validated_data.get('ip_address'),
-                physical_location=validated_data.get('physical_location'),
                 firmware_version=validated_data.get('firmware_version'),
                 campus=validated_data.get('campus'),
                 name=validated_data.get('name'),
-                creation_date=validated_data.get('creation_date'),
-                calibration_date=validated_data.get('calibration_date'),
                 model=validated_data.get('model'),
                 geolocation_latitude=validated_data.get('geolocation_latitude'),
                 geolocation_longitude=validated_data.get(

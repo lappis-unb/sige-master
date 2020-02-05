@@ -175,7 +175,7 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
             for element in elements:
                 event = {}
                 event['id'] = element.pk
-                event['location'] = element.transductor.physical_location
+                event['location'] = element.transductor.name
                 event['campus'] = element.transductor.campus.acronym
                 event['transductor'] = element.transductor.serial_number
                 event['data'] = element.data
@@ -193,7 +193,7 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
             for transductor in transductors:
                 event = {}
                 event['id'] = element.pk
-                event['location'] = transductor.physical_location
+                event['location'] = transductor.name
                 event['campus'] = transductor.campus.acronym
                 event['transductor'] = element.transductor.serial_number
                 event['data'] = element.data

@@ -20,7 +20,7 @@ from rest_framework.request import Request
 import pytz
 
 
-class MeasurementsTestCase(TestCase):
+class GroupTestCase(TestCase):
     def setUp(self):
         self.factory = APIRequestFactory()
 
@@ -30,10 +30,7 @@ class MeasurementsTestCase(TestCase):
 
         self.campus = Campus.objects.create(
             name='UnB - Faculdade Gama',
-            acronym='FGA',
-            phone='(61) 3107-8901',
-            address='Área Especial de Indústria Projeção A',
-            website_address='http://fga.unb.br/'
+            acronym='FGA'
         )
 
         self.serializer_campus = CampusSerializer(
@@ -93,11 +90,10 @@ class MeasurementsTestCase(TestCase):
         params = {
             'serial_number': '8293010',
             'ip_address': '172.24.0.3',
-            'physical_location': 'ICC Sul',
             'geolocation_latitude': -48.04542,
             'geolocation_longitude': -15.989753,
             'firmware_version': '0.3',
-            'name': 'Medidor A',
+            'name': 'ICC Sul',
             'broken': True,
             'active': False,
             'campus': self.serializer_campus['url'],
@@ -117,11 +113,10 @@ class MeasurementsTestCase(TestCase):
         params = {
             'serial_number': '8293010',
             'ip_address': '172.24.0.3',
-            'physical_location': 'ICC Sul',
             'geolocation_latitude': -48.04542,
             'geolocation_longitude': -15.989753,
             'firmware_version': '0.3',
-            'name': 'Medidor A',
+            'name': 'ICC Sul',
             'broken': True,
             'active': False,
             'campus': self.serializer_campus['url'],
