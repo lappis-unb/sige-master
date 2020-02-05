@@ -125,6 +125,11 @@ DATABASES = {
     }
 }
 
+if env('ENVIRONMENT') == 'development':
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
@@ -221,5 +226,9 @@ MATERIAL_ADMIN_SITE = {
     # }
 }
 
-# debug configuration to view how emails are being sent
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# Using temp gmail account
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'unb.smi@gmail.com'
+EMAIL_HOST_PASSWORD = 'g^C4bN4nTDL}obv+'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
