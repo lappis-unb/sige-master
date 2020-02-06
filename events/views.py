@@ -195,18 +195,9 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
                 event['id'] = element.pk
                 event['location'] = transductor.name
                 event['campus'] = transductor.campus.acronym
-                event['transductor'] = element.transductor.serial_number
+                event['transductor'] = transductor.serial_number
                 event['data'] = element.data
-
-                time = (
-                    timezone.now() - timezone.timedelta(
-                        hours=element.created_at.hour,
-                        minutes=element.created_at.minute,
-                        seconds=element.created_at.second
-                    )
-                )
-
-                event['time'] = (time.hour * 60) + (time.minute)
+                event['time'] = element.created_at
                 slave_events.append(event)
 
         events['slave_connection_fail'] = slave_events
