@@ -196,7 +196,7 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
                 event['location'] = transductor.name
                 event['campus'] = transductor.campus.acronym
                 event['transductor'] = transductor.serial_number
-                event['data'] = { 'slave': element.slave.pk }
+                event['data'] = {'slave': element.slave.pk}
                 event['time'] = element.created_at
                 slave_events.append(event)
 
