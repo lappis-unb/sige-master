@@ -14,6 +14,7 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
             'geolocation_latitude',
             'geolocation_longitude',
             'campus',
+            'firmware_version',
             'name',
             'broken',
             'active',
@@ -22,10 +23,10 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
             'url'
         )
         read_only_fields = (
-            'creation_date',
-            'serial_number',
-            'active',
-            'broken'
+            # 'creation_date',
+            # 'serial_number',
+            # 'active',
+            # 'broken'
         )
 
     def update(self, instance, validated_data):
