@@ -76,7 +76,7 @@ class MeasurementsTestCase(TestCase):
             dht_current_b=8,
             dht_current_c=8,
             transductor=self.transductor,
-            collection_time=self.time
+            collection_date=self.time
         )
 
         self.factory = APIRequestFactory()

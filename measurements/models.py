@@ -1,11 +1,12 @@
 from django.db import models
+from django.utils import timezone
 from transductors.models import EnergyTransductor
 from polymorphic.models import PolymorphicModel
 from django.contrib.postgres.fields import ArrayField, HStoreField
 
 
 class Measurement(PolymorphicModel):
-    collection_time = models.DateTimeField(blank=False, null=False)
+    collection_date = models.DateTimeField(blank=False, null=False)
     transductor = models.ForeignKey(
         EnergyTransductor,
         related_name="%(app_label)s_%(class)s",
@@ -15,7 +16,7 @@ class Measurement(PolymorphicModel):
     )
 
     def __str__(self):
-        return '%s' % self.collection_time
+        return '%s' % self.collection_date
 
     class Meta:
         abstract = True

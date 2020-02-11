@@ -1,6 +1,6 @@
 from .api import *
 from django.db import models
-from datetime import datetime
+from django.utils.timezone import datetime
 from polymorphic.models import PolymorphicModel
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
@@ -15,6 +15,25 @@ class Transductor(PolymorphicModel):
         blank=False,
         null=False
     )
+
+    last_minutely_collection = models.DateTimeField(
+        blank=False, 
+        null=False,
+        default=datetime.now
+    )
+    
+    last_quarterly_collection = models.DateTimeField(
+        blank=False, 
+        null=False,
+        default=datetime.now
+    )
+    
+    last_monthly_collection = models.DateTimeField(
+        blank=False, 
+        null=False,
+        default=datetime.now
+    )
+
     ip_address = models.CharField(
         max_length=15,
         unique=True,
