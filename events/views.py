@@ -137,10 +137,21 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
 
     def list(self, request):
         serial_number = request.data.get('serial_number')
+        type = self.request.query_params.get('type')
 
-        self.queryset = Event.objects.filter(
-            ended_at__isnull=True
-        )
+        if type == 'period':
+            # Initially defined to be filtered for 3 days
+            now = timezone.now()
+            initial = now - timezone.timedelta(days=3)
+
+            self.queryset = Event.objects.filter(
+                created_at__gte=initial,
+                created_at__lte=now
+            )
+        else:
+            self.queryset = Event.objects.filter(
+                ended_at__isnull=True
+            )
 
         if serial_number:
             try:
@@ -164,18 +175,11 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
             for element in elements:
                 event = {}
                 event['id'] = element.pk
-                event['location'] = element.transductor.physical_location
+                event['location'] = element.transductor.name
                 event['campus'] = element.transductor.campus.acronym
+                event['transductor'] = element.transductor.serial_number
                 event['data'] = element.data
-
-                time = (
-                    timezone.now() - timezone.timedelta(
-                        hours=element.created_at.hour,
-                        minutes=element.created_at.minute,
-                        seconds=element.created_at.second
-                    )
-                )
-                event['time'] = (time.hour * 60) + (time.minute)
+                event['time'] = element.created_at
                 events[self.events[type]].append(event)
 
         elements = self.queryset.instance_of(FailedConnectionSlaveEvent)
@@ -189,19 +193,11 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
             for transductor in transductors:
                 event = {}
                 event['id'] = element.pk
-                event['location'] = transductor.physical_location
+                event['location'] = transductor.name
                 event['campus'] = transductor.campus.acronym
-                event['data'] = element.data
-
-                time = (
-                    timezone.now() - timezone.timedelta(
-                        hours=element.created_at.hour,
-                        minutes=element.created_at.minute,
-                        seconds=element.created_at.second
-                    )
-                )
-
-                event['time'] = (time.hour * 60) + (time.minute)
+                event['transductor'] = transductor.serial_number
+                event['data'] = {'slave': element.slave.pk}
+                event['time'] = element.created_at
                 slave_events.append(event)
 
         events['slave_connection_fail'] = slave_events

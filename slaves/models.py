@@ -7,10 +7,10 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from transductors.models import EnergyTransductor
 
-'''
+"""
     TODO Make get all measurements and list
     transductor models methods
-'''
+"""
 
 
 class Slave(models.Model):
@@ -79,7 +79,7 @@ class Slave(models.Model):
         if old_status is True and new_status is False:
             try:
                 related_event = FailedConnectionSlaveEvent.objects.filter(
-                    transductor=self,
+                    slave=self,
                     ended_at__isnull=True
                 ).last()
                 related_event.ended_at = timezone.now()
