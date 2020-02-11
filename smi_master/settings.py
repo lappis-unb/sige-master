@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'events',
     'rosetta',
+    'groups',
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True

@@ -14,9 +14,10 @@ from transductors import views as energy_transductor_views
 
 from slaves import views as slaves_views
 from measurements import urls as measurements_routes
+from events import urls as events_routes
+from groups import urls as groups_routes
 
 from .views import login
-
 
 router = DefaultRouter()
 router.register(r'campi', campi_views.CampusViewSet)
@@ -29,6 +30,7 @@ router.register(
 
 router.registry.extend(measurements_routes.router.registry)
 router.registry.extend(events_routes.router.registry)
+router.registry.extend(groups_routes.router.registry)
 
 # django-admin custom titles
 # admin.site.index_title = _('')

@@ -10,6 +10,8 @@ from polymorphic.models import PolymorphicModel
 
 from .api import *
 from campi.models import Campus
+from groups.models import Group
+from django.utils.translation import gettext_lazy as _
 
 
 class Transductor(PolymorphicModel):
@@ -95,6 +97,12 @@ class Transductor(PolymorphicModel):
         help_text=_('This field is required')
     )
 
+    grouping = models.ManyToManyField(
+        Group,
+        verbose_name=_('Grouping'),
+        help_text=_('This field is required')
+    )
+
     class Meta:
         abstract = True
         verbose_name = _('Meter')
@@ -108,7 +116,6 @@ class Transductor(PolymorphicModel):
 
     def update(self, *args, **kwargs):
         self.full_clean()
-
         failed = False
 
         for slave in self.slave_servers.all():

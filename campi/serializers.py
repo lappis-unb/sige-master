@@ -6,4 +6,4 @@ from .models import Campus
 class CampusSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Campus
-        fields = ('id', 'name', 'acronym')
+        fields = ('id', 'name', 'acronym', 'url')
