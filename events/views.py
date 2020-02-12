@@ -179,7 +179,8 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
                 event['campus'] = element.transductor.campus.acronym
                 event['transductor'] = element.transductor.serial_number
                 event['data'] = element.data
-                event['time'] = element.created_at
+                event['start_time'] = element.created_at
+                event['end_time'] = element.ended_at
                 events[self.events[type]].append(event)
 
         elements = self.queryset.instance_of(FailedConnectionSlaveEvent)
@@ -197,7 +198,8 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
                 event['campus'] = transductor.campus.acronym
                 event['transductor'] = transductor.serial_number
                 event['data'] = {'slave': element.slave.pk}
-                event['time'] = element.created_at
+                event['start_time'] = element.created_at
+                event['end_time'] = element.ended_at
                 slave_events.append(event)
 
         events['slave_connection_fail'] = slave_events
