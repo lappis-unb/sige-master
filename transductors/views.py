@@ -9,8 +9,11 @@ from rest_framework import serializers, viewsets, permissions
 from .api import *
 from slaves.models import Slave
 from .models import EnergyTransductor
-from .serializers import EnergyTransductorSerializer, AddToServerSerializer
+from .serializers import EnergyTransductorSerializer, AddToServerSerializer, EnergyTransductorListSerializer
 
+from django.utils import timezone
+
+from rest_framework import mixins
 
 class EnergyTransductorViewSet(viewsets.ModelViewSet):
     queryset = EnergyTransductor.objects.all()
@@ -30,3 +33,30 @@ class EnergyTransductorViewSet(viewsets.ModelViewSet):
         else:
             return Response(data=serializer.errors,
                             status=status.HTTP_400_BAD_REQUEST)
+
+
+class EnergyTransductorListViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin, mixins.ListModelMixin):
+    serializer_class = EnergyTransductorListSerializer
+    
+    def get_queryset(self):
+        transductors = EnergyTransductor.objects.all()
+        transductorList = []
+        for transductor in transductors:
+            crit = transductor.events_failedconnectiontransductorevent.filter(ended_at__isnull=True).count()
+            prec = transductor.events_voltagerelatedevent.filter(ended_at__isnull=True).count()
+            last72h = transductor.events_failedconnectiontransductorevent.filter(
+              created_at__range=[timezone.now() - timezone.timedelta(days=3), timezone.now()]).count()
+            last72h = last72h + transductor.events_voltagerelatedevent.filter(
+                created_at__range=[timezone.now() - timezone.timedelta(days=3), timezone.now()]).count()
+            transductorInformation = {
+                'campus': transductor.campus.name,
+                'name': transductor.name,
+                'active': transductor.active,
+                'model': transductor.model,
+                'grouping': transductor.grouping.all(),
+                'current_precarious_events_count': prec,
+                'current_critical_events_count': crit,
+                'events_last72h': last72h
+            }
+            transductorList.append(transductorInformation)
+        return transductorList
