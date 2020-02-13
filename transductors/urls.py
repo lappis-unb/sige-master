@@ -6,7 +6,8 @@ app_name = "transductors"
 
 router = routers.DefaultRouter()
 router.register(r'energy-transductors', EnergyTransductorViewSet)
-router.register(r'energy-transductors-list', EnergyTransductorListViewSet, basename='energy-transductor-list')
+router.register(r'energy-transductors-list', 
+                EnergyTransductorListViewSet,
+                basename='energy-transductor-list')
 
 urlpatterns = []
-
