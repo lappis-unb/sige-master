@@ -1,6 +1,7 @@
 from django.utils import timezone
 import numpy as np
 import os
+import csv
 from .lttb import downsample
 
 from django.db.models.query import QuerySet
@@ -10,6 +11,8 @@ from rest_framework import viewsets
 from rest_framework import mixins
 
 from rest_framework.exceptions import APIException
+
+from rest_framework.decorators import api_view
 
 from transductors.models import EnergyTransductor
 
@@ -29,6 +32,9 @@ from .serializers import QuarterlyMeasurementSerializer
 from .serializers import MonthlyMeasurementSerializer
 from .serializers import QuarterlySerializer
 from .serializers import RealTimeMeasurementSerializer
+
+from django.http import StreamingHttpResponse
+from django.utils.translation import ugettext as _
 
 
 #  this viewset don't inherits from viewsets.ModelViewSet because it
@@ -425,3 +431,33 @@ class TotalConsumtionViewSet(QuarterlyMeasurementViewSet):
 class RealTimeMeasurementViewSet(MeasurementViewSet):
     serializer_class = RealTimeMeasurementSerializer
     queryset = RealTimeMeasurement.objects.select_related('transductor').all()
+
+
+class Echo:
+    def write(self, value):
+        return value
+
+class MeasurementResults(mixins.RetrieveModelMixin,
+                         mixins.ListModelMixin,
+                         viewsets.GenericViewSet):
+
+    @api_view(['GET'])
+    def csv_results(request):
+        fields = (_('transductor'), _('collection_time'), _('voltage_a'),
+                  _('voltage_b'), _('voltage_c'))
+
+        queryset = list(MinutelyMeasurement.objects.all().values_list(*fields))
+        queryset.insert(0, fields)
+        pseudo_buffer = Echo()
+
+        writer = csv.writer(pseudo_buffer)
+
+        response = StreamingHttpResponse(
+            (writer.writerow(measurement) for measurement in queryset),
+            content_type='text/csv'
+        )
+        response['Content-Disposition'] = (
+            'attachment; filename="minutely_measurement_dataset.csv"'
+        )
+
+        return response
