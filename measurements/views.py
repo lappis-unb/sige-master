@@ -444,6 +444,11 @@ class MeasurementResults(mixins.RetrieveModelMixin,
                          viewsets.GenericViewSet):
     @api_view(['GET'])
     def minutely_results(request):
+        all_fields = {
+            measurement.name: measurement.verbose_name
+            for measurement in MinutelyMeasurement._meta.get_fields()
+        }
+
         fields = request.query_params.get('fields')
         start_date = request.query_params.get('start_date')
         if start_date is None:
@@ -463,17 +468,25 @@ class MeasurementResults(mixins.RetrieveModelMixin,
         )
 
         if columns:
-            queryset.insert(0, columns)
+            queryset.insert(
+                0,
+                [
+                    all_fields[column] for column in columns
+                    if column in all_fields
+                ]
+            )
         else:
             queryset.insert(
                 0,
                 [
-                    measurement.name for measurement
-                    in MinutelyMeasurement._meta.get_fields()
+                    measurement.verbose_name
+                    for measurement in MinutelyMeasurement._meta.get_fields()
                 ]
             )
 
         pseudo_buffer = Echo()
+        import codecs
+        pseudo_buffer.write(codecs.BOM_UTF8)
 
         writer = csv.writer(pseudo_buffer)
 
@@ -484,5 +497,6 @@ class MeasurementResults(mixins.RetrieveModelMixin,
         response['Content-Disposition'] = (
             'attachment; filename="minutely_measurement_dataset.csv"'
         )
+        response['Content-Transfer-Encoding'] = 'binary'
 
         return response
