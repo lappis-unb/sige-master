@@ -11,6 +11,7 @@ from rest_framework import viewsets
 from rest_framework import mixins
 
 from rest_framework.exceptions import APIException
+from rest_framework.exceptions import NotAcceptable
 
 from rest_framework.decorators import api_view
 
@@ -437,17 +438,41 @@ class Echo:
     def write(self, value):
         return value
 
+
 class MeasurementResults(mixins.RetrieveModelMixin,
                          mixins.ListModelMixin,
                          viewsets.GenericViewSet):
-
     @api_view(['GET'])
-    def csv_results(request):
-        fields = (_('transductor'), _('collection_time'), _('voltage_a'),
-                  _('voltage_b'), _('voltage_c'))
+    def minutely_results(request):
+        fields = request.query_params.get('fields')
+        start_date = request.query_params.get('start_date')
+        if start_date is None:
+            raise NotAcceptable(
+                'Start date param is needed to create the csv file.'
+            )
 
-        queryset = list(MinutelyMeasurement.objects.all().values_list(*fields))
-        queryset.insert(0, fields)
+        if fields is not None:
+            columns = fields.split(',')
+        else:
+            columns = []
+
+        queryset = list(
+            MinutelyMeasurement.objects.filter(
+                collection_time__gte=start_date
+            ).values_list(*columns)
+        )
+
+        if columns:
+            queryset.insert(0, columns)
+        else:
+            queryset.insert(
+                0,
+                [
+                    measurement.name for measurement
+                    in MinutelyMeasurement._meta.get_fields()
+                ]
+            )
+
         pseudo_buffer = Echo()
 
         writer = csv.writer(pseudo_buffer)
