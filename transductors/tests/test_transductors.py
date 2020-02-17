@@ -14,22 +14,17 @@ class TransductorTestCase(TestCase):
         self.campus = Campus.objects.create(
             name='UnB - Faculdade Gama',
             acronym='FGA',
-            phone='(61) 3107-8901',
-            address='Área Especial de Indústria Projeção A',
-            website_address='http://fga.unb.br/'
         )
 
         self.sample_energy_transductor = EnergyTransductor.objects.create(
             serial_number='87654321',
             ip_address='192.168.1.1',
-            physical_location="MESP",
             geolocation_latitude=20.1,
             geolocation_longitude=37.9,
             name="MESP 1",
             broken=True,
             active=False,
             creation_date=timezone.now(),
-            calibration_date=timezone.now(),
             firmware_version='0.1',
             model='EnergyTransductorModel',
             campus=self.campus
@@ -47,14 +42,13 @@ class TransductorTestCase(TestCase):
         transductor = EnergyTransductor.objects.create(
             serial_number='12345678',
             ip_address='192.168.10.10',
-            physical_location="MESP",
+            port=1001,
             geolocation_latitude=20.1,
             geolocation_longitude=37.9,
             name="MESP 2",
             broken=False,
             active=True,
             creation_date=timezone.now(),
-            calibration_date=timezone.now(),
             firmware_version='0.1',
             model='EnergyTransductorModel',
             campus=self.campus
@@ -73,14 +67,12 @@ class TransductorTestCase(TestCase):
             transductor = EnergyTransductor.objects.create(
                 serial_number='87654321',
                 ip_address='192.168.10.10',
-                physical_location="MESP",
                 geolocation_latitude=20.1,
                 geolocation_longitude=37.9,
                 name="MESP 2",
                 broken=False,
                 active=True,
                 creation_date=timezone.now(),
-                calibration_date=timezone.now(),
                 firmware_version='0.1',
                 model='EnergyTransductorModel',
                 campus=self.campus
@@ -94,14 +86,12 @@ class TransductorTestCase(TestCase):
         with self.assertRaises(ValidationError):
             transductor = EnergyTransductor.objects.create(
                 ip_address='192.168.10.10',
-                physical_location="MESP",
                 geolocation_latitude=20.1,
                 geolocation_longitude=37.9,
                 name="MESP 2",
                 broken=False,
                 active=True,
                 creation_date=timezone.now(),
-                calibration_date=timezone.now(),
                 firmware_version='0.1',
                 model='EnergyTransductorModel',
                 campus=self.campus
@@ -116,7 +106,6 @@ class TransductorTestCase(TestCase):
             transductor = EnergyTransductor.objects.create(
                 serial_number='87554321',
                 ip_address='192.168.10.10',
-                physical_location="MESP",
                 geolocation_latitude=20.1,
                 geolocation_longitude=37.9,
                 name="MESP 2",
@@ -124,7 +113,6 @@ class TransductorTestCase(TestCase):
                 active=True,
                 creation_date=timezone.now(),
                 firmware_version='0.1',
-                calibration_date=timezone.now(),
                 campus=self.campus
             )
 
@@ -144,7 +132,6 @@ class TransductorTestCase(TestCase):
             transductor.update(
                 serial_number='88888888',
                 ip_address='192.168.10.12',
-                physical_location="UED",
                 geolocation_latitude=20.2,
                 geolocation_longitude=37.0,
                 name="UED 1",
@@ -152,7 +139,6 @@ class TransductorTestCase(TestCase):
                 active=False,
                 creation_date=timezone.now(),
                 firmware_version='0.1',
-                calibration_date=timezone.now(),
                 campus=self.campus
             )
         )
@@ -161,14 +147,12 @@ class TransductorTestCase(TestCase):
         EnergyTransductor.objects.create(
             serial_number='12345678',
             ip_address='192.168.10.10',
-            physical_location="MESP",
             geolocation_latitude=20.1,
             geolocation_longitude=37.9,
             name="MESP 2",
             broken=False,
             active=True,
             creation_date=timezone.now(),
-            calibration_date=timezone.now(),
             firmware_version='0.1',
             model='EnergyTransductorModel',
             campus=self.campus
@@ -180,7 +164,6 @@ class TransductorTestCase(TestCase):
             transductor.update(
                 serial_number='12345678',
                 ip_address='192.168.10.12',
-                physical_location="UED",
                 geolocation_latitude=20.2,
                 geolocation_longitude=37.0,
                 name="UED 1",
@@ -188,7 +171,6 @@ class TransductorTestCase(TestCase):
                 active=False,
                 creation_date=timezone.now(),
                 firmware_version='0.1',
-                calibration_date=timezone.now(),
                 campus=self.campus
             )
 
