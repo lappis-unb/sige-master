@@ -407,7 +407,6 @@ class ConsumptionPeakViewSet(QuarterlyMeasurementViewSet):
     serializer_class = QuarterlySerializer
     fields = ['consumption_peak_time']
 
-
 class ConsumptionOffPeakViewSet(QuarterlyMeasurementViewSet):
     serializer_class = QuarterlySerializer
     fields = ['consumption_off_peak_time']
@@ -430,4 +429,20 @@ class TotalConsumtionViewSet(QuarterlyMeasurementViewSet):
 
 class RealTimeMeasurementViewSet(MeasurementViewSet):
     serializer_class = RealTimeMeasurementSerializer
-    queryset = RealTimeMeasurement.objects.select_related('transductor').all()
+
+    def get_queryset(self):
+        serial_number = self.request.query_params.get('serial_number')
+        if serial_number:
+            try:
+                transductor = EnergyTransductor.objects.get(serial_number=serial_number)
+                queryset = RealTimeMeasurement.objects.filter(transductor=transductor)
+            except:
+                exception = APIException(
+                    serial_number,
+                    _('This serial_number does not match with any Transductor'),
+                )
+                exception.status_code = 400
+                raise exception
+        else:
+            queryset = RealTimeMeasurement.objects.all()
+        return queryset

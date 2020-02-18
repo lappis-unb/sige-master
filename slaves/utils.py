@@ -86,16 +86,28 @@ class DataCollector():
             active_max_power_list_peak_time=(
                 msm['active_max_power_list_peak_time']
             ),
+            active_max_power_list_peak=(
+                msm['active_max_power_list_peak']
+            ),
             active_max_power_list_off_peak_time=(
                 msm['active_max_power_list_off_peak_time']
+            ),
+            active_max_power_list_off_peak=(
+                msm['active_max_power_list_off_peak']
             ),
             reactive_max_power_list_peak_time=(
                 msm['reactive_max_power_list_peak_time']
             ),
+            reactive_max_power_list_peak=(
+                msm['reactive_max_power_list_peak']
+            ),
             reactive_max_power_list_off_peak_time=(
                 msm['reactive_max_power_list_off_peak_time']
             ),
-            collection_date=msm['collection_date'],
+            reactive_max_power_list_off_peak=(
+                msm['reactive_max_power_list_off_peak']
+            ),
+            collection_date=msm['transductor_collection_date'],
             transductor_id=transductor.serial_number
         )
 
@@ -251,7 +263,8 @@ class DataCollector():
             measurement.total_power_factor = msm['total_power_factor']
             measurement.transductor = transductor
             measurement.collection_date = datetime.strptime(
-                msm['collection_date'], '%Y-%m-%dT%H:%M:%S'
+                msm['transductor_collection_date'], 
+                '%Y-%m-%dT%H:%M:%S.%f'
             )
 
             measurement.save()
@@ -268,7 +281,8 @@ class DataCollector():
                 total_power_factor=msm['total_power_factor'],
                 transductor=transductor,
                 collection_date=datetime.strptime(
-                    msm['collection_date'], '%Y-%m-%dT%H:%M:%S'
+                    msm['transductor_collection_date'],
+                    '%Y-%m-%dT%H:%M:%S.%f'
                 )
             )
 
@@ -342,8 +356,8 @@ class DataCollector():
                             msm, transductor
                         )
                         # except Exception:
-                            # pass
-                    
+                        # pass
+
                     transductor.last_quarterly_collection = collection_date
                     transductor.save()
 
@@ -360,12 +374,12 @@ class DataCollector():
 
                     for msm in measurements:
                         # Create MonthlyMeasurement object
-                        try:
-                            DataCollector.build_monthly_measurements(
-                                msm, transductor
-                            )
-                        except Exception:
-                            pass
-                    
+                        # try:
+                        DataCollector.build_monthly_measurements(
+                            msm, transductor
+                        )
+                        # except Exception:
+                        #     pass
+
                     transductor.last_monthly_collection = collection_date
                     transductor.save()
