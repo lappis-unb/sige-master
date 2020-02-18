@@ -10,7 +10,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('id', 'email', 'username', 'password')
 
     def create(self, validated_data):
-        user = models.CustomUser(
+        user = User(
             username=validated_data.get('username', None),
             email=validated_data.get('email', None),
         )
@@ -26,3 +26,4 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
                 instance.__setattr__(field, validated_data.get(field))
         instance.save()
         return instance
+
