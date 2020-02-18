@@ -139,7 +139,6 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
         serial_number = self.request.query_params.get('serial_number')
         type = self.request.query_params.get('type')
 
-
         if type == 'period':
             # Initially defined to be filtered for 3 days
             now = timezone.now()
@@ -250,8 +249,7 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
 
         if period is not None and range is not None:
             queryset = class_instance.objects.filter(
-                Q(ended_at__isnull=True) |
-                Q(ended_at__range=range)
+                Q(ended_at__isnull=True) | Q(ended_at__range=range)
             )
         else:
             queryset = class_instance.objects.filter(
