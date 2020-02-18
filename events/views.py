@@ -220,9 +220,16 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
         slave_events = []
 
         for element in failed_connection_slave_events:
-            transductors = (
-                element.slave.transductors.select_related('campus').all()
-            )
+            if serial_number:
+                transductors = (
+                    element.slave.transductors.select_related('campus').filter(
+                        serial_number=serial_number
+                    )
+                )
+            else:
+                transductors = (
+                    element.slave.transductors.select_related('campus').all()
+                )
             for transductor in transductors:
                 event = {}
                 event['id'] = element.pk
