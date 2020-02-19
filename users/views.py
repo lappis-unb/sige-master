@@ -9,6 +9,7 @@ from rest_framework.decorators import permission_classes
 from .serializers import *
 from .models import CustomUser
 
+
 class CurrentUserOnly(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method == 'POST':
@@ -25,4 +26,4 @@ class CurrentUserOnly(permissions.BasePermission):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [permissions.IsAdminUser|CurrentUserOnly]
+    permission_classes = [permissions.IsAdminUser | CurrentUserOnly]
