@@ -99,29 +99,41 @@ class MeasurementsTestCase(TestCase):
             active_max_power_off_peak_time=8,
             reactive_max_power_peak_time=8,
             reactive_max_power_off_peak_time=8,
+            active_max_power_list_peak=[
+                0.0, 0.0, 0.0, 0.0
+            ],
             active_max_power_list_peak_time=[
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"}
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0)
+            ],
+            active_max_power_list_off_peak=[
+                0.0, 0.0, 0.0, 0.0
             ],
             active_max_power_list_off_peak_time=[
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"}
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0)
+            ],
+            reactive_max_power_list_peak=[
+                0.0, 0.0, 0.0, 0.0
             ],
             reactive_max_power_list_peak_time=[
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"}
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0)
+            ],
+            reactive_max_power_list_off_peak=[
+                0.0, 0.0, 0.0, 0.0,
             ],
             reactive_max_power_list_off_peak_time=[
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"}
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0)
             ],
             transductor=self.transductor,
             collection_date=self.time
@@ -241,29 +253,41 @@ class MeasurementsTestCase(TestCase):
             active_max_power_off_peak_time=8,
             reactive_max_power_peak_time=8,
             reactive_max_power_off_peak_time=8,
+            active_max_power_list_peak=[
+                0.0, 0.0, 0.0, 0.0
+            ],
             active_max_power_list_peak_time=[
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"}
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0)
+            ],
+            active_max_power_list_off_peak=[
+                0.0, 0.0, 0.0, 0.0
             ],
             active_max_power_list_off_peak_time=[
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"}
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0)
+            ],
+            reactive_max_power_list_peak=[
+                0.0, 0.0, 0.0, 0.0
             ],
             reactive_max_power_list_peak_time=[
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"}
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0)
+            ],
+            reactive_max_power_list_off_peak=[
+                0.0, 0.0, 0.0, 0.0,
             ],
             reactive_max_power_list_off_peak_time=[
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"}
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0)
             ],
             transductor=self.transductor,
             collection_date=timezone.now()
