@@ -7,7 +7,7 @@ from rest_framework.decorators import api_view
 from rest_framework.decorators import permission_classes
 
 from .serializers import *
-from django.contrib.auth.models import User
+from .models import CustomUser
 
 class CurrentUserOnly(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -19,10 +19,10 @@ class CurrentUserOnly(permissions.BasePermission):
             userid = int(userid)
         except Exception:
             return False
-        return request.user == User.objects.get(id=userid)
+        return request.user == CustomUser.objects.get(id=userid)
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
+    queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAdminUser|CurrentUserOnly]
