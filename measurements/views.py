@@ -59,7 +59,6 @@ class MeasurementViewSet(mixins.RetrieveModelMixin,
             params['serial_number'] = serial_number
         transductor = None
 
-
         MeasurementParamsValidator.validate_query_params(params)
 
         try:
@@ -80,6 +79,7 @@ class MeasurementViewSet(mixins.RetrieveModelMixin,
             )
 
         return self.mount_data_list(transductor)
+
 
 class MinutelyMeasurementViewSet(MeasurementViewSet):
     model = MinutelyMeasurement
@@ -407,6 +407,7 @@ class ConsumptionPeakViewSet(QuarterlyMeasurementViewSet):
     serializer_class = QuarterlySerializer
     fields = ['consumption_peak_time']
 
+
 class ConsumptionOffPeakViewSet(QuarterlyMeasurementViewSet):
     serializer_class = QuarterlySerializer
     fields = ['consumption_off_peak_time']
@@ -434,9 +435,11 @@ class RealTimeMeasurementViewSet(MeasurementViewSet):
         serial_number = self.request.query_params.get('serial_number')
         if serial_number:
             try:
-                transductor = EnergyTransductor.objects.get(serial_number=serial_number)
-                queryset = RealTimeMeasurement.objects.filter(transductor=transductor)
-            except:
+                transductor = EnergyTransductor.objects.get(
+                    serial_number=serial_number)
+                queryset = RealTimeMeasurement.objects.filter(
+                    transductor=transductor)
+            except Exception:
                 exception = APIException(
                     serial_number,
                     _('This serial_number does not match with any Transductor'),
