@@ -89,8 +89,8 @@ class MeasurementsTestCase(TestCase):
             self.client.get(
                 '/graph/minutely-active-power/'
                 '?serial_number=12345678'
-                '&start_date=2000-01-01 00:00'
-                '&end_date=2000-01-01 23:59'
+                '&start_date=2000-01-01 00:00:00'
+                '&end_date=2000-01-01 23:59:00'
             ).status_code,
             200)
 

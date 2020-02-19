@@ -12,6 +12,7 @@ web_site_validator = RegexValidator(
     'Invalid website format'
 )
 
+
 class ValidationException(Exception):
     def __init__(self, message):
         super(ValidationException, self).__init__(message)

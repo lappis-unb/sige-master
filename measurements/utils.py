@@ -6,7 +6,6 @@ from transductors.models import EnergyTransductor
 from utils import ValidationException
 
 
-
 class MeasurementParamsValidator(): 
 
     @staticmethod
@@ -36,7 +35,7 @@ class MeasurementParamsValidator():
             _('This serial_number does not match with any Transductor'),
         )
         exception.status_code = 400
-        if len(errors) != 0 :
+        if len(errors) != 0:
             raise exception
 
     @staticmethod
@@ -50,12 +49,11 @@ class MeasurementParamsValidator():
 
     @staticmethod
     def validate_start_date(start_date):
-        try:        
+        try:
             timezone.datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S")
         except ValueError:
             message = 'The start_date param must be a valid date in '
-            message +=  'the format YYYY-MM-DD HH:MM:SS'
-            print(start_date)
+            message += 'the format YYYY-MM-DD HH:MM:SS'
             raise ValidationException(
                 _(message),
             )
@@ -66,7 +64,7 @@ class MeasurementParamsValidator():
             timezone.datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")
         except ValueError:
             message = 'The end_date param must be a valid date in '
-            message +=  'the format YYYY-MM-DD HH:MM:SS'
+            message += 'the format YYYY-MM-DD HH:MM:SS'
             raise ValidationException(
                 _(message),
             )
