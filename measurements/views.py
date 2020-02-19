@@ -13,7 +13,7 @@ from rest_framework.exceptions import APIException
 
 from transductors.models import EnergyTransductor
 
-from measurements import utils as validations
+from measurements.utils import MeasurementParamsValidator
 
 from .models import Measurement
 from .models import MinutelyMeasurement
@@ -41,26 +41,26 @@ class MeasurementViewSet(mixins.RetrieveModelMixin,
     model = None
     fields = []
 
-
-class MinutelyMeasurementViewSet(MeasurementViewSet):
-    model = MinutelyMeasurement
-    queryset = MinutelyMeasurement.objects.none()
-    serializer_class = MinutelyMeasurementSerializer
-    fields = []
-
     def get_queryset(self):
+        params = {}
         start_date = self.request.query_params.get('start_date')
+        if start_date:
+            params['start_date'] = start_date
         end_date = self.request.query_params.get('end_date')
+        if end_date:
+            params['end_date'] = end_date
+        else:
+            end_date = timezone.now()
+            end_date = end_date.strftime("%Y-%m-%d %H:%M:%S")
+            params['end_date'] = str(end_date)
+
         serial_number = self.request.query_params.get('serial_number')
+        if serial_number:
+            params['serial_number'] = serial_number
         transductor = None
 
-        params = [
-            {'name': 'start_date', 'value': start_date},
-            {'name': 'end_date', 'value': end_date},
-            {'name': 'serial_number', 'value': serial_number}
-        ]
 
-        validations.validate_query_params(params)
+        MeasurementParamsValidator.validate_query_params(params)
 
         try:
             transductor = EnergyTransductor.objects.get(
@@ -68,10 +68,10 @@ class MinutelyMeasurementViewSet(MeasurementViewSet):
             )
             self.queryset = self.model.objects.filter(
                 transductor=transductor,
-                collection_time__gte=start_date,
-                collection_time__lte=end_date
+                collection_date__gte=start_date,
+                collection_date__lte=end_date
             ).order_by(
-                'collection_time'
+                'collection_date'
             )
         except EnergyTransductor.DoesNotExist:
             raise APIException(
@@ -80,6 +80,12 @@ class MinutelyMeasurementViewSet(MeasurementViewSet):
             )
 
         return self.mount_data_list(transductor)
+
+class MinutelyMeasurementViewSet(MeasurementViewSet):
+    model = MinutelyMeasurement
+    queryset = MinutelyMeasurement.objects.none()
+    serializer_class = MinutelyMeasurementSerializer
+    fields = []
 
     def mount_data_list(self, transductor):
         minutely_measurements = []
@@ -105,7 +111,7 @@ class MinutelyMeasurementViewSet(MeasurementViewSet):
             list_c = self.apply_filter(self.fields[2])
         else:
             list_a = self.queryset.values_list(
-                self.fields[0], 'collection_time'
+                self.fields[0], 'collection_date'
             )
             list_a = (
                 [
@@ -114,7 +120,7 @@ class MinutelyMeasurementViewSet(MeasurementViewSet):
                 ]
             )
             list_b = self.queryset.values_list(
-                self.fields[1], 'collection_time'
+                self.fields[1], 'collection_date'
             )
             list_b = (
                 [
@@ -123,7 +129,7 @@ class MinutelyMeasurementViewSet(MeasurementViewSet):
                 ]
             )
             list_c = self.queryset.values_list(
-                self.fields[2], 'collection_time'
+                self.fields[2], 'collection_date'
             )
             list_c = (
                 [
@@ -147,7 +153,7 @@ class MinutelyMeasurementViewSet(MeasurementViewSet):
             list_measurement = self.apply_filter(self.fields[0])
         else:
             list_measurement = self.queryset.values_list(
-                self.fields[0], 'collection_time'
+                self.fields[0], 'collection_date'
             )
 
         minutely_measurements = {}
@@ -158,7 +164,7 @@ class MinutelyMeasurementViewSet(MeasurementViewSet):
 
     def apply_filter(self, value):
         filtered_values = self.queryset.values(
-            value, 'collection_time'
+            value, 'collection_date'
         )
         indexes = range(len(filtered_values))
         filtered_values = (
@@ -166,7 +172,7 @@ class MinutelyMeasurementViewSet(MeasurementViewSet):
                 [
                     counter,
                     item[value],
-                    timezone.datetime.timestamp(item['collection_time'])
+                    timezone.datetime.timestamp(item['collection_date'])
                 ]
                 for counter, item in zip(indexes, filtered_values)
             ]
@@ -196,38 +202,38 @@ class QuarterlyMeasurementViewSet(MeasurementViewSet):
     queryset = QuarterlyMeasurement.objects.none()
     serializer_class = QuarterlyMeasurementSerializer
 
-    def get_queryset(self):
-        start_date = self.request.query_params.get('start_date')
-        end_date = self.request.query_params.get('end_date')
+    # def get_queryset(self):
+    #     start_date = self.request.query_params.get('start_date')
+    #     end_date = self.request.query_params.get('end_date')
 
-        params = [
-            {'name': 'start_date', 'value': start_date},
-            {'name': 'end_date', 'value': end_date}
-        ]
+    #     params = [
+    #         {'name': 'start_date', 'value': start_date},
+    #         {'name': 'end_date', 'value': end_date}
+    #     ]
 
-        validations.validate_query_params(params)
+    #     validations.validate_query_params(params)
 
-        try:
-            self.queryset = self.model.objects.filter(
-                collection_time__gte=start_date,
-                collection_time__lte=end_date
-            ).order_by(
-                'collection_time'
-            )
-        except EnergyTransductor.DoesNotExist:
-            raise APIException(
-                'Serial number field does not match '
-                'any existent EnergyTransductor.'
-            )
+    #     try:
+    #         self.queryset = self.model.objects.filter(
+    #             collection_date__gte=start_date,
+    #             collection_date__lte=end_date
+    #         ).order_by(
+    #             'collection_date'
+    #         )
+    #     except EnergyTransductor.DoesNotExist:
+    #         raise APIException(
+    #             'Serial number field does not match '
+    #             'any existent EnergyTransductor.'
+    #         )
 
-        return self.mount_data_list()
+    #     return self.mount_data_list()
 
     def mount_data_list(self, transductor=[]):
         total_consumption_per_hour = []
 
         for field in self.fields:
             measurements = self.queryset.values(
-                field, 'collection_time'
+                field, 'collection_date'
             )
 
             if measurements:
@@ -242,15 +248,15 @@ class QuarterlyMeasurementViewSet(MeasurementViewSet):
         measurements_list = (
             [
                 [
-                    measurements[0]['collection_time'],
+                    measurements[0]['collection_date'],
                     measurements[0][field],
                 ]
             ]
         )
 
         for i in range(1, len(measurements) - 1):
-            actual = measurements[i]['collection_time']
-            last = measurements[i - 1]['collection_time']
+            actual = measurements[i]['collection_date']
+            last = measurements[i - 1]['collection_date']
 
             if actual.minute < 15:
                 answer_hour = actual.hour
@@ -401,7 +407,6 @@ class ConsumptionPeakViewSet(QuarterlyMeasurementViewSet):
     serializer_class = QuarterlySerializer
     fields = ['consumption_peak_time']
 
-
 class ConsumptionOffPeakViewSet(QuarterlyMeasurementViewSet):
     serializer_class = QuarterlySerializer
     fields = ['consumption_off_peak_time']
@@ -424,4 +429,20 @@ class TotalConsumtionViewSet(QuarterlyMeasurementViewSet):
 
 class RealTimeMeasurementViewSet(MeasurementViewSet):
     serializer_class = RealTimeMeasurementSerializer
-    queryset = RealTimeMeasurement.objects.select_related('transductor').all()
+
+    def get_queryset(self):
+        serial_number = self.request.query_params.get('serial_number')
+        if serial_number:
+            try:
+                transductor = EnergyTransductor.objects.get(serial_number=serial_number)
+                queryset = RealTimeMeasurement.objects.filter(transductor=transductor)
+            except:
+                exception = APIException(
+                    serial_number,
+                    _('This serial_number does not match with any Transductor'),
+                )
+                exception.status_code = 400
+                raise exception
+        else:
+            queryset = RealTimeMeasurement.objects.all()
+        return queryset

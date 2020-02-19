@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 from transductors.models import EnergyTransductor
 from polymorphic.models import PolymorphicModel
 from django.contrib.postgres.fields import ArrayField, HStoreField
@@ -6,7 +7,7 @@ from django.utils.translation import gettext_lazy as _
 
 
 class Measurement(PolymorphicModel):
-    collection_time = models.DateTimeField(
+    collection_date = models.DateTimeField(
         blank=False,
         null=False,
         verbose_name=_('Collection time'),
@@ -23,7 +24,7 @@ class Measurement(PolymorphicModel):
     )
 
     def __str__(self):
-        return '%s' % self.collection_time
+        return '%s' % self.collection_date
 
     class Meta:
         abstract = True
@@ -226,92 +227,57 @@ class QuarterlyMeasurement(Measurement):
 
 
 class MonthlyMeasurement(Measurement):
-    class Meta:
-        verbose_name = _('Monthly measurement')
+    def __str__(self):
+        return '%s' % self.collection_date
 
-    generated_energy_peak_time = models.FloatField(
-        default=0,
-        verbose_name=_('Generated energy on peak hours')
-    )
+    generated_energy_peak_time = models.FloatField(default=0)
+    generated_energy_off_peak_time = models.FloatField(default=0)
 
-    generated_energy_off_peak_time = models.FloatField(
-        default=0,
-        verbose_name=_('Generated energy not on peak hours')
-    )
+    consumption_peak_time = models.FloatField(default=0)
+    consumption_off_peak_time = models.FloatField(default=0)
 
-    consumption_peak_time = models.FloatField(
-        default=0,
-        verbose_name=_('Consumption on peak hours')
-    )
+    inductive_power_peak_time = models.FloatField(default=0)
+    inductive_power_off_peak_time = models.FloatField(default=0)
 
-    consumption_off_peak_time = models.FloatField(
-        default=0,
-        verbose_name=_('Consumption not on peak hours')
-    )
+    capacitive_power_peak_time = models.FloatField(default=0)
+    capacitive_power_off_peak_time = models.FloatField(default=0)
 
-    inductive_power_peak_time = models.FloatField(
-        default=0,
-        verbose_name=_('Inductive power on peak hours')
-    )
+    active_max_power_peak_time = models.FloatField(default=0)
+    active_max_power_off_peak_time = models.FloatField(default=0)
 
-    inductive_power_off_peak_time = models.FloatField(
-        default=0,
-        verbose_name=_('Inductive power not on peak hours')
-    )
-
-    capacitive_power_peak_time = models.FloatField(
-        default=0,
-        verbose_name=_('Capacitive power on peak hours')
-    )
-
-    capacitive_power_off_peak_time = models.FloatField(
-        default=0,
-        verbose_name=_('Capacitive power not on peak hours')
-    )
-
-    active_max_power_peak_time = models.FloatField(
-        default=0,
-        verbose_name=_('Active max power on peak hours')
-    )
-
-    active_max_power_off_peak_time = models.FloatField(
-        default=0,
-        verbose_name=_('Active max power not on peak hours')
-    )
-
-    reactive_max_power_peak_time = models.FloatField(
-        default=0,
-        verbose_name=_('Reactive max power on peak hours')
-    )
-
+    reactive_max_power_peak_time = models.FloatField(default=0)
     reactive_max_power_off_peak_time = models.FloatField(
-        default=0,
-        verbose_name=_('Reactive max power not on peak hours')
+        default=0
     )
 
-    # When using HStoreField remember to install the extension in the migration
+    active_max_power_list_peak = ArrayField(
+        models.FloatField(), default=None
+    )
     active_max_power_list_peak_time = ArrayField(
-        HStoreField(),
-        default=None,
-        verbose_name=_('Active max power list on peak hours')
+        models.DateTimeField(), default=None
+    )
+
+    active_max_power_list_off_peak = ArrayField(
+        models.FloatField(), default=None
     )
 
     active_max_power_list_off_peak_time = ArrayField(
-        HStoreField(),
-        default=None,
-        verbose_name=_('Active max power list not on peak hours')
+        models.DateTimeField(), default=None
+    )
+
+    reactive_max_power_list_peak = ArrayField(
+        models.FloatField(), default=None
     )
 
     reactive_max_power_list_peak_time = ArrayField(
-        HStoreField(),
-        default=None,
-        verbose_name=_('Reactive max power list on peak hours')
+        models.DateTimeField(), default=None
     )
 
+    reactive_max_power_list_off_peak = ArrayField(
+        models.FloatField(), default=None
+    )
     reactive_max_power_list_off_peak_time = ArrayField(
-        HStoreField(),
-        default=None,
-        verbose_name=_('Reactive max power list not on peak hours')
+        models.DateTimeField(), default=None
     )
 
 

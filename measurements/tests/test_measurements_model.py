@@ -70,7 +70,7 @@ class MeasurementsTestCase(TestCase):
             dht_current_b=8,
             dht_current_c=8,
             transductor=self.transductor,
-            collection_time=self.time
+            collection_date=self.time
         )
 
         self.quarterly_measurement = QuarterlyMeasurement.objects.create(
@@ -83,7 +83,7 @@ class MeasurementsTestCase(TestCase):
             capacitive_power_peak_time=8,
             capacitive_power_off_peak_time=8,
             transductor=self.transductor,
-            collection_time=self.time
+            collection_date=self.time
         )
 
         self.monthly_measurement = MonthlyMeasurement.objects.create(
@@ -124,7 +124,7 @@ class MeasurementsTestCase(TestCase):
                 {"value": 0.0, "timestamp": "2019-02-05 14:00:00"}
             ],
             transductor=self.transductor,
-            collection_time=self.time
+            collection_date=self.time
         )
 
     # Minutely measurements tests
@@ -162,13 +162,13 @@ class MeasurementsTestCase(TestCase):
             dht_current_b=8,
             dht_current_c=8,
             transductor=self.transductor,
-            collection_time=timezone.now()
+            collection_date=timezone.now()
         )
         after = len(MinutelyMeasurement.objects.all())
 
         self.assertEqual(before + 1, after)
 
-    def test_should_not_create_minutely_measurement_without_collection_time(
+    def test_should_not_create_minutely_measurement_without_collection_date(
             self):
         new_measurement = MinutelyMeasurement()
         new_measurement.transductor = self.transductor
@@ -178,7 +178,7 @@ class MeasurementsTestCase(TestCase):
 
     def test_should_not_create_minutely_measurement_without_transductor(self):
         new_measurement = MinutelyMeasurement()
-        new_measurement.collection_time = timezone.now()
+        new_measurement.collection_date = timezone.now()
 
         with self.assertRaises(IntegrityError):
             new_measurement.save()
@@ -200,13 +200,13 @@ class MeasurementsTestCase(TestCase):
             capacitive_power_peak_time=8,
             capacitive_power_off_peak_time=8,
             transductor=self.transductor,
-            collection_time=timezone.now()
+            collection_date=timezone.now()
         )
         after = len(QuarterlyMeasurement.objects.all())
 
         self.assertEqual(before + 1, after)
 
-    def test_should_not_create_quarterly_measurement_without_collection_time(
+    def test_should_not_create_quarterly_measurement_without_collection_date(
             self):
         new_measurement = QuarterlyMeasurement()
         new_measurement.transductor = self.transductor
@@ -216,7 +216,7 @@ class MeasurementsTestCase(TestCase):
 
     def test_should_not_create_quarterly_measurement_without_transductor(self):
         new_measurement = QuarterlyMeasurement()
-        new_measurement.collection_time = timezone.now()
+        new_measurement.collection_date = timezone.now()
 
         with self.assertRaises(IntegrityError):
             new_measurement.save()
@@ -266,13 +266,13 @@ class MeasurementsTestCase(TestCase):
                 {"value": 0.0, "timestamp": "2019-02-05 14:00:00"}
             ],
             transductor=self.transductor,
-            collection_time=timezone.now()
+            collection_date=timezone.now()
         )
         after = len(MonthlyMeasurement.objects.all())
 
         self.assertEqual(before + 1, after)
 
-    def test_should_not_create_monthly_measurement_without_collection_time(
+    def test_should_not_create_monthly_measurement_without_collection_date(
             self):
         new_measurement = MonthlyMeasurement()
         new_measurement.transductor = self.transductor
@@ -282,7 +282,7 @@ class MeasurementsTestCase(TestCase):
 
     def test_should_not_create_monthly_measurement_without_transductor(self):
         new_measurement = MonthlyMeasurement()
-        new_measurement.collection_time = timezone.now()
+        new_measurement.collection_date = timezone.now()
 
         with self.assertRaises(IntegrityError):
             new_measurement.save()
