@@ -84,7 +84,17 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
 CORS_ORIGIN_ALLOW_ALL = True
+
+CORS_ALLOW_HEADERS = [
+    'content-disposition', 
+    'accept-encoding',
+    'content-type',
+    'accept',
+    'origin',
+    'authorization'
+]
 
 ROOT_URLCONF = 'smi_master.urls'
 
