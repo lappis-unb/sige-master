@@ -8,3 +8,6 @@ MASTER_SECRET_KEY=some-random-stuff
 ENVIRONMENT=development
 ALLOWED_HOSTS=*
 LIMIT_FILTER=1440
+
+EMAIL_HOST_USER = 'unb.smi@gmail.com'
+EMAIL_HOST_PASSWORD = 'g^C4bN4nTDL}obv+'
