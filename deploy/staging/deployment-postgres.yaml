@@ -13,7 +13,7 @@ spec:
     app: postgres
     tier: database
 ---
-apiVersion: apps/v1beta2
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: postgres
@@ -36,7 +36,7 @@ spec:
       volumes:
       - name: postgres-pv
         persistentVolumeClaim:
-          claimName: postgres-staging-pvc
+          claimName: postgres-smi-master-staging-pvc
       containers:
       - name: postgres
         image: postgres:9.6-alpine
@@ -44,13 +44,13 @@ spec:
         - name: POSTGRES_USER
           valueFrom:
             secretKeyRef:
-              name: "master-staging-secrets"
+              name: "smi-master-staging-secrets"
               key: "db-user"
         - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: "master-staging-secrets"
-              key: "db-user-pass"
+              name: "smi-master-staging-secrets"
+              key: "db-pass"
         - name: POSTGRES_PORT
           value: "5432"
         - name: POSTGRES_DB
@@ -61,7 +61,7 @@ spec:
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: postgres-staging-pvc
+  name: postgres-smi-master-staging-pvc
   namespace: smi-master-staging
 spec:
   accessModes:
