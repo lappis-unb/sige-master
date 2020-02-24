@@ -8,6 +8,13 @@ stages:
       pushRemote: true
       registry: registry.lappis.rocks
 
+- name: Deploy Production
+  when:
+    branch: master
+  steps:
+  - applyYamlConfig:
+      path: ./deploy/production/deployment-master.yaml
+
 - name: Deploy Staging
   when:
     branch: development
