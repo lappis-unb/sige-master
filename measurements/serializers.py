@@ -11,7 +11,7 @@ class MinutelyMeasurementSerializer(serializers.HyperlinkedModelSerializer):
         model = MinutelyMeasurement
         fields = ('id',
                   'transductor',
-                  'collection_time',
+                  'collection_date',
                   'frequency_a',
                   'voltage_a',
                   'voltage_b',
@@ -49,7 +49,7 @@ class QuarterlyMeasurementSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = QuarterlyMeasurement
         fields = ('id',
-                  'collection_time',
+                  'collection_date',
                   'generated_energy_peak_time',
                   'generated_energy_off_peak_time',
                   'consumption_peak_time',
@@ -147,7 +147,7 @@ class RealTimeMeasurementSerializer(serializers.HyperlinkedModelSerializer):
         model = MinutelyMeasurement
         fields = ('id',
                   'transductor_id',
-                  'collection_time',
+                  'collection_date',
                   'voltage_a',
                   'voltage_b',
                   'voltage_c',

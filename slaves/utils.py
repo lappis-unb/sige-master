@@ -86,16 +86,28 @@ class DataCollector():
             active_max_power_list_peak_time=(
                 msm['active_max_power_list_peak_time']
             ),
+            active_max_power_list_peak=(
+                msm['active_max_power_list_peak']
+            ),
             active_max_power_list_off_peak_time=(
                 msm['active_max_power_list_off_peak_time']
+            ),
+            active_max_power_list_off_peak=(
+                msm['active_max_power_list_off_peak']
             ),
             reactive_max_power_list_peak_time=(
                 msm['reactive_max_power_list_peak_time']
             ),
+            reactive_max_power_list_peak=(
+                msm['reactive_max_power_list_peak']
+            ),
             reactive_max_power_list_off_peak_time=(
                 msm['reactive_max_power_list_off_peak_time']
             ),
-            collection_time=msm['collection_date'],
+            reactive_max_power_list_off_peak=(
+                msm['reactive_max_power_list_off_peak']
+            ),
+            collection_date=msm['transductor_collection_date'],
             transductor_id=transductor.serial_number
         )
 
@@ -131,7 +143,7 @@ class DataCollector():
             dht_current_a=msm['dht_current_a'],
             dht_current_b=msm['dht_current_b'],
             dht_current_c=msm['dht_current_c'],
-            collection_time=msm['collection_date'],
+            collection_date=msm['transductor_collection_date'],
             transductor_id=transductor.serial_number
         )
 
@@ -152,7 +164,7 @@ class DataCollector():
             capacitive_power_off_peak_time=(
                 msm['capacitive_power_off_peak_time']
             ),
-            collection_time=msm['collection_date'],
+            collection_date=msm['transductor_collection_date'],
             transductor_id=transductor.serial_number
         )
 
@@ -250,8 +262,9 @@ class DataCollector():
             measurement.total_reactive_power = msm['total_reactive_power']
             measurement.total_power_factor = msm['total_power_factor']
             measurement.transductor = transductor
-            measurement.collection_time = datetime.strptime(
-                msm['collection_date'], '%Y-%m-%dT%H:%M:%S'
+            measurement.collection_date = datetime.strptime(
+                msm['transductor_collection_date'], 
+                '%Y-%m-%dT%H:%M:%S.%f'
             )
 
             measurement.save()
@@ -267,8 +280,9 @@ class DataCollector():
                 total_reactive_power=msm['total_reactive_power'],
                 total_power_factor=msm['total_power_factor'],
                 transductor=transductor,
-                collection_time=datetime.strptime(
-                    msm['collection_date'], '%Y-%m-%dT%H:%M:%S'
+                collection_date=datetime.strptime(
+                    msm['transductor_collection_date'],
+                    '%Y-%m-%dT%H:%M:%S.%f'
                 )
             )
 
@@ -279,13 +293,12 @@ class DataCollector():
         """
         slaves = Slave.objects.all()
 
+        collection_date = datetime.now()
         for slave in slaves:
             if kwargs.get('realtime', None):
                 realtime_response = request_measurements(
-                    slave,
-                    None,
-                    None,
-                    'realtime-measurements'
+                    'realtime-measurements',
+                    slave
                 )
 
                 measurement = json.loads(realtime_response.content)
@@ -301,13 +314,15 @@ class DataCollector():
                         print(exception)
 
             for transductor in slave.transductors.all():
+                collection_date = datetime.now()
                 if kwargs.get('minutely', None):
                     # Get response and save it in the master database
                     minutely_response = request_measurements(
+                        "minutely-measurements",
                         slave,
                         transductor,
-                        None,
-                        "minutely-measurements"
+                        transductor.last_minutely_collection,
+                        collection_date
                     )
 
                     measurements = json.loads(minutely_response.content)
@@ -318,46 +333,53 @@ class DataCollector():
                             DataCollector.build_minutely_measurements(
                                 msm, transductor
                             )
-                            transductor.save()
                         except Exception as exception:
                             pass
+                    transductor.last_minutely_collection = collection_date
+                    transductor.save()
 
                 if kwargs.get('quarterly', None):
                     quarterly_response = request_measurements(
+                        "quarterly-measurements",
                         slave,
                         transductor,
-                        None,
-                        "quarterly-measurements"
+                        transductor.last_quarterly_collection,
+                        collection_date
                     )
 
                     measurements = json.loads(quarterly_response.content)
 
                     for msm in measurements:
                         # Create QuarterlyMeasurement object
-                        try:
-                            DataCollector.build_quarterly_measurements(
-                                msm, transductor
-                            )
-                            transductor.save()
-                        except Exception:
-                            pass
+                        # try:
+                        DataCollector.build_quarterly_measurements(
+                            msm, transductor
+                        )
+                        # except Exception:
+                        # pass
+
+                    transductor.last_quarterly_collection = collection_date
+                    transductor.save()
 
                 if kwargs.get('monthly', None):
                     monthly_response = request_measurements(
+                        "monthly-measurements",
                         slave,
                         transductor,
-                        None,
-                        "monthly-measurements"
+                        transductor.last_monthly_collection,
+                        collection_date
                     )
 
                     measurements = json.loads(monthly_response.content)
 
                     for msm in measurements:
                         # Create MonthlyMeasurement object
-                        try:
-                            DataCollector.build_monthly_measurements(
-                                msm, transductor
-                            )
-                            transductor.save()
-                        except Exception:
-                            pass
+                        # try:
+                        DataCollector.build_monthly_measurements(
+                            msm, transductor
+                        )
+                        # except Exception:
+                        #     pass
+
+                    transductor.last_monthly_collection = collection_date
+                    transductor.save()

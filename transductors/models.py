@@ -1,6 +1,7 @@
-from datetime import datetime
-from django.utils import timezone
-
+from .api import *
+from django.db import models
+from django.utils.timezone import datetime
+from polymorphic.models import PolymorphicModel
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
@@ -29,6 +30,28 @@ class Transductor(PolymorphicModel):
         verbose_name=_('name'),
         help_text=_('This field is required')
     )
+
+    last_minutely_collection = models.DateTimeField(
+        blank=False, 
+        null=False,
+        default=datetime.now,
+        verbose_name=_('last minutely collection')
+    )
+    
+    last_quarterly_collection = models.DateTimeField(
+        blank=False, 
+        null=False,
+        default=datetime.now,
+        verbose_name=_('last quarterly collection')
+    )
+    
+    last_monthly_collection = models.DateTimeField(
+        blank=False, 
+        null=False,
+        default=datetime.now,
+        verbose_name=_('last monthly collection')
+    )
+
     ip_address = models.CharField(
         max_length=15,
         unique=True,
@@ -78,7 +101,7 @@ class Transductor(PolymorphicModel):
     )
 
     creation_date = models.DateTimeField(
-        default=timezone.now,
+        default=datetime.now,
         verbose_name=_('created at')
     )
 
