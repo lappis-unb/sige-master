@@ -1,22 +1,24 @@
+import sys
+import pytz
 import pytest
+
 from django.test import Client, TestCase
 from django.conf import settings
 from django.db import IntegrityError
+from django.utils import timezone
 
-from measurements.models import MinutelyMeasurement
-from measurements.models import QuarterlyMeasurement
-from measurements.models import MonthlyMeasurement
-from measurements.serializers import ThreePhaseSerializer
-from slaves.models import Slave
-from transductors.models import EnergyTransductor
-from campi.models import Campus
 from datetime import datetime
-import sys
+
 from rest_framework.request import Request
 from rest_framework.test import APIRequestFactory
-from django.utils import timezone
-from datetime import datetime
-import pytz
+
+from campi.models import Campus
+from slaves.models import Slave
+from transductors.models import EnergyTransductor
+from measurements.models import MonthlyMeasurement
+from measurements.models import MinutelyMeasurement
+from measurements.models import QuarterlyMeasurement
+from measurements.serializers import ThreePhaseSerializer
 
 
 class MeasurementsTestCase(TestCase):
@@ -28,9 +30,6 @@ class MeasurementsTestCase(TestCase):
         self.campus = Campus.objects.create(
             name='UnB - Faculdade Gama',
             acronym='FGA',
-            phone='(61) 3107-8901',
-            address='Área Especial de Indústria Projeção A',
-            website_address='http://fga.unb.br/'
         )
 
         self.transductor = EnergyTransductor.objects.create(
@@ -76,7 +75,7 @@ class MeasurementsTestCase(TestCase):
             dht_current_b=8,
             dht_current_c=8,
             transductor=self.transductor,
-            collection_time=self.time
+            collection_date=self.time
         )
 
         self.factory = APIRequestFactory()
@@ -90,8 +89,8 @@ class MeasurementsTestCase(TestCase):
             self.client.get(
                 '/graph/minutely-active-power/'
                 '?serial_number=12345678'
-                '&start_date=2000-01-01 00:00'
-                '&end_date=2000-01-01 23:59'
+                '&start_date=2000-01-01 00:00:00'
+                '&end_date=2000-01-01 23:59:00'
             ).status_code,
             200)
 

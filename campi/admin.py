@@ -6,8 +6,5 @@ from . import models
 class CampusAdmin(admin.ModelAdmin):
     list_display = (
         'name',
-        'acronym',
-        'phone',
-        'address',
-        'website_address',
+        'acronym'
     )

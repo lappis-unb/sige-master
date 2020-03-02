@@ -2,7 +2,8 @@ import requests
 from datetime import datetime, timedelta
 
 
-def request_measurements(slave, transductor, start_date, measurement_type):
+def request_measurements(measurement_type, slave, transductor=None, 
+                         start_date=None, end_date=None):
     protocol = "http://"
     endpoint = "/" + measurement_type + "/"
     address = protocol\
@@ -31,11 +32,18 @@ def request_events(slave, event_type):
     endpoint = "/" + event_type + "/"
 
     params = {}
+    if transductor is not None:
+        params["serial_number"] = transductor.serial_number
 
-    url = "%s%s:%s%s" % (protocol, slave.ip_address, slave.port, endpoint)
+    if start_date is not None:
+        start_date = start_date.strftime("%Y-%m-%d %H:%M:%S")
+        params["start_date"] = start_date        
 
-    response = requests.get(url, params=params)
-    return response
+    if end_date is not None:
+        end_date = end_date.strftime("%Y-%m-%d %H:%M:%S")
+        params["end_date"] = end_date        
+
+    return requests.get(address, params=params)
 
 
 def request_all_events(slave):
@@ -46,11 +54,11 @@ def request_all_events(slave):
     responses = [
         (
             "FailedConnectionTransductorEvent",
-            request_events(slave, 'failed-connection-events')
+            request_measurements('failed-connection-events', slave)
         ),
         (
             "VoltageRelatedEvent",
-            request_events(slave, 'voltage-events')
+            request_measurements('voltage-events', slave)
         )
     ]
 

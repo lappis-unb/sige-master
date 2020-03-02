@@ -29,9 +29,6 @@ class CheckTransductorsAndSlaves():
         slaves = Slave.objects.all()
 
         for slave in slaves:
-            slave.broken = False
-            slave.save()
-
             # to work in dev dont forget to insert the port
             url = 'http://' + slave.ip_address + ":" + \
                 os.getenv('SLAVE_PORT') + '/broken-transductors'
@@ -51,6 +48,7 @@ class CheckTransductorsAndSlaves():
                         transductor_status.broken = transductor['broken']
                         transductor_status.save()
 
+                    slave.set_broken(False)
                 else:
                     slave.set_broken(True)
 
@@ -88,16 +86,28 @@ class DataCollector():
             active_max_power_list_peak_time=(
                 msm['active_max_power_list_peak_time']
             ),
+            active_max_power_list_peak=(
+                msm['active_max_power_list_peak']
+            ),
             active_max_power_list_off_peak_time=(
                 msm['active_max_power_list_off_peak_time']
+            ),
+            active_max_power_list_off_peak=(
+                msm['active_max_power_list_off_peak']
             ),
             reactive_max_power_list_peak_time=(
                 msm['reactive_max_power_list_peak_time']
             ),
+            reactive_max_power_list_peak=(
+                msm['reactive_max_power_list_peak']
+            ),
             reactive_max_power_list_off_peak_time=(
                 msm['reactive_max_power_list_off_peak_time']
             ),
-            collection_time=msm['collection_date'],
+            reactive_max_power_list_off_peak=(
+                msm['reactive_max_power_list_off_peak']
+            ),
+            collection_date=msm['transductor_collection_date'],
             transductor_id=transductor.serial_number
         )
 
@@ -133,7 +143,7 @@ class DataCollector():
             dht_current_a=msm['dht_current_a'],
             dht_current_b=msm['dht_current_b'],
             dht_current_c=msm['dht_current_c'],
-            collection_time=msm['collection_date'],
+            collection_date=msm['transductor_collection_date'],
             transductor_id=transductor.serial_number
         )
 
@@ -154,25 +164,74 @@ class DataCollector():
             capacitive_power_off_peak_time=(
                 msm['capacitive_power_off_peak_time']
             ),
-            collection_time=msm['collection_date'],
+            collection_date=msm['transductor_collection_date'],
             transductor_id=transductor.serial_number
         )
 
     @staticmethod
-    def save_event_object(events_array):
+    def save_event_object(event_dict, request_type):
         """
         Builds and saves events from a dict to a given class
         """
-        for event_dict in events_array:
+        if request_type == 'VoltageRelatedEvent':
+            DataCollector.build_voltage_related_events(event_dict)
+        else:
+            DataCollector.build_failed_connection_transductor_events(event_dict)
+
+    @staticmethod
+    def build_failed_connection_transductor_events(event_dict):
+        event_class = globals()[event_dict['type']]
+        transductor = EnergyTransductor.objects.get(
+            ip_address=event_dict['ip_address']
+        )
+        last_event = event_class.objects.filter(
+            transductor=transductor,
+            ended_at__isnull=True
+        ).last()
+        if last_event:
+            if not event_dict['ended_at']:
+                last_event.data = event_dict['data']
+                last_event.save()
+            else:
+                last_event.data = event_dict['data']
+                last_event.ended_at = event_dict['ended_at']
+                last_event.save()
+        else:
+            if not event_dict['ended_at']:
+                event_class.objects.create(
+                    transductor=transductor,
+                    data=event_dict['data'],
+                    created_at=event_dict['created_at'],
+                    ended_at=event_dict['ended_at']
+                )
+
+    @staticmethod
+    def build_voltage_related_events(voltage_related_events):
+        for event_dict in voltage_related_events:
             event_class = globals()[event_dict['type']]
-            event_class.objects.create(
-                transductor=EnergyTransductor.objects.get(
-                    ip_address=event_dict['ip_address']
-                ),
-                data=event_dict['data'],
-                created_at=event_dict['created_at'],
-                ended_at=event_dict['ended_at']
+            transductor = EnergyTransductor.objects.get(
+                ip_address=event_dict['ip_address']
             )
+            last_event = event_class.objects.filter(
+                transductor=transductor,
+                ended_at__isnull=True
+            ).last()
+            if last_event:
+                if not event_dict['ended_at']:
+                    last_event.data = event_dict['data']
+                    last_event.save()
+                else:
+                    last_event.data = event_dict['data']
+                    last_event.ended_at = event_dict['ended_at']
+                    last_event.save()
+            else:
+                if not event_dict['ended_at']:
+                    event_class.objects.create(
+                        transductor=transductor,
+                        data=event_dict['data'],
+                        created_at=event_dict['created_at'],
+                        ended_at=event_dict['ended_at']
+                    )
 
     @staticmethod
     def get_events():
@@ -183,14 +242,12 @@ class DataCollector():
 
         for slave in slave_servers:
             event_responses = request_all_events(slave)
-
             for pairs in event_responses:
                 loaded_events = json.loads(pairs[1].content)
-                DataCollector.save_event_object(loaded_events)
+                DataCollector.save_event_object(loaded_events, pairs[0])
 
     @staticmethod
     def build_realtime_measurements(msm, transductor):
-        print(RealTimeMeasurement.objects.filter(transductor=transductor))
         if RealTimeMeasurement.objects.filter(transductor=transductor):
             measurement = RealTimeMeasurement.objects.get(
                 transductor=transductor
@@ -205,8 +262,9 @@ class DataCollector():
             measurement.total_reactive_power = msm['total_reactive_power']
             measurement.total_power_factor = msm['total_power_factor']
             measurement.transductor = transductor
-            measurement.collection_time = datetime.strptime(
-                msm['collection_date'], '%Y-%m-%dT%H:%M:%S'
+            measurement.collection_date = datetime.strptime(
+                msm['transductor_collection_date'], 
+                '%Y-%m-%dT%H:%M:%S.%f'
             )
 
             measurement.save()
@@ -222,8 +280,9 @@ class DataCollector():
                 total_reactive_power=msm['total_reactive_power'],
                 total_power_factor=msm['total_power_factor'],
                 transductor=transductor,
-                collection_time=datetime.strptime(
-                    msm['collection_date'], '%Y-%m-%dT%H:%M:%S'
+                collection_date=datetime.strptime(
+                    msm['transductor_collection_date'],
+                    '%Y-%m-%dT%H:%M:%S.%f'
                 )
             )
 
@@ -234,16 +293,15 @@ class DataCollector():
         """
         slaves = Slave.objects.all()
 
+        collection_date = datetime.now()
         for slave in slaves:
             if kwargs.get('realtime', None):
                 realtime_response = request_measurements(
-                    slave,
-                    None,
-                    None,
-                    'realtime-measurements'
+                    'realtime-measurements',
+                    slave
                 )
 
-                measurement = json.loads(realtime_response.content)['results']
+                measurement = json.loads(realtime_response.content)
                 for transductor_data in measurement:
                     try:
                         transductor = EnergyTransductor.objects.get(
@@ -256,13 +314,15 @@ class DataCollector():
                         print(exception)
 
             for transductor in slave.transductors.all():
+                collection_date = datetime.now()
                 if kwargs.get('minutely', None):
                     # Get response and save it in the master database
                     minutely_response = request_measurements(
+                        "minutely-measurements",
                         slave,
                         transductor,
-                        None,
-                        "minutely-measurements"
+                        transductor.last_minutely_collection,
+                        collection_date
                     )
 
                     measurements = json.loads(minutely_response.content)
@@ -273,44 +333,53 @@ class DataCollector():
                             DataCollector.build_minutely_measurements(
                                 msm, transductor
                             )
-                            transductor.save()
                         except Exception as exception:
                             pass
+                    transductor.last_minutely_collection = collection_date
+                    transductor.save()
 
                 if kwargs.get('quarterly', None):
                     quarterly_response = request_measurements(
+                        "quarterly-measurements",
                         slave,
                         transductor,
-                        "quarterly-measurements"
+                        transductor.last_quarterly_collection,
+                        collection_date
                     )
 
                     measurements = json.loads(quarterly_response.content)
 
                     for msm in measurements:
                         # Create QuarterlyMeasurement object
-                        try:
-                            DataCollector.build_quarterly_measurements(
-                                msm, transductor
-                            )
-                            transductor.save()
-                        except Exception:
-                            pass
+                        # try:
+                        DataCollector.build_quarterly_measurements(
+                            msm, transductor
+                        )
+                        # except Exception:
+                        # pass
+
+                    transductor.last_quarterly_collection = collection_date
+                    transductor.save()
 
                 if kwargs.get('monthly', None):
                     monthly_response = request_measurements(
+                        "monthly-measurements",
                         slave,
                         transductor,
-                        "monthly-measurements"
+                        transductor.last_monthly_collection,
+                        collection_date
                     )
 
                     measurements = json.loads(monthly_response.content)
 
                     for msm in measurements:
                         # Create MonthlyMeasurement object
-                        try:
-                            DataCollector.build_monthly_measurements(
-                                msm, transductor
-                            )
-                            transductor.save()
-                        except Exception:
-                            pass
+                        # try:
+                        DataCollector.build_monthly_measurements(
+                            msm, transductor
+                        )
+                        # except Exception:
+                        #     pass
+
+                    transductor.last_monthly_collection = collection_date
+                    transductor.save()
