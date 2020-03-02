@@ -20,6 +20,8 @@ from .serializers import FailedConnectionTransductorEventSerializer
 from .serializers import AllEventSerializer
 
 from django.utils import timezone
+from django.db.models import Q
+from itertools import chain
 
 
 class EventViewSet(mixins.RetrieveModelMixin,
@@ -123,7 +125,6 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = None
     serializer_class = AllEventSerializer
     types = {
-        'FailedConnectionTransductorEvent': FailedConnectionTransductorEvent,
         'CriticalVoltageEvent': CriticalVoltageEvent,
         'PrecariousVoltageEvent': PrecariousVoltageEvent,
         'PhaseDropEvent': PhaseDropEvent
@@ -131,12 +132,11 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
     events = {
         'CriticalVoltageEvent': 'critical_tension',
         'PrecariousVoltageEvent': 'precarious_tension',
-        'PhaseDropEvent': 'phase_drop',
-        'FailedConnectionTransductorEvent': 'transductor_connection_fail'
+        'PhaseDropEvent': 'phase_drop'
     }
 
     def list(self, request):
-        serial_number = request.data.get('serial_number')
+        serial_number = self.request.query_params.get('serial_number')
         type = self.request.query_params.get('type')
 
         if type == 'period':
@@ -144,20 +144,55 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
             now = timezone.now()
             initial = now - timezone.timedelta(days=3)
 
-            self.queryset = Event.objects.filter(
-                created_at__gte=initial,
-                created_at__lte=now
+            voltage_related_events = self.generic_filter(
+                VoltageRelatedEvent,
+                (initial, now),
+                type
             )
+
+            failed_connection_transductor_events = self.generic_filter(
+                FailedConnectionTransductorEvent,
+                (initial, now),
+                type
+            )
+
+            failed_connection_slave_events = self.generic_filter(
+                FailedConnectionSlaveEvent,
+                (initial, now),
+                type
+            )
+
         else:
-            self.queryset = Event.objects.filter(
-                ended_at__isnull=True
+            voltage_related_events = self.generic_filter(
+                VoltageRelatedEvent
+            )
+
+            failed_connection_transductor_events = self.generic_filter(
+                FailedConnectionTransductorEvent
+            )
+
+            failed_connection_slave_events = self.generic_filter(
+                FailedConnectionSlaveEvent
             )
 
         if serial_number:
             try:
-                self.queryset = self.queryset.filter(
-                    transductor=EnergyTransductor.objects.get(
-                        serial_number=serial_number
+                transductor = EnergyTransductor.objects.get(
+                    serial_number=serial_number
+                )
+
+                voltage_related_events = voltage_related_events.filter(
+                    transductor=transductor
+                )
+                failed_connection_transductor_events = (
+                    failed_connection_transductor_events.filter(
+                        transductor=transductor
+                    )
+                )
+
+                failed_connection_slave_events = (
+                    failed_connection_slave_events.filter(
+                        slave__transductors__in=[transductor]
                     )
                 )
             except EnergyTransductor.DoesNotExist:
@@ -171,26 +206,29 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
 
         for type in self.types:
             events[self.events[type]] = []
-            elements = self.queryset.instance_of(self.types[type])
-            for element in elements:
-                event = {}
-                event['id'] = element.pk
-                event['location'] = element.transductor.name
-                event['campus'] = element.transductor.campus.acronym
-                event['transductor'] = element.transductor.serial_number
-                event['data'] = element.data
-                event['start_time'] = element.created_at
-                event['end_time'] = element.ended_at
-                events[self.events[type]].append(event)
+            elements = voltage_related_events.instance_of(self.types[type])
+            self.build_transductor_related_event(
+                events, elements, self.events[type]
+            )
 
-        elements = self.queryset.instance_of(FailedConnectionSlaveEvent)
+        events['transductor_connection_fail'] = []
+        self.build_transductor_related_event(
+            events, failed_connection_transductor_events, self.events[type]
+        )
 
         slave_events = []
 
-        for element in elements:
-            transductors = (
-                element.slave.transductors.select_related('campus').all()
-            )
+        for element in failed_connection_slave_events:
+            if serial_number:
+                transductors = (
+                    element.slave.transductors.select_related('campus').filter(
+                        serial_number=serial_number
+                    )
+                )
+            else:
+                transductors = (
+                    element.slave.transductors.select_related('campus').all()
+                )
             for transductor in transductors:
                 event = {}
                 event['id'] = element.pk
@@ -205,3 +243,29 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
         events['slave_connection_fail'] = slave_events
 
         return Response(events, status=200)
+
+    def generic_filter(self, class_instance, range=None, period=None):
+        queryset = None
+
+        if period is not None and range is not None:
+            queryset = class_instance.objects.filter(
+                Q(ended_at__isnull=True) | Q(ended_at__range=range)
+            )
+        else:
+            queryset = class_instance.objects.filter(
+                ended_at__isnull=True
+            )
+
+        return queryset
+
+    def build_transductor_related_event(self, events, elements, type):
+        for element in elements:
+            event = {}
+            event['id'] = element.pk
+            event['location'] = element.transductor.name
+            event['campus'] = element.transductor.campus.acronym
+            event['transductor'] = element.transductor.serial_number
+            event['data'] = element.data
+            event['start_time'] = element.created_at
+            event['end_time'] = element.ended_at
+            events[type].append(event)
