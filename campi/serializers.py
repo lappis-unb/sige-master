@@ -4,7 +4,9 @@ from .models import Campus
 
 
 class CampusSerializer(serializers.HyperlinkedModelSerializer):
-    transductors = serializers.IntegerField(default=0)
+    transductors = serializers.IntegerField(
+        source='energytransductor_set.count', read_only=True
+    )
 
     class Meta:
         model = Campus
