@@ -268,11 +268,21 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
 
         events['slave_connection_fail'] = slave_events
 
-        events['count'] = \
-            len(events['slave_connection_fail']) + \
-            len(events['transductor_connection_fail']) +\
-            len(events['phase_drop']) + \
+        events['count'] = (
+            len(events['slave_connection_fail']) +
+            len(events['transductor_connection_fail']) +
+            len(events['phase_drop']) +
             len(events['critical_tension'])
+        )
+        events['critical_events_count'] = (
+            len(events['critical_tension']) +
+            len(events['phase_drop'])
+        )
+        events['light_events_count'] = (
+            len(events['slave_connection_fail']) +
+            len(events['transductor_connection_fail']) +
+            len(events['precarious_tension'])
+        )
 
         return Response(events, status=200)
 
