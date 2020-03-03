@@ -62,7 +62,7 @@ urlpatterns = [
         auth_views.PasswordResetCompleteView.as_view(),
         name='password_reset_complete'
     ),
-    path('csv-minutely/', MeasurementResults.minutely_results),
+    path('csv-export/', MeasurementResults.mount_csv_measurement),
     path('', include(router.urls)),
     path('graph/', include(measurements_routes.graph_router.urls))
 ]
