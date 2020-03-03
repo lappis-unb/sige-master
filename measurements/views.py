@@ -455,7 +455,9 @@ class RealTimeMeasurementViewSet(MeasurementViewSet):
                 exception.status_code = 400
                 raise exception
         else:
-            queryset = RealTimeMeasurement.objects.select_related('transductor').all()
+            queryset = RealTimeMeasurement.objects.select_related(
+                'transductor'
+            ).all()
 
         return queryset
 
@@ -511,7 +513,6 @@ class MeasurementResults(mixins.RetrieveModelMixin,
             )
             exception.status_code = 400
             raise exception
-
 
     @staticmethod
     def build_csv(request, class_name, fields, start_date):
