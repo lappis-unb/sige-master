@@ -13,6 +13,7 @@ from rest_framework.exceptions import APIException
 from django.core.exceptions import ObjectDoesNotExist
 
 from .models import *
+from campi.models import Campus
 
 from .serializers import VoltageRelatedEventSerializer
 from .serializers import FailedConnectionSlaveEventSerializer
@@ -21,7 +22,6 @@ from .serializers import AllEventSerializer
 
 from django.utils import timezone
 from django.db.models import Q
-from itertools import chain
 
 
 class EventViewSet(mixins.RetrieveModelMixin,
@@ -137,6 +137,7 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
 
     def list(self, request):
         serial_number = self.request.query_params.get('serial_number')
+        campus = self.request.query_params.get('campus')
         type = self.request.query_params.get('type')
 
         if type == 'period':
@@ -198,6 +199,31 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
             except EnergyTransductor.DoesNotExist:
                 exception = APIException(
                     'Serial number does not match with any EnergyTransductor'
+                )
+                exception.status_code = 404
+                raise exception
+        elif campus:
+            try:
+                transductors = EnergyTransductor.objects.filter(
+                    campus=Campus.objects.get(pk=int(campus))
+                )
+
+                voltage_related_events = voltage_related_events.filter(
+                    transductor__in=transductors
+                )
+                failed_connection_transductor_events = (
+                    failed_connection_transductor_events.filter(
+                        transductor__in=transductors
+                    )
+                )
+                failed_connection_slave_events = (
+                    failed_connection_slave_events.filter(
+                        slave__transductors__in=transductors
+                    )
+                )
+            except Campus.DoesNotExist:
+                exception = APIException(
+                    'Campus id does not match with any Campus'
                 )
                 exception.status_code = 404
                 raise exception
