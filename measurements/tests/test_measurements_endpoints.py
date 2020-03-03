@@ -33,10 +33,9 @@ class MeasurementsEndPointsTestCase(TestCase):
         )
 
     def test_get_with_auth_minutely_three_phase(self):
-        params = "?serial_number={}&start_date={}&end_date={}".format(
+        params = "?serial_number={}&start_date={}".format(
             self.transductor.serial_number,
-            "2019-01-01 00:00",
-            "2019-01-01 23:59"
+            "2019-01-01 00:00:00",
         )
         endpoint = self.__minutely_three_phase + params
 
@@ -45,13 +44,14 @@ class MeasurementsEndPointsTestCase(TestCase):
         response = self.__api_client.get(endpoint)
 
         self.__api_client.logout()
+        print(response.content)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_get_without_auth_minutely_three_phase(self):
         params = "?serial_number={}&start_date={}&end_date={}".format(
             self.transductor.serial_number,
-            "2019-01-01 00:00",
-            "2019-01-01 23:59"
+            "2019-01-01 00:00:00",
+            "2019-01-01 23:59:00"
         )
 
         endpoint = self.__minutely_three_phase + params
