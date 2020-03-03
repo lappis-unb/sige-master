@@ -43,6 +43,7 @@ class FailedConnectionTransductorEventSerializer(s.HyperlinkedModelSerializer):
 
 
 class AllEventSerializer(s.HyperlinkedModelSerializer):
+    count = s.IntegerField()
     slave_connection_fail = s.ListField(child=s.DictField())
     transductor_connection_fail = s.ListField(child=s.DictField())
     critical_tension = s.ListField(child=s.DictField())
@@ -52,6 +53,7 @@ class AllEventSerializer(s.HyperlinkedModelSerializer):
     class Meta:
         model = Event
         fields = (
+            'count',
             'critical_tension',
             'precarious_tension',
             'phase_drop',
