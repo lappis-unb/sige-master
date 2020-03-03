@@ -14,6 +14,7 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
             'geolocation_latitude',
             'geolocation_longitude',
             'campus',
+            'firmware_version',
             'name',
             'broken',
             'active',
@@ -24,6 +25,9 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
         )
 
         read_only_fields = (
+            # 'creation_date',
+            # 'serial_number',
+            # 'firmware_version',
             'active',
             'broken'
         )

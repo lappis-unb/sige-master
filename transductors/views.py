@@ -13,9 +13,20 @@ from .serializers import EnergyTransductorSerializer, AddToServerSerializer
 
 
 class EnergyTransductorViewSet(viewsets.ModelViewSet):
-    queryset = EnergyTransductor.objects.all()
+    queryset = EnergyTransductor.objects
     serializer_class = EnergyTransductorSerializer
     permission_classes = (permissions.AllowAny,)
+
+    def get_queryset(self):
+        campus = self.request.query_params.get('campi_id')
+
+        if campus is not None:
+            queryset = self.queryset.select_related(
+                'campus').filter(campus=campus)
+        else:
+            queryset = self.queryset.all()
+
+        return queryset
 
     @action(detail=True, methods=['post'])
     def add_to_server(self, request, pk=None):
