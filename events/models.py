@@ -12,6 +12,7 @@ from transductors.models import EnergyTransductor
 
 from fcm_django.fcm import fcm_send_topic_message
 
+
 class Event(PolymorphicModel):
     """
     Defines a new event object
