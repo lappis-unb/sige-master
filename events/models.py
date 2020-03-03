@@ -12,6 +12,8 @@ from transductors.models import EnergyTransductor
 
 from fcm_django.fcm import fcm_send_topic_message
 
+TOPIC_NAME = 'ALL'
+
 
 class Event(PolymorphicModel):
     """
@@ -91,7 +93,7 @@ class VoltageRelatedEvent(Event):
                     body += ', '
 
         fcm_send_topic_message(
-            topic_name="ALL1",
+            topic_name=TOPIC_NAME,
             data_message={
                 'title': str(self._meta.verbose_name).capitalize(),
                 'body': body,
@@ -130,7 +132,7 @@ class FailedConnectionTransductorEvent(Event):
         body = self.transductor.name 
         
         fcm_send_topic_message(
-            topic_name="ALL1",
+            topic_name=TOPIC_NAME,
             data_message={
                 'title': str(self._meta.verbose_name).capitalize(),
                 'body': body,
