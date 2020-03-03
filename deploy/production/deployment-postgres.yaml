@@ -13,7 +13,7 @@ spec:
     app: postgres
     tier: database
 ---
-apiVersion: apps/v1beta2
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: postgres
@@ -36,7 +36,7 @@ spec:
       volumes:
       - name: postgres-pv
         persistentVolumeClaim:
-          claimName: postgres-production-pvc
+          claimName: postgres-smi-master-production-pvc
       containers:
       - name: postgres
         image: postgres:9.6
@@ -44,24 +44,24 @@ spec:
         - name: POSTGRES_USER
           valueFrom:
             secretKeyRef:
-              name: "master-production-secrets"
+              name: "smi-master-production-secrets"
               key: "db-user"
         - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: "master-production-secrets"
-              key: "db-user-pass"
+              name: "smi-master-production-secrets"
+              key: "db-pass"
         - name: POSTGRES_PORT
           value: "5432"
         - name: POSTGRES_DB
-          value: "smi-master-dev"
+          value: "smi-master-prod"
         ports:
         - containerPort: 5432
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: postgres-production-pvc
+  name: postgres-smi-master-production-pvc
   namespace: smi-master-production
 spec:
   accessModes:
