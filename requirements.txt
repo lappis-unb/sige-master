@@ -43,3 +43,4 @@ wcwidth==0.1.8
 zipp==0.6.0
 django-rosetta
 django-material-admin
+fcm-django
