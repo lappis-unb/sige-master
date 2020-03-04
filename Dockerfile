@@ -31,7 +31,7 @@ COPY crons/crontab /etc/cron.d/smi-cron
 
 RUN chmod 0644 /etc/cron.d/smi-cron
 
-RUN touch /var/log/cron.log
+# RUN touch /var/log/cron.log
 
 RUN /usr/bin/crontab /etc/cron.d/smi-cron
 
