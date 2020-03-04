@@ -11,6 +11,7 @@ from polymorphic.models import PolymorphicModel
 
 from .api import *
 from campi.models import Campus
+from slaves.models import Slave
 from groups.models import Group
 from django.utils.translation import gettext_lazy as _
 
@@ -37,14 +38,14 @@ class Transductor(PolymorphicModel):
         default=datetime.now,
         verbose_name=_('last minutely collection')
     )
-    
+
     last_quarterly_collection = models.DateTimeField(
         blank=False, 
         null=False,
         default=datetime.now,
         verbose_name=_('last quarterly collection')
     )
-    
+
     last_monthly_collection = models.DateTimeField(
         blank=False, 
         null=False,
@@ -126,6 +127,14 @@ class Transductor(PolymorphicModel):
         help_text=_('This field is required')
     )
 
+    slave_server = models.ForeignKey(
+        Slave,
+        verbose_name = _('Collection Server'),
+        default = None,
+        null=True,
+        on_delete=models.DO_NOTHING
+    )
+
     class Meta:
         abstract = True
         verbose_name = _('Meter')
@@ -133,40 +142,8 @@ class Transductor(PolymorphicModel):
     def __str__(self):
         raise NotImplementedError
 
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        
-        failed = False
-
-        slave = self.slave_server
-        if not kwargs.get('bypass_requests', None):
-            response = update_transductor(self, slave)
-            if not self.__is_success_status(response.status_code):
-                failed = True
-
-        if not failed:
-            super(Transductor, self).save()
-
-        return failed
-        
-    def update(self, *args, **kwargs):
-        self.full_clean()
-        failed = False
-
-        slave = self.slave_server
-        if not kwargs.get('bypass_requests', None):
-            response = update_transductor(self, slave)
-            if not self.__is_success_status(response.status_code):
-                failed = True
-
-        if not failed:
-            super(Transductor, self).save()
-
-        return failed
-
     def delete(self, *args, **kwargs):
         self.active = False
-
 
         failed = False
 
