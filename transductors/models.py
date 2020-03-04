@@ -135,40 +135,51 @@ class Transductor(PolymorphicModel):
 
     def save(self, *args, **kwargs):
         self.full_clean()
-        super(Transductor, self).save()
+        
+        failed = False
 
+        slave = self.slave_server
+        if not kwargs.get('bypass_requests', None):
+            response = update_transductor(self, slave)
+            if not self.__is_success_status(response.status_code):
+                failed = True
+
+        if not failed:
+            super(Transductor, self).save()
+
+        return failed
+        
     def update(self, *args, **kwargs):
         self.full_clean()
         failed = False
 
-        for slave in self.slave_servers.all():
-            if not kwargs.get('bypass_requests', None):
-                response = update_transductor(self, slave)
-                if not self.__is_success_status(response.status_code):
-                    failed = True
+        slave = self.slave_server
+        if not kwargs.get('bypass_requests', None):
+            response = update_transductor(self, slave)
+            if not self.__is_success_status(response.status_code):
+                failed = True
 
         if not failed:
             super(Transductor, self).save()
-        else:
-            # FIXME: Raise exception
-            print("Couldn't update this transductor in all Slave Servers")
+
+        return failed
 
     def delete(self, *args, **kwargs):
         self.active = False
 
+
         failed = False
-        for slave in self.slave_servers.all():
-            if not kwargs.get('bypass_requests', None):
-                response = slave.remove_transductor(self)
-                if not self.__successfully_deleted(response.status_code):
-                    failed = True
+
+        slave = self.slave_server
+        if not kwargs.get('bypass_requests', None):
+            response = update_transductor(self, slave)
+            if not self.__is_success_status(response.status_code):
+                failed = True
 
         if not failed:
-            self.full_clean()
             super(Transductor, self).delete()
-        else:
-            # FIXME: Raise exception
-            print("Couldn't delete this transductor in all Slave Servers")
+
+        return failed 
 
     def get_measurements(self, datetime):
         raise NotImplementedError

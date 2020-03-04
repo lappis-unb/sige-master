@@ -1,7 +1,16 @@
+from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from slaves.models import Slave
 from rest_framework.exceptions import NotAcceptable
+from rest_framework.exceptions import APIException
+from campi.models import Campus
+
 from .models import EnergyTransductor
+from .api import create_transductor
+from .api import update_transductor
+
+import time
+import requests
 
 
 class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
@@ -11,6 +20,7 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
             'serial_number',
             'ip_address',
             'port',
+            'slave_server',
             'geolocation_latitude',
             'geolocation_longitude',
             'campus',
@@ -40,6 +50,30 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
                 'two or more groups of the same type.'
             )
         else:
+            if(validated_data.get('slave_server') is not None):
+                try:
+                    slave_server = validated_data.get('slave_server')
+                    respose = create_transductor(validated_data, slave_server)
+                    if respose.status_code != 201:
+                        error_message = _('Could not add transductor to server ')
+                        error_message += slave_server.ip_address
+                        exception = APIException(
+                            error_message
+                        )
+                        exception.status_code = 400
+                        raise exception
+
+                except requests.exceptions.Timeout:
+                    error_message = 'Could not connect with connect with' + \
+                        'collection server at ip: ' + \
+                        slave_server.ip_address
+                    
+                    exception = APIException(
+                            error_message
+                        )
+                    exception.status_code = 400
+                    raise exception
+
             transductor = EnergyTransductor.objects.create(
                 serial_number=validated_data.get('serial_number'),
                 ip_address=validated_data.get('ip_address'),
@@ -55,6 +89,7 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
 
             for group in validated_data.get('grouping'):
                 transductor.grouping.add(group)
+
 
             return transductor
 
@@ -72,9 +107,42 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
                 'two or more groups of the same type.'
             )
         else:
-            for attr, value in validated_data.items():
-                setattr(instance, attr, value)
-            instance.update()
+            slave_servers = validated_data.get('slave_servers')
+            errors = [] 
+            for slave_server in slave_servers:
+                try:
+                    respose = update_transductor(validated_data, slave_server)
+                    if respose.status_code != 200:
+                        errors.append(
+                            _('Could not add transductor to server at ip:') + slave_server.ip_address)
+                except requests.exceptions.Timeout:
+                    error_messages = _('Could not connect with connect with') + \
+                        _('collection server at ip: ') + \
+                        slave_server.ip_address
+                    errors.append(error_messages)
+
+                if errors.__len__() != 0:
+                    exception = APIException(
+                        errors
+                    )
+                    exception.status_code = 400
+                    raise exception
+
+            instance.serial_number = validated_data.get('serial_number')
+            instance.ip_address = validated_data.get('ip_address')
+            instance.firmware_version = validated_data.get('firmware_version')
+            instance.campus = validated_data.get('campus')
+            instance.name = validated_data.get('name')
+            instance.model = validated_data.get('model')
+            instance.geolocation_latitude = validated_data.get(
+                'geolocation_latitude')
+            instance.geolocation_longitude = validated_data.get(
+                'geolocation_longitude'
+            )
+
+            instance.grouping.set(validated_data.get('grouping'))
+
+            instance.slave_servers.set(validated_data.get('slave_servers'))
 
             return instance
 
