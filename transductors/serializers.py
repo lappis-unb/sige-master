@@ -4,6 +4,8 @@ from slaves.models import Slave
 from rest_framework.exceptions import NotAcceptable
 from rest_framework.exceptions import APIException
 from campi.models import Campus
+from rest_framework import status,viewsets
+from rest_framework.response import Response
 
 from .models import EnergyTransductor
 from .api import check_connection
@@ -84,11 +86,13 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
                 geolocation_latitude=validated_data.get('geolocation_latitude'),
                 geolocation_longitude=validated_data.get(
                     'geolocation_longitude'
-                )
+                ),
+                slave_server= slave_server
             )
 
             for group in validated_data.get('grouping'):
                 transductor.grouping.add(group)
+
 
             return transductor
 
@@ -188,6 +192,17 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
         instance.save()
         return instance
 
+    def destroy(self, request, *args, **kwargs):
+        try:
+            print('delelelelete    ')
+            instance = self.get_object()
+            slave_server = instance.slave_server
+            if slave_server is not None:
+                delete_transductor(instance, slave_server)            
+            instance.delete()
+        except Exception:
+            pass
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 class AddToServerSerializer(serializers.Serializer):
     slave_id = serializers.IntegerField()

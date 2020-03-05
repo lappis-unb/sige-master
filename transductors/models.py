@@ -142,23 +142,23 @@ class Transductor(PolymorphicModel):
     def __str__(self):
         raise NotImplementedError
 
-    def delete(self, *args, **kwargs):
-        slave = self.slave_server
-        failed = False
+    # def delete(self, *args, **kwargs):
+    #     slave = self.slave_server
+    #     failed = False
         
-        if not kwargs.get('bypass_requests', None):
-            try:
-                response = delete_transductor(self, slave)
-            except Exception:
-                failed = True
+    #     if not kwargs.get('bypass_requests', None):
+    #         # try:
+    #         response = delete_transductor(self, slave)
+    #         # except Exception:
+    #             # failed = True
 
-            if not self.__is_success_status(response.status_code):
-                failed = True
+    #         if not self.__is_success_status(response.status_code):
+    #             failed = True
 
-        if not failed:
-            super(Transductor, self).delete()
+    #     if not failed:
+    #         super(Transductor, self).delete()
 
-        return failed 
+    #     return failed 
 
     def get_measurements(self, datetime):
         raise NotImplementedError

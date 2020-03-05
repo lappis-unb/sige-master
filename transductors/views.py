@@ -4,18 +4,30 @@ from django.shortcuts import render
 
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework import serializers, viewsets, permissions
+from rest_framework import serializers, viewsets, permissions, status
 
 from .api import *
 from slaves.models import Slave
 from .models import EnergyTransductor
 from .serializers import EnergyTransductorSerializer, AddToServerSerializer
+from django.http import Http404
 
 
 class EnergyTransductorViewSet(viewsets.ModelViewSet):
     queryset = EnergyTransductor.objects.all()
     serializer_class = EnergyTransductorSerializer
     permission_classes = (permissions.AllowAny,)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        try:
+            response = delete_transductor(instance, instance.slave_server)
+            if response.status_code is not 204:
+               return Response(status=status.HTTP_400_BAD_REQUEST) 
+            instance.delete()
+        except Http404:
+            pass
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=['post'])
     def add_to_server(self, request, pk=None):
