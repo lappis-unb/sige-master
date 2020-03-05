@@ -4,7 +4,7 @@ from django.shortcuts import render
 
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework import serializers, viewsets, permissions
+from rest_framework import serializers, viewsets, permissions, status
 
 from .api import *
 from slaves.models import Slave
@@ -33,7 +33,7 @@ class EnergyTransductorViewSet(viewsets.ModelViewSet):
             return Response(data=json.loads(response.content),
                             status=response.status_code)
         else:
-            return Response(data=serializer.errors,
+            return Response(data=serializer_class.errors,
                             status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -44,7 +44,8 @@ class EnergyTransductorListViewSet(viewsets.GenericViewSet,
     
     def get_queryset(self):
         transductors = EnergyTransductor.objects.all()
-        transductorList = []
+        slaves = Slave.objects.all()
+        transductorList = {}
         for transductor in transductors:
             crit = transductor.events_failedconnectiontransductorevent.filter(
                 ended_at__isnull=True).count()
@@ -68,5 +69,27 @@ class EnergyTransductorListViewSet(viewsets.GenericViewSet,
                 'current_critical_events_count': crit,
                 'events_last72h': last72h
             }
-            transductorList.append(transductorInformation)
-        return transductorList
+            transductor_id = transductor.pk
+            transductorList[transductor.pk] = transductorInformation
+        for slave in slaves:
+            slave_transductors = slave.transductors.all()
+            for transductor in slave_transductors:
+                transductor_id = transductor.pk
+                count = transductorList[transductor_id][
+                    'current_precarious_events_count']
+                count = count + \
+                    slave.events_failedconnectionslaveevent.filter(
+                        ended_at__isnull=True).count()
+                transductorList[transductor_id][
+                    'current_precarious_events_count'] = count
+                count = transductorList[transductor_id]['events_last72h']
+                count = count + \
+                    slave.events_failedconnectionslaveevent.filter(
+                        created_at__range=[timezone.now() - timezone.
+                                           timedelta(days=3),
+                                           timezone.now()]).count()
+                transductorList[transductor_id]['events_last72h'] = count
+        response = []
+        for item in transductorList.values():
+            response.append(item)
+        return response
