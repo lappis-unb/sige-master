@@ -118,7 +118,7 @@ graph_router.register(
 )
 
 graph_router.register(
-    r'quarterly_daily_consumption',
+    r'quarterly-daily-consumption',
     DailyConsumptionViewSet,
     basename='quarterlydailyconsumption'
 )
