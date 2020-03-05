@@ -9,9 +9,13 @@ from rest_framework import serializers
 from rest_framework import viewsets
 from rest_framework import mixins
 
+from rest_framework.response import Response
+
 from rest_framework.exceptions import APIException
 
 from transductors.models import EnergyTransductor
+
+from campi.models import Campus
 
 from measurements.utils import MeasurementParamsValidator
 
@@ -29,6 +33,8 @@ from .serializers import QuarterlyMeasurementSerializer
 from .serializers import MonthlyMeasurementSerializer
 from .serializers import QuarterlySerializer
 from .serializers import RealTimeMeasurementSerializer
+
+from django.utils.translation import gettext_lazy as _
 
 
 #  this viewset don't inherits from viewsets.ModelViewSet because it
@@ -197,39 +203,46 @@ class MinutelyMeasurementViewSet(MeasurementViewSet):
         return filtered_values
 
 
-class QuarterlyMeasurementViewSet(MeasurementViewSet):
+class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
+                                  mixins.DestroyModelMixin,
+                                  mixins.ListModelMixin,
+                                  viewsets.GenericViewSet):
     model = QuarterlyMeasurement
-    queryset = QuarterlyMeasurement.objects.none()
+    queryset = QuarterlyMeasurement.objects.all()
     serializer_class = QuarterlyMeasurementSerializer
 
-    # def get_queryset(self):
-    #     start_date = self.request.query_params.get('start_date')
-    #     end_date = self.request.query_params.get('end_date')
+    def list(self, request):
+        start_date = self.request.query_params.get('start_date')
+        end_date = self.request.query_params.get('end_date')
+        campus = self.request.query_params.get('campus')
 
-    #     params = [
-    #         {'name': 'start_date', 'value': start_date},
-    #         {'name': 'end_date', 'value': end_date}
-    #     ]
+        try:
+            if start_date is not None and end_date is not None:
+                self.queryset = self.model.objects.filter(
+                    collection_date__range=(start_date, end_date)
+                ).order_by(
+                    'collection_date'
+                )
 
-    #     validations.validate_query_params(params)
+            if campus:
+                campus = Campus.objects.get(
+                    pk=int(campus)
+                )
+                self.queryset = self.queryset.filter(
+                    transductor__campus__in=[campus]
+                ) 
+        except Campus.DoesNotExist:
+            raise APIException(
+                'Campus id does not match '
+                'any existent campus.'
+            )
 
-    #     try:
-    #         self.queryset = self.model.objects.filter(
-    #             collection_date__gte=start_date,
-    #             collection_date__lte=end_date
-    #         ).order_by(
-    #             'collection_date'
-    #         )
-    #     except EnergyTransductor.DoesNotExist:
-    #         raise APIException(
-    #             'Serial number field does not match '
-    #             'any existent EnergyTransductor.'
-    #         )
-
-    #     return self.mount_data_list()
+        return Response(self.mount_data_list(), status=200)
 
     def mount_data_list(self, transductor=[]):
         total_consumption_per_hour = []
+        response = [0] * 24
+        import re
 
         for field in self.fields:
             measurements = self.queryset.values(
@@ -241,8 +254,11 @@ class QuarterlyMeasurementViewSet(MeasurementViewSet):
                     measurements,
                     field
                 )
+                for measurement in total_consumption_per_hour:
+                    position = int(re.search('([ ][0-9]+)', measurement[0]).group(0))
+                    response[position] = measurement[1]
 
-        return total_consumption_per_hour
+        return response
 
     def apply_algorithm(self, measurements, field, transductor=[]):
         measurements_list = (
@@ -256,23 +272,17 @@ class QuarterlyMeasurementViewSet(MeasurementViewSet):
 
         for i in range(1, len(measurements) - 1):
             actual = measurements[i]['collection_date']
-            last = measurements[i - 1]['collection_date']
-
-            if actual.minute < 15:
-                answer_hour = actual.hour
-            else:
-                answer_hour = actual.hour + 1
-
+            
             last_hour = measurements_list[len(measurements_list) - 1][0].hour
 
-            if answer_hour == last_hour:
+            if actual.hour == last_hour:
                 measurements_list[len(measurements_list) - 1][1] += (
                     measurements[i][field]
                 )
             else:
                 answer_date = timezone.datetime(
                     actual.year, actual.month,
-                    actual.day, answer_hour, 0, 0
+                    actual.day, actual.hour, 0, 0
                 )
 
                 measurements_list[len(measurements_list) - 1][0] = (
@@ -291,13 +301,7 @@ class QuarterlyMeasurementViewSet(MeasurementViewSet):
             .strftime('%m/%d/%Y %H:%M:%S')
         )
 
-        quarterly_measurements = {}
-        quarterly_measurements['measurements'] = measurements_list
-
-        if transductor != []:
-            quarterly_measurements['transductor'] = transductor
-
-        return [quarterly_measurements]
+        return measurements_list
 
 
 class MonthlyMeasurementViewSet(MeasurementViewSet):
