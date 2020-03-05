@@ -49,7 +49,9 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
                 name=validated_data.get('name'),
                 model=validated_data.get('model'),
                 geolocation_latitude=validated_data.get('geolocation_latitude'),
-                geolocation_longitude=validated_data.get('geolocation_longitude'),
+                geolocation_longitude=validated_data.get(
+                    'geolocation_longitude'
+                ),
                 history=validated_data.get('history')
             )
 
