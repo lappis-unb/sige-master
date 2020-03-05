@@ -1,5 +1,26 @@
 import requests
 
+def check_connection(slave):
+    if slave is None:
+        return True 
+
+    protocol = "http://"
+    endpoint = "/energy-transductors/"
+    address = protocol\
+        + slave.ip_address\
+        + ":"\
+        + slave.port\
+        + endpoint
+    try:
+        response = requests.get(address, timeout=1)
+    except Exception:
+        return False
+         
+    if response.status_code == 200:
+        return True
+
+    else:
+        return False
 
 def create_transductor(transductor_data, slave_server):
     protocol = "http://"
@@ -32,7 +53,6 @@ def update_transductor(transductor_data, slave_server):
 
     j = __get_transductor_data(transductor_data, slave_server)
 
-    print(j )
     return requests.put(address, json=j)
 
     # return requests.put(address, json=__get_transductor_data(transductor_data,

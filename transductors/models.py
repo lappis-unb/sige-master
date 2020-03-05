@@ -143,13 +143,15 @@ class Transductor(PolymorphicModel):
         raise NotImplementedError
 
     def delete(self, *args, **kwargs):
-        self.active = False
-
-        failed = False
-
         slave = self.slave_server
+        failed = False
+        
         if not kwargs.get('bypass_requests', None):
-            response = update_transductor(self, slave)
+            try:
+                response = delete_transductor(self, slave)
+            except Exception:
+                failed = True
+
             if not self.__is_success_status(response.status_code):
                 failed = True
 

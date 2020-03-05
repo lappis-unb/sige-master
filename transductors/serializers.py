@@ -6,8 +6,10 @@ from rest_framework.exceptions import APIException
 from campi.models import Campus
 
 from .models import EnergyTransductor
+from .api import check_connection
 from .api import create_transductor
 from .api import update_transductor
+from .api import delete_transductor
 
 import time
 import requests
@@ -55,7 +57,8 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
                     slave_server = validated_data.get('slave_server')
                     respose = create_transductor(validated_data, slave_server)
                     if respose.status_code != 201:
-                        error_message = _('The collection server %s is unavailable' % slave_server.name)
+                        error_message = _(
+                            'The collection server %s is unavailable' % slave_server.name)
                         exception = APIException(
                             error_message
                         )
@@ -63,7 +66,8 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
                         raise exception
 
                 except Exception:
-                    error_message = _('Could not connect with server %s. try it again latter' % slave_server.name)
+                    error_message = _(
+                        'Could not connect with server %s. try it again latter' % slave_server.name)
                     exception = APIException(
                         error_message
                     )
@@ -89,6 +93,7 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
             return transductor
 
     def update(self, instance, validated_data):
+
         existent_group_type = (
             [
                 group.type.name for group in set(validated_data.get('grouping'))
@@ -98,48 +103,90 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
 
         if len(existent_group_type) is not len(valid_groups_type):
             raise NotAcceptable(
-                'You could not link the same transductor for '
-                'two or more groups of the same type.'
+                _('You could not link the same transductor for '
+                  'two or more groups of the same type.')
             )
-        else:
-            slave_servers = validated_data.get('slave_servers')
-            errors = [] 
-            for slave_server in slave_servers:
+        old_slave_server = instance.slave_server
+        new_slave_server = validated_data.get('slave_server')
+
+        print(old_slave_server)      
+        print(new_slave_server)
+        print(validated_data.get('slave_server'))
+
+        errors = []
+        if new_slave_server != old_slave_server:
+            if not check_connection(old_slave_server):
+                error_message = _(
+                    'Could not disconnect from server %s. try it again latter' % old_slave_server.name)
+                errors.append(error_message)
+
+            if not check_connection(new_slave_server):
+                error_message = _(
+                    'Could not connect wit h server %s. try it again latter' % new_slave_server.name)
+
+                errors.append(error_message)
+
+            if errors.__len__() > 0:
+                exception = APIException(
+                    errors
+                )
+                exception.status_code = 400
+                raise exception
+
+            else:
                 try:
-                    respose = update_transductor(validated_data, slave_server)
-                    if respose.status_code != 200:
-                        errors.append(
-                            _('Could not add transductor to server at ip:') + slave_server.ip_address)
-                except requests.exceptions.Timeout:
-                    error_messages = _('Could not connect with connect with') + \
-                        _('collection server at ip: ') + \
-                        slave_server.ip_address
+                    if old_slave_server is not None:
+                        delete_transductor(instance, old_slave_server)
+
+                except Exception:
+                    error_messages = _(
+                        'Could not disconnect from server %s. try it again latter' % old_slave_server.name)
+
                     errors.append(error_messages)
+                try:
+                    if new_slave_server is not None:
+                        create_transductor(validated_data, new_slave_server)
+                except Exception:
+                    error_message = _(
+                        'Could not connect with server %s. try it again latter' % new_slave_server.name)
+                    
+                    errors.append(error_messages)
+        
+        else:
+            try:
+                if old_slave_server is not None:
+                    update_transductor(validated_data, old_slave_server)
+            except Exception:
+                error_message = _(
+                    'Could not connect with server %s. try it again latter' % new_slave_server.name)
+                
+                errors.append(error_messages)
 
-                if errors.__len__() != 0:
-                    exception = APIException(
-                        errors
-                    )
-                    exception.status_code = 400
-                    raise exception
-
-            instance.serial_number = validated_data.get('serial_number')
-            instance.ip_address = validated_data.get('ip_address')
-            instance.firmware_version = validated_data.get('firmware_version')
-            instance.campus = validated_data.get('campus')
-            instance.name = validated_data.get('name')
-            instance.model = validated_data.get('model')
-            instance.geolocation_latitude = validated_data.get(
-                'geolocation_latitude')
-            instance.geolocation_longitude = validated_data.get(
-                'geolocation_longitude'
+        if errors.__len__() > 0:
+            exception = APIException(
+                errors
             )
+            exception.status_code = 400
+            raise exception
 
-            instance.grouping.set(validated_data.get('grouping'))
+        instance.serial_number = validated_data.get('serial_number')
+        instance.ip_address = validated_data.get('ip_address')
+        instance.firmware_version = validated_data.get('firmware_version')
+        instance.campus = validated_data.get('campus')
+        instance.name = validated_data.get('name')
+        instance.model = validated_data.get('model')
+        instance.geolocation_latitude = validated_data.get(
+            'geolocation_latitude')
+        instance.geolocation_longitude = validated_data.get(
+            'geolocation_longitude'
+        )
 
-            instance.slave_servers.set(validated_data.get('slave_servers'))
+        instance.grouping.set(validated_data.get('grouping'))
 
-            return instance
+        instance.slave_server = new_slave_server
+        
+        instance.save()
+        return instance
 
 
 class AddToServerSerializer(serializers.Serializer):
