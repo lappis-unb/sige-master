@@ -122,8 +122,13 @@ class Transductor(PolymorphicModel):
 
     grouping = models.ManyToManyField(
         Group,
-        verbose_name=_('Grouping'),
+        verbose_name=_('grouping'),
         help_text=_('This field is required')
+    )
+
+    history = models.TextField(
+        blank=True,
+        verbose_name=_('history')
     )
 
     class Meta:
