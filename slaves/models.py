@@ -41,7 +41,7 @@ class Slave(models.Model):
         verbose_name = _('Slave server')
 
     def __str__(self):
-        return self.ip_address
+        return self.name
 
     def save(self, *args, **kwargs):
         self.full_clean()

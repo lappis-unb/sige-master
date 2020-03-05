@@ -46,8 +46,8 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
 
         if len(existent_group_type) is not len(valid_groups_type):
             raise NotAcceptable(
-                'You could not link the same transductor for '
-                'two or more groups of the same type.'
+                _('You could not link the same transductor for '
+                  'two or more groups of the same type.')
             )
         else:
             if(validated_data.get('slave_server') is not None):
@@ -55,22 +55,18 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
                     slave_server = validated_data.get('slave_server')
                     respose = create_transductor(validated_data, slave_server)
                     if respose.status_code != 201:
-                        error_message = _('Could not add transductor to server ')
-                        error_message += slave_server.ip_address
+                        error_message = _('The collection server %s is unavailable' % slave_server.name)
                         exception = APIException(
                             error_message
                         )
                         exception.status_code = 400
                         raise exception
 
-                except requests.exceptions.Timeout:
-                    error_message = 'Could not connect with connect with' + \
-                        'collection server at ip: ' + \
-                        slave_server.ip_address
-                    
+                except Exception:
+                    error_message = _('Could not connect with server %s. try it again latter' % slave_server.name)
                     exception = APIException(
-                            error_message
-                        )
+                        error_message
+                    )
                     exception.status_code = 400
                     raise exception
 
@@ -89,7 +85,6 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
 
             for group in validated_data.get('grouping'):
                 transductor.grouping.add(group)
-
 
             return transductor
 
