@@ -116,3 +116,9 @@ graph_router.register(
     GenerationOffPeakViewSet,
     basename='quarterlygenerationoffpeak'
 )
+
+graph_router.register(
+    r'quarterly_daily_consumption',
+    DailyConsumptionViewSet,
+    basename='quarterlydailyconsumption'
+)
