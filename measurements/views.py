@@ -1,6 +1,7 @@
 from django.utils import timezone
 import numpy as np
 import os
+import re
 from .lttb import downsample
 
 from django.db.models.query import QuerySet
@@ -210,6 +211,7 @@ class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
     model = QuarterlyMeasurement
     queryset = QuarterlyMeasurement.objects.all()
     serializer_class = QuarterlyMeasurementSerializer
+    fields = []
 
     def list(self, request):
         start_date = self.request.query_params.get('start_date')
@@ -240,23 +242,18 @@ class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
         return Response(self.mount_data_list(), status=200)
 
     def mount_data_list(self, transductor=[]):
-        total_consumption_per_hour = []
-        response = [0] * 24
-        import re
-
+        response = []
+ 
         for field in self.fields:
             measurements = self.queryset.values(
                 field, 'collection_date'
             )
 
             if measurements:
-                total_consumption_per_hour = self.apply_algorithm(
+                response = self.apply_algorithm(
                     measurements,
                     field
                 )
-                for measurement in total_consumption_per_hour:
-                    position = int(re.search('([ ][0-9]+)', measurement[0]).group(0))
-                    response[position] = measurement[1]
 
         return response
 
@@ -265,14 +262,14 @@ class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
             [
                 [
                     measurements[0]['collection_date'],
-                    measurements[0][field],
+                    measurements[0][field]
                 ]
             ]
         )
 
         for i in range(1, len(measurements) - 1):
             actual = measurements[i]['collection_date']
-            
+
             last_hour = measurements_list[len(measurements_list) - 1][0].hour
 
             if actual.hour == last_hour:
@@ -430,6 +427,33 @@ class GenerationOffPeakViewSet(QuarterlyMeasurementViewSet):
 class TotalConsumtionViewSet(QuarterlyMeasurementViewSet):
     serializer_class = QuarterlySerializer
     fields = ['consumption_peak_time', 'consumption_off_peak_time']
+
+
+class DailyConsumptionViewSet(QuarterlyMeasurementViewSet):
+    serializer_class = QuarterlySerializer
+    fields = ['consumption_peak_time', 'consumption_off_peak_time']
+
+    def mount_data_list(self, transductor=[]):
+        total_consumption_per_hour = []
+        response = [0] * 24
+
+        for field in self.fields:
+            measurements = self.queryset.values(
+                field, 'collection_date'
+            )
+
+            if measurements:
+                total_consumption_per_hour = self.apply_algorithm(
+                    measurements,
+                    field
+                )
+                for measurement in total_consumption_per_hour:
+                    position = int(
+                        re.search('([ ][0-9]+)', measurement[0]).group(0)
+                    )
+                    response[position] = measurement[1]
+
+        return response        
 
 
 class RealTimeMeasurementViewSet(MeasurementViewSet):
