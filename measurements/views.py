@@ -26,6 +26,7 @@ from .models import QuarterlyMeasurement
 from .models import MonthlyMeasurement
 from .models import RealTimeMeasurement
 from .models import EnergyTransductor
+from .models import Tax
 
 from .serializers import MeasurementSerializer
 from .serializers import ThreePhaseSerializer
@@ -281,7 +282,6 @@ class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
                     actual.year, actual.month,
                     actual.day, actual.hour, 0, 0
                 )
-
                 measurements_list[len(measurements_list) - 1][0] = (
                     measurements_list[len(measurements_list) - 1][0]
                     .strftime('%m/%d/%Y %H:%M:%S')
@@ -454,6 +454,93 @@ class DailyConsumptionViewSet(QuarterlyMeasurementViewSet):
                     response[position] = measurement[1]
 
         return response        
+
+
+class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
+    serializer_class = QuarterlySerializer
+    fields = ['consumption_peak_time', 'consumption_off_peak_time']
+
+    def mount_data_list(self, transductor=[]):
+        response = []
+ 
+        for field in self.fields:
+            measurements = self.queryset.order_by('collection_date').values(
+                field, 'collection_date', 'tax'
+            )
+
+            if measurements:
+                response = self.apply_algorithm(
+                    measurements,
+                    field
+                )
+
+        return response
+
+    def apply_algorithm(self, measurements, field, transductor=[]):
+        type = self.request.query_params.get('type')
+
+        measurements_list = (
+            [
+                [
+                    measurements[0]['collection_date'],
+                    0,
+                    0
+                ]
+            ]
+        )
+
+        if type == 'daily':
+            for i in range(0, len(measurements) - 1):
+                actual = measurements[i]['collection_date']
+
+                last_day = (
+                    measurements_list[len(measurements_list) - 1][0].day
+                )
+
+                if actual.day == last_day:
+                    if actual.hour in range(0, 17) \
+                       or actual.hour in range(21, 23):
+                        measurements_list[len(measurements_list) - 1][1] += (
+                            measurements[i][field]
+                        )
+                    else:
+                        measurements_list[len(measurements_list) - 1][2] += (
+                            measurements[i][field]
+                        )
+                else:
+                    answer_date = timezone.datetime(
+                        actual.year, actual.month,
+                        actual.day, actual.hour, 0, 0
+                    )
+                    measurements_list[len(measurements_list) - 1][0] = (
+                        measurements_list[len(measurements_list) - 1][0]
+                        .strftime('%m/%d/%Y %H:%M:%S')
+                    )
+
+                    if actual.hour in range(0, 17) \
+                       or actual.hour in range(21, 23):
+                        measurements_list.append(
+                            [
+                                answer_date,
+                                measurements[i][field],
+                                0
+                            ]
+                        )
+                    else:
+                        measurements_list.append(
+                            [
+                                answer_date,
+                                0,
+                                measurements[i][field]
+                            ]
+                        )
+
+            measurements_list[len(measurements_list) - 1][0] = (
+                measurements_list[len(measurements_list) - 1][0]
+                .strftime('%m/%d/%Y %H:%M:%S')
+            )
+
+        return measurements_list      
 
 
 class RealTimeMeasurementViewSet(MeasurementViewSet):
