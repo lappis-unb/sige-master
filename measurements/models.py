@@ -6,6 +6,19 @@ from django.contrib.postgres.fields import ArrayField, HStoreField
 from django.utils.translation import gettext_lazy as _
 
 
+class Tax(models.Model):
+    value = models.FloatField(
+        default=0,
+        verbose_name=_('Tax value')
+    )
+
+    registration_date = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name=_('registration date')
+    )
+
+
 class Measurement(PolymorphicModel):
     collection_date = models.DateTimeField(
         blank=False,
@@ -223,6 +236,13 @@ class QuarterlyMeasurement(Measurement):
     capacitive_power_off_peak_time = models.FloatField(
         default=0,
         verbose_name=_('Capacitive power not on peak hours')
+    )
+
+    tax = models.ForeignKey(
+        Tax,
+        null=True,
+        on_delete=models.SET_NULL,
+        verbose_name=_('Tax for peak time collection')
     )
 
 
