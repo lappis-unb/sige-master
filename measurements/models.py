@@ -7,9 +7,14 @@ from django.utils.translation import gettext_lazy as _
 
 
 class Tax(models.Model):
-    value = models.FloatField(
+    value_peak = models.FloatField(
         default=0,
-        verbose_name=_('Tax value')
+        verbose_name=_('Tax value to periods in peak time')
+    )
+
+    value_off_peak = models.FloatField(
+        default=0,
+        verbose_name=_('Tax value to periods in off peak time')
     )
 
     registration_date = models.DateTimeField(
