@@ -108,15 +108,13 @@ class FailedConnectionSlaveEvent(Event):
     class Meta:
         verbose_name = _('failed connection with slave server')
 
-    @staticmethod
-    def save_event(slave):
+    def save_event(self, slave):
         """
         Saves a failed connection event related to a slave
         """
-        new_event = FailedConnectionSlaveEvent()
-        new_event.slave = slave
-        new_event.save()
-        return new_event
+        self.slave = slave
+        self.save()
+        return self
 
 
 class CriticalVoltageEvent(VoltageRelatedEvent):
