@@ -64,7 +64,7 @@ INSTALLED_APPS = [
     'slaves',
     'measurements',
     'transductors',
-    # 'users',
+    'users',
     'corsheaders',
     'events',
     'rosetta',
@@ -84,7 +84,17 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
 CORS_ORIGIN_ALLOW_ALL = True
+
+CORS_ALLOW_HEADERS = [
+    'content-disposition', 
+    'accept-encoding',
+    'content-type',
+    'accept',
+    'origin',
+    'authorization'
+]
 
 ROOT_URLCONF = 'smi_master.urls'
 
@@ -189,7 +199,7 @@ USE_L10N = True
 
 STATIC_URL = '/static/'
 
-# AUTH_USER_MODEL = 'users.CustomUser'
+AUTH_USER_MODEL = 'users.CustomUser'
 
 LOCALE_PATHS = (PROJECT_DIR + '/locale', )
 

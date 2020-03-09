@@ -18,13 +18,13 @@ from users.serializers import UserSerializer
 @api_view(["POST"])
 @permission_classes((AllowAny,))
 def login(request):
-    username = request.data.get("username")
+    email = request.data.get("email")
     password = request.data.get("password")
-    if username is None or password is None:
-        return Response({'error': 'Please provide username and password'},
+    if email is None or password is None:
+        return Response({'error': 'Please provide email and password'},
                         status=HTTP_400_BAD_REQUEST)
 
-    user = authenticate(username=username, password=password)
+    user = authenticate(email=email, password=password)
 
     if not user:
         return Response({'error': 'Invalid Credentials'},
