@@ -233,7 +233,7 @@ class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
                 )
                 self.queryset = self.queryset.filter(
                     transductor__campus__in=[campus]
-                ) 
+                )
         except Campus.DoesNotExist:
             raise APIException(
                 'Campus id does not match '
@@ -244,7 +244,7 @@ class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
 
     def mount_data_list(self, transductor=[]):
         response = []
- 
+
         for field in self.fields:
             measurements = self.queryset.values(
                 field, 'collection_date'
@@ -453,7 +453,7 @@ class DailyConsumptionViewSet(QuarterlyMeasurementViewSet):
                     )
                     response[position] = measurement[1]
 
-        return response        
+        return response
 
 
 class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
@@ -462,10 +462,11 @@ class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
 
     def mount_data_list(self, transductor=[]):
         response = []
- 
+
         for field in self.fields:
             measurements = self.queryset.order_by('collection_date').values(
-                field, 'collection_date', 'tax'
+                field, 'collection_date',
+                'tax__value_peak', 'tax__value_off_peak'
             )
 
             if measurements:
@@ -502,10 +503,12 @@ class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
                        or actual.hour in range(21, 23):
                         measurements_list[len(measurements_list) - 1][1] += (
                             measurements[i][field]
+                            * measurements[i]['tax__value_off_peak']
                         )
                     else:
                         measurements_list[len(measurements_list) - 1][2] += (
                             measurements[i][field]
+                            * measurements[i]['tax__value_peak']
                         )
                 else:
                     answer_date = timezone.datetime(
@@ -522,7 +525,10 @@ class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
                         measurements_list.append(
                             [
                                 answer_date,
-                                measurements[i][field],
+                                (
+                                    measurements[i][field]
+                                    * measurements[i]['tax__value_off_peak']
+                                ),
                                 0
                             ]
                         )
@@ -531,7 +537,10 @@ class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
                             [
                                 answer_date,
                                 0,
-                                measurements[i][field]
+                                (
+                                    measurements[i][field]
+                                    * measurements[i]['tax__value_peak']
+                                )
                             ]
                         )
 
@@ -540,7 +549,7 @@ class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
                 .strftime('%m/%d/%Y %H:%M:%S')
             )
 
-        return measurements_list      
+        return measurements_list
 
 
 class RealTimeMeasurementViewSet(MeasurementViewSet):
