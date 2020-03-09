@@ -501,15 +501,13 @@ class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
                 if actual.day == last_day:
                     if actual.hour in range(0, 17) \
                        or actual.hour in range(21, 23):
-                        measurements_list[len(measurements_list) - 1][1] += (
-                            measurements[i][field]
+                        measurements_list[len(measurements_list) - 1][1] += \
+                            measurements[i][field] \
                             * measurements[i]['tax__value_off_peak']
-                        )
                     else:
-                        measurements_list[len(measurements_list) - 1][2] += (
-                            measurements[i][field]
+                        measurements_list[len(measurements_list) - 1][2] += \
+                            measurements[i][field] \
                             * measurements[i]['tax__value_peak']
-                        )
                 else:
                     answer_date = timezone.datetime(
                         actual.year, actual.month,
@@ -522,25 +520,21 @@ class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
 
                     if actual.hour in range(0, 17) \
                        or actual.hour in range(21, 23):
+                        value_off_peak = measurements[i]['tax__value_off_peak']
                         measurements_list.append(
                             [
                                 answer_date,
-                                (
-                                    measurements[i][field]
-                                    * measurements[i]['tax__value_off_peak']
-                                ),
+                                measurements[i][field] * value_off_peak,
                                 0
                             ]
                         )
                     else:
+                        value_peak = measurements[i]['tax__value_peak']
                         measurements_list.append(
                             [
                                 answer_date,
                                 0,
-                                (
-                                    measurements[i][field]
-                                    * measurements[i]['tax__value_peak']
-                                )
+                                measurements[i][field] * value_peak
                             ]
                         )
 
