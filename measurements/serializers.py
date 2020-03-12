@@ -3,6 +3,9 @@ from rest_framework import serializers
 from .models import MinutelyMeasurement
 from .models import QuarterlyMeasurement
 from .models import MonthlyMeasurement
+from .models import EnergyTransductor
+
+from django.db.models import Sum
 
 
 class MinutelyMeasurementSerializer(serializers.HyperlinkedModelSerializer):
@@ -142,6 +145,7 @@ class QuarterlySerializer(QuarterlyMeasurementSerializer):
 
 
 class RealTimeMeasurementSerializer(serializers.HyperlinkedModelSerializer):
+    consumption = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = MinutelyMeasurement
@@ -157,4 +161,19 @@ class RealTimeMeasurementSerializer(serializers.HyperlinkedModelSerializer):
                   'total_active_power',
                   'total_reactive_power',
                   'total_power_factor',
+                  'consumption',
                   'url')
+
+    def get_consumption(self, obj):
+        info = QuarterlyMeasurement.objects.filter(
+            transductor=EnergyTransductor.objects.get(
+                pk=self.__dict__['_args'][0].last().transductor_id
+            )
+        ).aggregate(
+            total_consumption=(
+                Sum('consumption_peak_time')
+                + Sum('consumption_off_peak_time')
+            )
+        )
+
+        return info['total_consumption']
