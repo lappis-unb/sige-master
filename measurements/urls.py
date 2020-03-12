@@ -128,3 +128,15 @@ graph_router.register(
     CostConsumptionViewSet,
     basename='costconsumption'
 )
+
+graph_router.register(
+    r'quarterly-total-generation',
+    TotalGenerationViewSet,
+    basename='quarterlytotalgeneration'
+)
+
+graph_router.register(
+    r'quarterly-total-consumption',
+    TotalConsumtionViewSet,
+    basename='quarterlytotalconsumption'
+)

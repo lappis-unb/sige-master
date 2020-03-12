@@ -221,6 +221,7 @@ class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
         end_date = self.request.query_params.get('end_date')
         campus = self.request.query_params.get('campus')
         group = self.request.query_params.get('group')
+        serial_number = self.request.query_params.get('serial_number')
 
         try:
             if start_date is not None and end_date is not None:
@@ -236,6 +237,14 @@ class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
                 )
                 self.queryset = self.model.objects.filter(
                     transductor__grouping__in=[group]
+                )
+
+            if serial_number:
+                transductor = EnergyTransductor.objects.get(
+                    pk=int(serial_number)
+                )
+                self.queryset = self.model.objects.filter(
+                    transductor=transductor
                 )
 
             if campus:
@@ -443,6 +452,11 @@ class GenerationOffPeakViewSet(QuarterlyMeasurementViewSet):
 class TotalConsumtionViewSet(QuarterlyMeasurementViewSet):
     serializer_class = QuarterlySerializer
     fields = ['consumption_peak_time', 'consumption_off_peak_time']
+
+
+class TotalGenerationViewSet(QuarterlyMeasurementViewSet):
+    serializer_class = QuarterlySerializer
+    fields = ['generated_energy_peak_time', 'generated_energy_off_peak_time']
 
 
 class DailyConsumptionViewSet(QuarterlyMeasurementViewSet):
