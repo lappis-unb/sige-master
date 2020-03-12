@@ -18,6 +18,8 @@ from transductors.models import EnergyTransductor
 
 from campi.models import Campus
 
+from groups.models import Group
+
 from measurements.utils import MeasurementParamsValidator
 
 from .models import Measurement
@@ -227,6 +229,14 @@ class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
                     'collection_date'
                 )
 
+            if group:
+                group = Group.objects.get(
+                    pk=int(group)
+                )
+                self.queryset = self.model.objects.filter(
+                    transductor__grouping__in=[group]
+                )
+
             if campus:
                 campus = Campus.objects.get(
                     pk=int(campus)
@@ -236,8 +246,13 @@ class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
                 )
         except Campus.DoesNotExist:
             raise APIException(
-                'Campus id does not match '
+                'Campus id does not match with '
                 'any existent campus.'
+            )
+        except Group.DoesNotExist:
+            raise APIException(
+                'Group id does not match with '
+                'any existent group.'
             )
 
         return Response(self.mount_data_list(), status=200)
@@ -461,7 +476,10 @@ class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
     fields = ['consumption_peak_time', 'consumption_off_peak_time']
 
     def mount_data_list(self, transductor=[]):
-        response = []
+        data = {}
+        data['cost'] = []
+        data['min'] = 0
+        data['max'] = 0
 
         for field in self.fields:
             measurements = self.queryset.order_by('collection_date').values(
@@ -475,7 +493,15 @@ class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
                     field
                 )
 
-        return response
+                for value in response:
+                    total_cost = value[1] + value[2]
+
+                    if total_cost > data['max']:
+                        data['max'] = total_cost
+
+                    data['cost'].append([value[0], total_cost])
+
+        return data
 
     def apply_algorithm(self, measurements, field, transductor=[]):
         type = self.request.query_params.get('type')
@@ -499,44 +525,34 @@ class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
                 )
 
                 if actual.day == last_day:
-                    if actual.hour in range(0, 17) \
-                       or actual.hour in range(21, 23):
-                        measurements_list[len(measurements_list) - 1][1] += \
-                            measurements[i][field] \
-                            * measurements[i]['tax__value_off_peak']
-                    else:
-                        measurements_list[len(measurements_list) - 1][2] += \
-                            measurements[i][field] \
-                            * measurements[i]['tax__value_peak']
-                else:
-                    answer_date = timezone.datetime(
-                        actual.year, actual.month,
-                        actual.day, actual.hour, 0, 0
+                    self.build_data(
+                        actual, measurements, measurements_list, field, i
                     )
-                    measurements_list[len(measurements_list) - 1][0] = (
-                        measurements_list[len(measurements_list) - 1][0]
-                        .strftime('%m/%d/%Y %H:%M:%S')
+                else:
+                    self.finish_data(
+                        actual, measurements, measurements_list, field, i
                     )
 
-                    if actual.hour in range(0, 17) \
-                       or actual.hour in range(21, 23):
-                        value_off_peak = measurements[i]['tax__value_off_peak']
-                        measurements_list.append(
-                            [
-                                answer_date,
-                                measurements[i][field] * value_off_peak,
-                                0
-                            ]
-                        )
-                    else:
-                        value_peak = measurements[i]['tax__value_peak']
-                        measurements_list.append(
-                            [
-                                answer_date,
-                                0,
-                                measurements[i][field] * value_peak
-                            ]
-                        )
+            measurements_list[len(measurements_list) - 1][0] = (
+                measurements_list[len(measurements_list) - 1][0]
+                .strftime('%m/%d/%Y %H:%M:%S')
+            )
+        elif type == 'monthly':
+            for i in range(0, len(measurements) - 1):
+                actual = measurements[i]['collection_date']
+
+                last_month = (
+                    measurements_list[len(measurements_list) - 1][0].month
+                )
+
+                if actual.month == last_month:
+                    self.build_data(
+                        actual, measurements, measurements_list, field, i
+                    )
+                else:
+                    self.finish_data(
+                        actual, measurements, measurements_list, field, i
+                    )
 
             measurements_list[len(measurements_list) - 1][0] = (
                 measurements_list[len(measurements_list) - 1][0]
@@ -544,6 +560,55 @@ class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
             )
 
         return measurements_list
+
+    def build_data(
+            self, actual, measurements, measurements_list, field, index
+        ):
+        measurements_list[len(measurements_list) - 1][0] = (
+            measurements[index]['collection_date']
+        )
+        if actual.hour in range(0, 17) \
+            or actual.hour in range(21, 23):
+            measurements_list[len(measurements_list) - 1][1] += \
+                measurements[index][field] \
+                * measurements[index]['tax__value_off_peak']
+        else:
+            measurements_list[len(measurements_list) - 1][2] += \
+                measurements[index][field] \
+                * measurements[index]['tax__value_peak']
+
+    def finish_data(
+            self, actual, measurements, measurements_list, field, index
+        ):
+        answer_date = timezone.datetime(
+            actual.year, actual.month,
+            actual.day, actual.hour, 0, 0
+        )
+        measurements_list[len(measurements_list) - 1][0] = (
+            measurements_list[len(measurements_list) - 1][0]
+            .strftime('%m/%d/%Y %H:%M:%S')
+        )
+
+        if actual.hour in range(0, 17) \
+            or actual.hour in range(21, 23):
+            value_off_peak = measurements[index]['tax__value_off_peak']
+            measurements_list.append(
+                [
+                    answer_date,
+                    measurements[index][field] * value_off_peak,
+                    0
+                ]
+            )
+        else:
+            value_peak = measurements[index]['tax__value_peak']
+            measurements_list.append(
+                [
+                    answer_date,
+                    0,
+                    measurements[index][field] * value_peak
+                ]
+            )
+
 
 
 class RealTimeMeasurementViewSet(MeasurementViewSet):
