@@ -86,7 +86,7 @@ class Transductor(PolymorphicModel):
         verbose_name=_('longitude')
     )
     serial_number = models.CharField(
-        primary_key=True,
+        primary_key=False,
         unique=True,
         max_length=8,
         blank=False,
@@ -129,10 +129,17 @@ class Transductor(PolymorphicModel):
 
     slave_server = models.ForeignKey(
         Slave,
-        verbose_name = _('Collection Server'),
-        default = None,
+        verbose_name=_('Collection Server'),
+        default=None,
         null=True,
-        on_delete=models.DO_NOTHING
+        on_delete=models.DO_NOTHING, 
+        related_name='transductors'
+    )
+
+    id_in_slave = models.IntegerField(
+        default=0,
+        null=False,
+        blank=False
     )
 
     class Meta:
@@ -145,7 +152,7 @@ class Transductor(PolymorphicModel):
     # def delete(self, *args, **kwargs):
     #     slave = self.slave_server
     #     failed = False
-        
+
     #     if not kwargs.get('bypass_requests', None):
     #         # try:
     #         response = delete_transductor(self, slave)

@@ -14,7 +14,7 @@ def request_measurements(measurement_type, slave, transductor=None,
 
     if transductor is not None and start_date is not None:
         params = {
-            "serial_number": transductor.serial_number,
+            "id": transductor.id,
             "start_date": start_date,
             "end_date": datetime.now()
         }
@@ -33,7 +33,7 @@ def request_events(slave, event_type):
 
     params = {}
     if transductor is not None:
-        params["serial_number"] = transductor.serial_number
+        params["id"] = transductor.id
 
     if start_date is not None:
         start_date = start_date.strftime("%Y-%m-%d %H:%M:%S")

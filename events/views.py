@@ -66,11 +66,11 @@ class VoltageRelatedEventViewSet(EventViewSet):
     serializer_class = VoltageRelatedEventSerializer
 
     def specific_query(self):
-        serial_number = self.request.query_params.get('serial_number')
+        transductor_id = self.request.query_params.get('id')
 
         try:
             transductor = EnergyTransductor.objects.get(
-                serial_number=serial_number
+                id=transductor_id
             )
             self.queryset = self.queryset.filter(
                 transductor=transductor
@@ -104,11 +104,11 @@ class FailedConnectionTransductorEventViewSet(EventViewSet):
     serializer_class = FailedConnectionTransductorEventSerializer
 
     def specific_query(self):
-        serial_number = self.request.query_params.get('serial_number')
+        transductor_id = self.request.query_params.get('id')
 
         try:
             transductor = EnergyTransductor.objects.get(
-                serial_number=serial_number
+                id=transductor_id
             )
             self.queryset = self.queryset.filter(
                 transductor=transductor
@@ -136,7 +136,7 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
     }
 
     def list(self, request):
-        serial_number = request.data.get('serial_number')
+        transductor_id = self.request.query_params.get('id')
         type = self.request.query_params.get('type')
 
         if type == 'period':
@@ -153,11 +153,11 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
                 ended_at__isnull=True
             )
 
-        if serial_number:
+        if transductor_id:
             try:
                 self.queryset = self.queryset.filter(
                     transductor=EnergyTransductor.objects.get(
-                        serial_number=serial_number
+                        id=transductor_id
                     )
                 )
             except EnergyTransductor.DoesNotExist:
@@ -177,7 +177,7 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
                 event['id'] = element.pk
                 event['location'] = element.transductor.name
                 event['campus'] = element.transductor.campus.acronym
-                event['transductor'] = element.transductor.serial_number
+                event['transductor'] = element.transductor.id
                 event['data'] = element.data
                 event['start_time'] = element.created_at
                 event['end_time'] = element.ended_at
@@ -196,7 +196,7 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
                 event['id'] = element.pk
                 event['location'] = transductor.name
                 event['campus'] = transductor.campus.acronym
-                event['transductor'] = transductor.serial_number
+                event['transductor'] = transductor.id
                 event['data'] = {'slave': element.slave.pk}
                 event['start_time'] = element.created_at
                 event['end_time'] = element.ended_at

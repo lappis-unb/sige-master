@@ -1,5 +1,6 @@
 import requests
 
+
 def check_connection(slave):
     if slave is None:
         return True 
@@ -15,12 +16,13 @@ def check_connection(slave):
         response = requests.get(address, timeout=1)
     except Exception:
         return False
-         
+
     if response.status_code == 200:
         return True
 
     else:
         return False
+
 
 def create_transductor(transductor_data, slave_server):
     protocol = "http://"
@@ -38,28 +40,27 @@ def create_transductor(transductor_data, slave_server):
                          )
 
 
-def update_transductor(transductor_data, slave_server):
+def update_transductor(transductor_id, transductor_data, slave_server):
     protocol = "http://"
     endpoint = "/energy-transductors/"
-    serial_number = transductor_data.get("serial_number")
-    
+    transductor_id = transductor_data.get("id")
+
     address = protocol\
         + slave_server.ip_address\
         + ":"\
         + slave_server.port\
         + endpoint\
-        + serial_number\
+        + transductor_id\
         + "/"
 
-    j = __get_transductor_data(transductor_data, slave_server)
+    return requests.post(address, 
+                         json=__get_transductor_data(
+                             transductor_data, slave_server),
+                         timeout=1
+                         )
 
-    return requests.put(address, json=j)
 
-    # return requests.put(address, json=__get_transductor_data(transductor_data,
-    #                                                          slave_server))
-
-
-def delete_transductor(transductor, slave_server):
+def delete_transductor(transductor_id, transductor, slave_server):
     protocol = "http://"
     endpoint = "/energy-transductors/"
     address = protocol\
@@ -67,10 +68,10 @@ def delete_transductor(transductor, slave_server):
         + ":"\
         + slave_server.port\
         + endpoint\
-        + transductor.serial_number\
+        + transductor.transductor_id\
         + "/"
 
-    return requests.delete(address)
+    return requests.delete(address, timeout=1)
 
 
 def __get_transductor_data(transductor, slave_server):

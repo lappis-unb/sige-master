@@ -44,7 +44,7 @@ class CheckTransductorsAndSlaves():
 
                     for transductor in transductors:
                         transductor_status = EnergyTransductor.objects.get(
-                            serial_number=transductor['serial_number'])
+                            id=transductor['id'])
                         transductor_status.broken = transductor['broken']
                         transductor_status.save()
 
@@ -108,7 +108,7 @@ class DataCollector():
                 msm['reactive_max_power_list_off_peak']
             ),
             collection_date=msm['transductor_collection_date'],
-            transductor_id=transductor.serial_number
+            transductor_id=transductor.id
         )
 
     @staticmethod
@@ -144,7 +144,7 @@ class DataCollector():
             dht_current_b=msm['dht_current_b'],
             dht_current_c=msm['dht_current_c'],
             collection_date=msm['transductor_collection_date'],
-            transductor_id=transductor.serial_number
+            transductor_id=transductor.id
         )
 
     @staticmethod
@@ -165,7 +165,7 @@ class DataCollector():
                 msm['capacitive_power_off_peak_time']
             ),
             collection_date=msm['transductor_collection_date'],
-            transductor_id=transductor.serial_number
+            transductor_id=transductor.id
         )
 
     @staticmethod
@@ -305,7 +305,7 @@ class DataCollector():
                 for transductor_data in measurement:
                     try:
                         transductor = EnergyTransductor.objects.get(
-                            serial_number=transductor_data['transductor_id']
+                            id=transductor_data['transductor_id']
                         )
                         DataCollector.build_realtime_measurements(
                             transductor_data, transductor
