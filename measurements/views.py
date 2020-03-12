@@ -220,6 +220,7 @@ class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
         start_date = self.request.query_params.get('start_date')
         end_date = self.request.query_params.get('end_date')
         campus = self.request.query_params.get('campus')
+        group = self.request.query_params.get('group')
 
         try:
             if start_date is not None and end_date is not None:
@@ -563,12 +564,12 @@ class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
 
     def build_data(
             self, actual, measurements, measurements_list, field, index
-        ):
+    ):
         measurements_list[len(measurements_list) - 1][0] = (
             measurements[index]['collection_date']
         )
         if actual.hour in range(0, 17) \
-            or actual.hour in range(21, 23):
+           or actual.hour in range(21, 23):
             measurements_list[len(measurements_list) - 1][1] += \
                 measurements[index][field] \
                 * measurements[index]['tax__value_off_peak']
@@ -579,7 +580,7 @@ class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
 
     def finish_data(
             self, actual, measurements, measurements_list, field, index
-        ):
+    ):
         answer_date = timezone.datetime(
             actual.year, actual.month,
             actual.day, actual.hour, 0, 0
@@ -590,7 +591,7 @@ class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
         )
 
         if actual.hour in range(0, 17) \
-            or actual.hour in range(21, 23):
+           or actual.hour in range(21, 23):
             value_off_peak = measurements[index]['tax__value_off_peak']
             measurements_list.append(
                 [
@@ -608,7 +609,6 @@ class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
                     measurements[index][field] * value_peak
                 ]
             )
-
 
 
 class RealTimeMeasurementViewSet(MeasurementViewSet):
