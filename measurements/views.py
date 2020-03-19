@@ -274,7 +274,8 @@ class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
             measurements = self.queryset.values(
                 field, 'collection_date'
             )
-
+            
+            print(len(measurements))        
             if measurements:
                 response = self.apply_algorithm(
                     measurements,
@@ -496,29 +497,27 @@ class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
         data['min'] = 0
         data['max'] = 0
 
-        for field in self.fields:
-            measurements = self.queryset.order_by('collection_date').values(
-                field, 'collection_date',
-                'tax__value_peak', 'tax__value_off_peak'
+        measurements = self.queryset.order_by('collection_date').values(
+            self.fields[0], self.fields[1], 'collection_date',
+            'tax__value_peak', 'tax__value_off_peak'
+        )
+
+        if measurements:
+            response = self.apply_algorithm(
+                measurements
             )
 
-            if measurements:
-                response = self.apply_algorithm(
-                    measurements,
-                    field
-                )
+            for value in response:
+                total_cost = value[1] + value[2]
 
-                for value in response:
-                    total_cost = value[1] + value[2]
+                if total_cost > data['max']:
+                    data['max'] = total_cost
 
-                    if total_cost > data['max']:
-                        data['max'] = total_cost
-
-                    data['cost'].append([value[0], total_cost])
+                data['cost'].append([value[0], total_cost])
 
         return data
 
-    def apply_algorithm(self, measurements, field, transductor=[]):
+    def apply_algorithm(self, measurements, transductor=[]):
         type = self.request.query_params.get('type')
 
         measurements_list = (
@@ -541,11 +540,11 @@ class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
 
                 if actual.day == last_day:
                     self.build_data(
-                        actual, measurements, measurements_list, field, i
+                        actual, measurements, measurements_list, i
                     )
                 else:
                     self.finish_data(
-                        actual, measurements, measurements_list, field, i
+                        actual, measurements, measurements_list, i
                     )
 
             measurements_list[len(measurements_list) - 1][0] = (
@@ -562,11 +561,32 @@ class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
 
                 if actual.month == last_month:
                     self.build_data(
-                        actual, measurements, measurements_list, field, i
+                        actual, measurements, measurements_list, i
                     )
                 else:
                     self.finish_data(
-                        actual, measurements, measurements_list, field, i
+                        actual, measurements, measurements_list, i
+                    )
+
+            measurements_list[len(measurements_list) - 1][0] = (
+                measurements_list[len(measurements_list) - 1][0]
+                .strftime('%m/%d/%Y %H:%M:%S')
+            )
+        elif type == 'yearly':
+            for i in range(0, len(measurements) - 1):
+                actual = measurements[i]['collection_date']
+
+                last_year = (
+                    measurements_list[len(measurements_list) - 1][0].year
+                )
+
+                if actual.year == last_year:
+                    self.build_data(
+                        actual, measurements, measurements_list, i
+                    )
+                else:
+                    self.finish_data(
+                        actual, measurements, measurements_list, i
                     )
 
             measurements_list[len(measurements_list) - 1][0] = (
@@ -577,7 +597,7 @@ class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
         return measurements_list
 
     def build_data(
-            self, actual, measurements, measurements_list, field, index
+            self, actual, measurements, measurements_list, index
     ):
         measurements_list[len(measurements_list) - 1][0] = (
             measurements[index]['collection_date']
@@ -585,15 +605,15 @@ class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
         if actual.hour in range(0, 17) \
            or actual.hour in range(21, 23):
             measurements_list[len(measurements_list) - 1][1] += \
-                measurements[index][field] \
+                measurements[index][self.fields[1]] \
                 * measurements[index]['tax__value_off_peak']
         else:
             measurements_list[len(measurements_list) - 1][2] += \
-                measurements[index][field] \
+                measurements[index][self.fields[0]] \
                 * measurements[index]['tax__value_peak']
 
     def finish_data(
-            self, actual, measurements, measurements_list, field, index
+            self, actual, measurements, measurements_list, index
     ):
         answer_date = timezone.datetime(
             actual.year, actual.month,
@@ -610,7 +630,7 @@ class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
             measurements_list.append(
                 [
                     answer_date,
-                    measurements[index][field] * value_off_peak,
+                    measurements[index][self.fields[1]] * value_off_peak,
                     0
                 ]
             )
@@ -620,7 +640,7 @@ class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
                 [
                     answer_date,
                     0,
-                    measurements[index][field] * value_peak
+                    measurements[index][self.fields[0]] * value_peak
                 ]
             )
 
