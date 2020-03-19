@@ -165,15 +165,13 @@ class RealTimeMeasurementSerializer(serializers.HyperlinkedModelSerializer):
                   'url')
 
     def get_consumption(self, obj):
+        consumptions = ['consumption_peak_time', 'consumption_off_peak_time']
         info = QuarterlyMeasurement.objects.filter(
             transductor=EnergyTransductor.objects.get(
                 pk=self.__dict__['_args'][0].last().transductor_id
             )
         ).aggregate(
-            total_consumption=(
-                Sum('consumption_peak_time')
-                + Sum('consumption_off_peak_time')
-            )
+            total_consumption=(Sum(consumptions[0]) + Sum(consumptions[1]))
         )
 
         return info['total_consumption']
