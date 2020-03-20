@@ -16,6 +16,8 @@ from django.utils import timezone
 
 from rest_framework import mixins
 
+from django.db.models import Q
+
 
 class EnergyTransductorViewSet(viewsets.ModelViewSet):
     queryset = EnergyTransductor.objects.all()
@@ -53,12 +55,15 @@ class EnergyTransductorListViewSet(viewsets.GenericViewSet,
                 ended_at__isnull=True).count()
             last72h = transductor. \
                 events_failedconnectiontransductorevent.filter(
-                    created_at__range=[timezone.now() - timezone.
-                                       timedelta(days=3),
-                                       timezone.now()]).count()
+                    Q(ended_at__isnull=True) | Q(ended_at__range=[
+                        timezone.now() - timezone.timedelta(days=3), 
+                        timezone.now()
+                    ])).count()
             last72h = last72h + transductor.events_voltagerelatedevent.filter(
-                created_at__range=[timezone.now() - timezone.timedelta(days=3), 
-                                   timezone.now()]).count()
+                Q(ended_at__isnull=True) | Q(ended_at__range=[
+                    timezone.now() - timezone.timedelta(days=3), 
+                    timezone.now()
+                ])).count()
             transductorInformation = {
                 'campus': transductor.campus.name,
                 'name': transductor.name,
@@ -85,9 +90,10 @@ class EnergyTransductorListViewSet(viewsets.GenericViewSet,
                 count = transductorList[transductor_id]['events_last72h']
                 count = count + \
                     slave.events_failedconnectionslaveevent.filter(
-                        created_at__range=[timezone.now() - timezone.
-                                           timedelta(days=3),
-                                           timezone.now()]).count()
+                        Q(ended_at__isnull=True) | Q(ended_at__range=[
+                            timezone.now() - timezone.timedelta(days=3), 
+                            timezone.now()
+                        ])).count()
                 transductorList[transductor_id]['events_last72h'] = count
         response = []
         for item in transductorList.values():
