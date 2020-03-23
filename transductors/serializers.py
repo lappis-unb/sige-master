@@ -81,3 +81,24 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
 
 class AddToServerSerializer(serializers.Serializer):
     slave_id = serializers.IntegerField()
+
+
+class EnergyTransductorListSerializer(serializers.HyperlinkedModelSerializer):
+    current_precarious_events_count = serializers.IntegerField()
+    current_critical_events_count = serializers.IntegerField()
+    events_last72h = serializers.IntegerField()
+    campus = serializers.CharField()
+    grouping = serializers.ListField(child=serializers.CharField())
+
+    class Meta:
+        model = EnergyTransductor
+        fields = (
+            'campus',
+            'name',
+            'active',
+            'model',
+            'grouping',
+            'current_precarious_events_count',
+            'current_critical_events_count',
+            'events_last72h'
+        )
