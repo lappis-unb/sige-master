@@ -25,6 +25,22 @@ class Campus(models.Model):
         verbose_name=_('Acronym'),
         help_text=_('This field is required')
     )
+    geolocation_latitude = models.FloatField(
+        null=True,
+        blank=True,
+        verbose_name=_('latitude')
+    )
+    geolocation_longitude = models.FloatField(
+        null=True,
+        blank=True,
+        verbose_name=_('longitude')
+    )
+    zoom_ratio = models.DecimalField(
+        max_digits=2,
+        decimal_places=0,
+        default=14,
+        verbose_name=_('map zoom')
+    )
 
     def __str__(self):
         return self.name
