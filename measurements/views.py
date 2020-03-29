@@ -508,7 +508,7 @@ class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
             )
 
             for value in response:
-                total_cost = value[1] + value[2]
+                total_cost = (value[1] + value[2]) / 1000
 
                 if total_cost > data['max']:
                     data['max'] = total_cost
