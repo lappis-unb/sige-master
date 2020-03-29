@@ -38,7 +38,7 @@ class Campus(models.Model):
     zoom_ratio = models.DecimalField(
         max_digits=2,
         decimal_places=0,
-        default=14,
+        default=16,
         verbose_name=_('map zoom')
     )
 
