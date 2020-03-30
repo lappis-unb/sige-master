@@ -1,3 +1,20 @@
 from django.contrib import admin
+from . import models
 
-# Register your models here.
+
+@admin.register(models.EnergyTransductor)
+class EnergyTransductorAdmin(admin.ModelAdmin):
+    list_display = (
+        'name',
+        'model',
+        'ip_address',
+        'port',
+        'serial_number',
+        'active',
+        'broken',
+    )
+
+    list_filter = (
+        'broken',
+        'active',
+    )

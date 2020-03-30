@@ -1,25 +1,29 @@
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 
 from utils import web_site_validator
 from utils import phone_validator
 
 
 class Campus(models.Model):
-    name = models.CharField(max_length=50, unique=True)
-    acronym = models.CharField(max_length=50, unique=True)
-    phone = models.CharField(
-        max_length=15,
-        blank=True,
-        validators=[phone_validator],
-        default=""
-    )
-    address = models.CharField(max_length=50, unique=True)
-    website_address = models.CharField(
+
+    class Meta:
+        # Campi is the plural for the latin word campus
+        verbose_name = _('Campus')
+        verbose_name_plural = _('Campi')
+
+    name = models.CharField(
         max_length=50,
-        blank=True,
-        validators=[web_site_validator],
-        default=""
+        unique=True,
+        verbose_name=_('Name'),
+        help_text=_('This field is required')
+    )
+    acronym = models.CharField(
+        max_length=50,
+        unique=True,
+        verbose_name=_('Acronym'),
+        help_text=_('This field is required')
     )
 
     def __str__(self):

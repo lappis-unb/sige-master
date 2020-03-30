@@ -1,39 +1,52 @@
 from django.db import models
-from django.contrib.postgres.fields import ArrayField
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
+from django.contrib.postgres.fields import ArrayField
+from django.utils.translation import gettext_lazy as _
+from django.core.exceptions import ObjectDoesNotExist
+
 from transductors.models import EnergyTransductor
 
-'''
+"""
     TODO Make get all measurements and list
     transductor models methods
-'''
+"""
 
 
-# Create your models here.
 class Slave(models.Model):
 
-    ip_validator = RegexValidator(
-        r'^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$',
-        'Incorrect IP address format'
-    )
-
     ip_address = models.CharField(
-        max_length=15,
-        validators=[ip_validator],
+        max_length=50,
+        verbose_name=_('IP address'),
+        help_text=_('This field is required')
     )
 
     port = models.CharField(
         max_length=5,
-        default="80"
+        default="80",
+        verbose_name=_('IP access port')
     )
 
-    location = models.CharField(max_length=50)
-    broken = models.BooleanField(default=True)
+    location = models.CharField(
+        max_length=50,
+        verbose_name=_('Location'),
+        help_text=_('This field is required')
+    )
+
+    broken = models.BooleanField(
+        default=False,
+        verbose_name=_('Broken')
+    )
 
     transductors = models.ManyToManyField(
-        EnergyTransductor, related_name='slave_servers'
+        EnergyTransductor,
+        related_name='slave_servers',
+        verbose_name=_('Meters'),
+        help_text=_('This field is required')
     )
+
+    class Meta:
+        verbose_name = _('Slave server')
 
     def __str__(self):
         return self.ip_address
@@ -54,7 +67,34 @@ class Slave(models.Model):
             self.transductors.remove(transductor)
         return response
 
-    # FIXME: Improve this
+    def set_broken(self, new_status):
+        """
+        Set the broken atribute's new status to match the param.
+        If toggled to True, creates a failed connection event
+        """
+        from events.models import FailedConnectionSlaveEvent
+
+        old_status = self.broken
+
+        if old_status is True and new_status is False:
+            try:
+                related_event = FailedConnectionSlaveEvent.objects.filter(
+                    slave=self,
+                    ended_at__isnull=True
+                ).last()
+                related_event.ended_at = timezone.now()
+                related_event.save()
+
+            except FailedConnectionSlaveEvent.DoesNotExist as e:
+                pass
+
+        elif old_status is False and new_status is True:
+            evt = FailedConnectionSlaveEvent()
+            evt.save_event(self)
+
+        self.broken = new_status
+        self.save(update_fields=['broken'])
+
     def __is_success_status(self, status):
         if (status is not None) and (200 <= status < 300):
             return True

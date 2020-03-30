@@ -1,4 +1,5 @@
 import numpy as np
+from datetime import datetime
 
 
 def _areas_of_triangles(a, bs, c):
@@ -38,16 +39,16 @@ def downsample(data, n_out):
         Array of shape (n_out, 2)
     """
     # Validate input
-    if data.shape[1] != 2:
-        raise ValueError('data should have 2 columns')
+    if len(data) == 0:
+        return data
+
+    if data.shape[1] < 2:
+        raise ValueError('data should have a minimun 2 columns')
 
     if np.any(data[1:, 0] <= data[:-1, 0]):
         raise ValueError('data should be sorted on first column')
 
     if n_out > data.shape[0]:
-        raise ValueError('n_out must be <= number of rows in data')
-
-    if n_out == data.shape[0]:
         return data
 
     if n_out < 3:
@@ -59,7 +60,7 @@ def downsample(data, n_out):
 
     # Prepare output array
     # First and last points are the same as in the input.
-    out = np.zeros((n_out, 2))
+    out = np.zeros((n_out, 3))
     out[0] = data[0]
     out[len(out) - 1] = data[len(data) - 1]
 

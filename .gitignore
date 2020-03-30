@@ -6,7 +6,7 @@ __pycache__
 */migrations/__pycache__/*
 */tests/__pycache__/*
 *.pyc
-
+node_modules/
 .vscode
 .pytest_cache
 *.log

@@ -10,6 +10,7 @@ import time
 import os
 
 port = int(os.environ["POSTGRES_PORT"])
+host = os.environ["POSTGRES_HOST"]
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -36,8 +37,8 @@ python3 manage.py makemigrations
 echo '======= RUNNING MIGRATIONS'
 python3 manage.py migrate
 
-echo '======= RUNNING SEED'
-python3 seed_db.py
+# echo '======= RUNNING SEED'
+# python3 seed_db.py
 
 echo '======= STARTING CRON'
 cron

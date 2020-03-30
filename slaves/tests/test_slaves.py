@@ -3,6 +3,7 @@ from django.utils import timezone
 
 from slaves.models import Slave
 from transductors.models import EnergyTransductor
+from campi.models import Campus
 
 from django.db import IntegrityError
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
@@ -23,21 +24,26 @@ class TestSlavesModels(TestCase):
             broken=False
         )
 
+        self.campus = Campus.objects.create(
+            name='UnB - Faculdade Gama',
+            acronym='FGA',
+        )
+
         self.energy_transductor = EnergyTransductor.objects.create(
             serial_number='87654321',
             ip_address='192.168.1.1',
-            location="MESP",
-            latitude=20.1,
-            longitude=37.9,
+            geolocation_latitude=20.1,
+            geolocation_longitude=37.9,
             name="MESP 1",
             broken=True,
             active=False,
             creation_date=timezone.now(),
-            calibration_date=timezone.now(),
-            last_data_collection=timezone.now(),
-            model='EnergyTransductorModel'
+            firmware_version='0.1',
+            model='EnergyTransductorModel',
+            campus=self.campus
         )
 
+        # Jango Fett would be proud
         self.slave_1.transductors.add(self.energy_transductor)
 
     def test_should_create_new_slave(self):
@@ -77,12 +83,11 @@ class TestSlavesModels(TestCase):
         self.assertNotEqual(original_location, new_location)
         self.assertNotEqual(original_broken, new_broken)
 
-    def test_should_not_update_a_speficic_slave_with_wrong_ip_address(self):
+    def test_should_update_a_speficic_slave_with_dns(self):
         slave = Slave.objects.get(ip_address="1.1.1.1")
-        slave.ip_address = "some ip adreess"
+        slave.ip_address = "https://api.herokuapp.com/"
 
-        with self.assertRaises(ValidationError):
-            slave.save()
+        self.assertIsNone(slave.save())
 
     def test_should_delete_a_existent_slave(self):
         slave = Slave.objects.get(ip_address="1.1.1.1")

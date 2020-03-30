@@ -1,7 +1,8 @@
-version: '3.7'
+version: '3.5'
 services:
     master-db:
         container_name: master-db
+        restart: always
         image: postgres:9.6
         ports:
             - 5431:5432
@@ -13,6 +14,7 @@ services:
 
     master-api:
         container_name: master-api
+        restart: always
         build: .
         env_file: dev-env
         command: ["sh", "scripts/start.sh"]

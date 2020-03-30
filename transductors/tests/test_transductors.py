@@ -5,24 +5,30 @@ from django.db.utils import IntegrityError
 from django.core.exceptions import ValidationError
 
 from slaves.models import Slave
+from campi.models import Campus
 from transductors.models import Transductor, EnergyTransductor
 
 
 class TransductorTestCase(TestCase):
     def setUp(self):
+        self.campus = Campus.objects.create(
+            name='UnB - Faculdade Gama',
+            acronym='FGA',
+        )
+
         self.sample_energy_transductor = EnergyTransductor.objects.create(
             serial_number='87654321',
             ip_address='192.168.1.1',
-            location="MESP",
-            latitude=20.1,
-            longitude=37.9,
+            geolocation_latitude=20.1,
+            geolocation_longitude=37.9,
             name="MESP 1",
             broken=True,
             active=False,
             creation_date=timezone.now(),
-            calibration_date=timezone.now(),
-            last_data_collection=timezone.now(),
-            model='EnergyTransductorModel'
+            firmware_version='0.1',
+            model='EnergyTransductorModel',
+            campus=self.campus,
+            history='Transductor history'
         )
 
         self.sample_slave_server = Slave.objects.create(
@@ -37,16 +43,17 @@ class TransductorTestCase(TestCase):
         transductor = EnergyTransductor.objects.create(
             serial_number='12345678',
             ip_address='192.168.10.10',
-            location="MESP",
-            latitude=20.1,
-            longitude=37.9,
+            port=1001,
+            geolocation_latitude=20.1,
+            geolocation_longitude=37.9,
             name="MESP 2",
             broken=False,
             active=True,
             creation_date=timezone.now(),
-            calibration_date=timezone.now(),
-            last_data_collection=timezone.now(),
-            model='EnergyTransductorModel'
+            firmware_version='0.1',
+            model='EnergyTransductorModel',
+            campus=self.campus,
+            history='Transductor history'
         )
 
         self.assertIs(
@@ -62,16 +69,16 @@ class TransductorTestCase(TestCase):
             transductor = EnergyTransductor.objects.create(
                 serial_number='87654321',
                 ip_address='192.168.10.10',
-                location="MESP",
-                latitude=20.1,
-                longitude=37.9,
+                geolocation_latitude=20.1,
+                geolocation_longitude=37.9,
                 name="MESP 2",
                 broken=False,
                 active=True,
                 creation_date=timezone.now(),
-                calibration_date=timezone.now(),
-                last_data_collection=timezone.now(),
-                model='EnergyTransductorModel'
+                firmware_version='0.1',
+                model='EnergyTransductorModel',
+                campus=self.campus,
+                history='Transductor history'
             )
 
         self.assertEqual(size, len(EnergyTransductor.objects.all()))
@@ -82,16 +89,16 @@ class TransductorTestCase(TestCase):
         with self.assertRaises(ValidationError):
             transductor = EnergyTransductor.objects.create(
                 ip_address='192.168.10.10',
-                location="MESP",
-                latitude=20.1,
-                longitude=37.9,
+                geolocation_latitude=20.1,
+                geolocation_longitude=37.9,
                 name="MESP 2",
                 broken=False,
                 active=True,
                 creation_date=timezone.now(),
-                calibration_date=timezone.now(),
-                last_data_collection=timezone.now(),
-                model='EnergyTransductorModel'
+                firmware_version='0.1',
+                model='EnergyTransductorModel',
+                campus=self.campus,
+                history='Transductor history'
             )
 
         self.assertEqual(size, len(EnergyTransductor.objects.all()))
@@ -103,15 +110,15 @@ class TransductorTestCase(TestCase):
             transductor = EnergyTransductor.objects.create(
                 serial_number='87554321',
                 ip_address='192.168.10.10',
-                location="MESP",
-                latitude=20.1,
-                longitude=37.9,
+                geolocation_latitude=20.1,
+                geolocation_longitude=37.9,
                 name="MESP 2",
                 broken=False,
                 active=True,
                 creation_date=timezone.now(),
-                calibration_date=timezone.now(),
-                last_data_collection=timezone.now()
+                firmware_version='0.1',
+                campus=self.campus,
+                history='Transductor history'
             )
 
         self.assertEqual(size, len(EnergyTransductor.objects.all()))
@@ -130,15 +137,15 @@ class TransductorTestCase(TestCase):
             transductor.update(
                 serial_number='88888888',
                 ip_address='192.168.10.12',
-                location="UED",
-                latitude=20.2,
-                longitude=37.0,
+                geolocation_latitude=20.2,
+                geolocation_longitude=37.0,
                 name="UED 1",
                 broken=True,
                 active=False,
                 creation_date=timezone.now(),
-                calibration_date=timezone.now(),
-                last_data_collection=timezone.now()
+                firmware_version='0.1',
+                campus=self.campus,
+                history='Transductor history'
             )
         )
 
@@ -146,16 +153,16 @@ class TransductorTestCase(TestCase):
         EnergyTransductor.objects.create(
             serial_number='12345678',
             ip_address='192.168.10.10',
-            location="MESP",
-            latitude=20.1,
-            longitude=37.9,
+            geolocation_latitude=20.1,
+            geolocation_longitude=37.9,
             name="MESP 2",
             broken=False,
             active=True,
             creation_date=timezone.now(),
-            calibration_date=timezone.now(),
-            last_data_collection=timezone.now(),
-            model='EnergyTransductorModel'
+            firmware_version='0.1',
+            model='EnergyTransductorModel',
+            campus=self.campus,
+            history='Transductor history'
         )
 
         transductor = EnergyTransductor.objects.filter(serial_number='87654321')
@@ -164,15 +171,15 @@ class TransductorTestCase(TestCase):
             transductor.update(
                 serial_number='12345678',
                 ip_address='192.168.10.12',
-                location="UED",
-                latitude=20.2,
-                longitude=37.0,
+                geolocation_latitude=20.2,
+                geolocation_longitude=37.0,
                 name="UED 1",
                 broken=True,
                 active=False,
                 creation_date=timezone.now(),
-                calibration_date=timezone.now(),
-                last_data_collection=timezone.now()
+                firmware_version='0.1',
+                campus=self.campus,
+                history='Transductor history'
             )
 
     def test_retrieve_one_transductors(self):
