@@ -224,18 +224,16 @@ class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
         serial_number = self.request.query_params.get('serial_number')
 
         try:
-            if start_date is not None and end_date is not None:
-                self.queryset = self.model.objects.filter(
+            if start_date is not None and end_date is None:
+                self.queryset = self.queryset.filter(
                     collection_date__range=(start_date, end_date)
-                ).order_by(
-                    'collection_date'
                 )
 
             if group:
                 group = Group.objects.get(
                     pk=int(group)
                 )
-                self.queryset = self.model.objects.filter(
+                self.queryset = self.queryset.filter(
                     transductor__grouping__in=[group]
                 )
 
@@ -243,7 +241,7 @@ class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
                 transductor = EnergyTransductor.objects.get(
                     pk=int(serial_number)
                 )
-                self.queryset = self.model.objects.filter(
+                self.queryset = self.queryset.filter(
                     transductor=transductor
                 )
 
@@ -254,6 +252,7 @@ class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
                 self.queryset = self.queryset.filter(
                     transductor__campus__in=[campus]
                 )
+
         except Campus.DoesNotExist:
             raise APIException(
                 'Campus id does not match with '
@@ -274,8 +273,7 @@ class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
             measurements = self.queryset.values(
                 field, 'collection_date'
             )
-            
-            print(len(measurements))        
+               
             if measurements:
                 response = self.apply_algorithm(
                     measurements,
@@ -501,7 +499,7 @@ class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
             self.fields[0], self.fields[1], 'collection_date',
             'tax__value_peak', 'tax__value_off_peak'
         )
-
+        
         if measurements:
             response = self.apply_algorithm(
                 measurements
@@ -593,6 +591,8 @@ class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
                 measurements_list[len(measurements_list) - 1][0]
                 .strftime('%m/%d/%Y %H:%M:%S')
             )
+        else:
+            measurements_list = []
 
         return measurements_list
 
