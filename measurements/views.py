@@ -273,7 +273,7 @@ class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
             measurements = self.queryset.values(
                 field, 'collection_date'
             )
-               
+
             if measurements:
                 response = self.apply_algorithm(
                     measurements,
@@ -452,10 +452,238 @@ class TotalConsumtionViewSet(QuarterlyMeasurementViewSet):
     serializer_class = QuarterlySerializer
     fields = ['consumption_peak_time', 'consumption_off_peak_time']
 
+    def mount_data_list(self, transductor=[]):
+        data = {}
+        data['consumption'] = []
+        data['min'] = 0
+        data['max'] = 0
+
+        measurements = self.queryset.order_by('collection_date').values(
+            self.fields[0], self.fields[1], 'collection_date'
+        )
+        
+        if measurements:
+            response = self.apply_algorithm(
+                measurements
+            )
+
+            for value in response:
+                total = (value[1] + value[2])
+
+                if total > data['max']:
+                    data['max'] = total
+
+                data['consumption'].append([value[0], total])
+
+        return data
+
+    def apply_algorithm(self, measurements, transductor=[]):
+        type = self.request.query_params.get('type')
+
+        measurements_list = (
+            [
+                [
+                    measurements[0]['collection_date'],
+                    0,
+                    0
+                ]
+            ]
+        )
+
+        if type == 'hourly':
+            for i in range(0, len(measurements) - 1):
+                actual = measurements[i]['collection_date']
+
+                last_hour = (
+                    measurements_list[len(measurements_list) - 1][0].hour
+                )
+
+                if actual.hour == last_hour:
+                    self.build_data(
+                        actual, measurements, measurements_list, i
+                    )
+                else:
+                    self.finish_data(
+                        actual, measurements, measurements_list, i
+                    )
+
+            measurements_list[len(measurements_list) - 1][0] = (
+                measurements_list[len(measurements_list) - 1][0]
+                .strftime('%m/%d/%Y %H:%M:%S')
+            )
+        elif type == 'daily':
+            for i in range(0, len(measurements) - 1):
+                actual = measurements[i]['collection_date']
+
+                last_day = (
+                    measurements_list[len(measurements_list) - 1][0].day
+                )
+
+                if actual.day == last_day:
+                    self.build_data(
+                        actual, measurements, measurements_list, i
+                    )
+                else:
+                    self.finish_data(
+                        actual, measurements, measurements_list, i
+                    )
+
+            measurements_list[len(measurements_list) - 1][0] = (
+                measurements_list[len(measurements_list) - 1][0]
+                .strftime('%m/%d/%Y %H:%M:%S')
+            )
+        else:
+            measurements_list = []
+
+        return measurements_list
+
+    def build_data(
+        self, actual, measurements, measurements_list, index
+    ):
+        measurements_list[len(measurements_list) - 1][0] = (
+            measurements[index]['collection_date']
+        )
+        measurements_list[len(measurements_list) - 1][1] += \
+            measurements[index][self.fields[1]]
+
+    def finish_data(
+        self, actual, measurements, measurements_list, index
+    ):
+        answer_date = timezone.datetime(
+            actual.year, actual.month,
+            actual.day, actual.hour, 0, 0
+        )
+        measurements_list[len(measurements_list) - 1][0] = (
+            measurements_list[len(measurements_list) - 1][0]
+            .strftime('%m/%d/%Y %H:%M:%S')
+        )
+
+        measurements_list.append(
+            [
+                answer_date,
+                measurements[index][self.fields[1]],
+                0
+            ]
+        )
+
 
 class TotalGenerationViewSet(QuarterlyMeasurementViewSet):
     serializer_class = QuarterlySerializer
     fields = ['generated_energy_peak_time', 'generated_energy_off_peak_time']
+
+    def mount_data_list(self, transductor=[]):
+        data = {}
+        data['generation'] = []
+        data['min'] = 0
+        data['max'] = 0
+
+        measurements = self.queryset.order_by('collection_date').values(
+            self.fields[0], self.fields[1], 'collection_date'
+        )
+        
+        if measurements:
+            response = self.apply_algorithm(
+                measurements
+            )
+
+            for value in response:
+                total = (value[1] + value[2])
+
+                if total > data['max']:
+                    data['max'] = total
+
+                data['generation'].append([value[0], total])
+
+        return data
+
+    def apply_algorithm(self, measurements, transductor=[]):
+        type = self.request.query_params.get('type')
+        print(measurements)
+        measurements_list = (
+            [
+                [
+                    measurements[0]['collection_date'],
+                    0,
+                    0
+                ]
+            ]
+        )
+
+        if type == 'hourly':
+            for i in range(0, len(measurements) - 1):
+                actual = measurements[i]['collection_date']
+
+                last_hour = (
+                    measurements_list[len(measurements_list) - 1][0].hour
+                )
+
+                if actual.hour == last_hour:
+                    self.build_data(
+                        actual, measurements, measurements_list, i
+                    )
+                else:
+                    self.finish_data(
+                        actual, measurements, measurements_list, i
+                    )
+
+            measurements_list[len(measurements_list) - 1][0] = (
+                measurements_list[len(measurements_list) - 1][0]
+                .strftime('%m/%d/%Y %H:%M:%S')
+            )
+        elif type == 'daily':
+            for i in range(0, len(measurements) - 1):
+                actual = measurements[i]['collection_date']
+
+                last_day = (
+                    measurements_list[len(measurements_list) - 1][0].day
+                )
+
+                if actual.day == last_day:
+                    self.build_data(
+                        actual, measurements, measurements_list, i
+                    )
+                else:
+                    self.finish_data(
+                        actual, measurements, measurements_list, i
+                    )
+
+            measurements_list[len(measurements_list) - 1][0] = (
+                measurements_list[len(measurements_list) - 1][0]
+                .strftime('%m/%d/%Y %H:%M:%S')
+            )
+        else:
+            measurements_list = []
+
+        return measurements_list
+
+    def build_data(
+        self, actual, measurements, measurements_list, index
+    ):
+        measurements_list[len(measurements_list) - 1][0] = (
+            measurements[index]['collection_date']
+        )
+        measurements_list[len(measurements_list) - 1][1] += \
+            measurements[index][self.fields[1]]
+
+    def finish_data(
+        self, actual, measurements, measurements_list, index
+    ):
+        answer_date = timezone.datetime(
+            actual.year, actual.month,
+            actual.day, actual.hour, 0, 0
+        )
+        measurements_list[len(measurements_list) - 1][0] = (
+            measurements_list[len(measurements_list) - 1][0]
+            .strftime('%m/%d/%Y %H:%M:%S')
+        )
+
+        measurements_list.append(
+            [
+                answer_date,
+                measurements[index][self.fields[1]],
+                0
+            ]
+        )
 
 
 class DailyConsumptionViewSet(QuarterlyMeasurementViewSet):
