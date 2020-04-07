@@ -18,6 +18,9 @@ class CampusSerializer(serializers.HyperlinkedModelSerializer):
             'name',
             'acronym',
             'transductors',
+            'geolocation_latitude',
+            'geolocation_longitude',
+            'zoom_ratio',
             'groups_related',
             'url'
         )
