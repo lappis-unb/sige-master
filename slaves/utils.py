@@ -173,41 +173,11 @@ class DataCollector():
         """
         Builds and saves events from a dict to a given class
         """
-        if request_type == 'VoltageRelatedEvent':
-            DataCollector.build_voltage_related_events(event_dict)
-        else:
-            DataCollector.build_failed_connection_transductor_events(event_dict)
+        DataCollector.build_events(event_dict)
 
     @staticmethod
-    def build_failed_connection_transductor_events(event_dict):
-        event_class = globals()[event_dict['type']]
-        transductor = EnergyTransductor.objects.get(
-            ip_address=event_dict['ip_address']
-        )
-        last_event = event_class.objects.filter(
-            transductor=transductor,
-            ended_at__isnull=True
-        ).last()
-        if last_event:
-            if not event_dict['ended_at']:
-                last_event.data = event_dict['data']
-                last_event.save()
-            else:
-                last_event.data = event_dict['data']
-                last_event.ended_at = event_dict['ended_at']
-                last_event.save()
-        else:
-            if not event_dict['ended_at']:
-                event_class.objects.create(
-                    transductor=transductor,
-                    data=event_dict['data'],
-                    created_at=event_dict['created_at'],
-                    ended_at=event_dict['ended_at']
-                )
-
-    @staticmethod
-    def build_voltage_related_events(voltage_related_events):
-        for event_dict in voltage_related_events:
+    def build_events(events):
+        for event_dict in events:
             event_class = globals()[event_dict['type']]
             transductor = EnergyTransductor.objects.get(
                 ip_address=event_dict['ip_address']
@@ -226,12 +196,7 @@ class DataCollector():
                     last_event.save()
             else:
                 if not event_dict['ended_at']:
-                    event_class.objects.create(
-                        transductor=transductor,
-                        data=event_dict['data'],
-                        created_at=event_dict['created_at'],
-                        ended_at=event_dict['ended_at']
-                    )
+                    event_class().save_event(transductor, event_dict)
 
     @staticmethod
     def get_events():

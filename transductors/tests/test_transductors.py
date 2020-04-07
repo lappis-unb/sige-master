@@ -28,7 +28,8 @@ class TransductorTestCase(TestCase):
             creation_date=timezone.now(),
             firmware_version='0.1',
             model='EnergyTransductorModel',
-            campus=self.campus
+            campus=self.campus,
+            history='Transductor history'
         )
 
         self.sample_slave_server = Slave.objects.create(
@@ -52,7 +53,8 @@ class TransductorTestCase(TestCase):
             creation_date=timezone.now(),
             firmware_version='0.1',
             model='EnergyTransductorModel',
-            campus=self.campus
+            campus=self.campus,
+            history='Transductor history'
         )
 
         self.assertIs(
@@ -76,7 +78,8 @@ class TransductorTestCase(TestCase):
                 creation_date=timezone.now(),
                 firmware_version='0.1',
                 model='EnergyTransductorModel',
-                campus=self.campus
+                campus=self.campus,
+                history='Transductor history'
             )
 
         self.assertEqual(size, len(EnergyTransductor.objects.all()))
@@ -97,7 +100,8 @@ class TransductorTestCase(TestCase):
                 creation_date=timezone.now(),
                 firmware_version='0.1',
                 model='EnergyTransductorModel',
-                campus=self.campus
+                campus=self.campus,
+                history='Transductor history'
             )
 
         self.assertEqual(size, len(EnergyTransductor.objects.all()))
@@ -105,20 +109,20 @@ class TransductorTestCase(TestCase):
     def test_not_create_transductor_with_no_transductor_model(self):
         size = len(EnergyTransductor.objects.all())
 
-        with transaction.atomic(): 
-            with self.assertRaises(ValidationError):
-                transductor = EnergyTransductor.objects.create(
-                    serial_number='87554321',
-                    ip_address='192.168.10.10',
-                    geolocation_latitude=20.1,
-                    geolocation_longitude=37.9,
-                    name="MESP 2",
-                    broken=False,
-                    active=True,
-                    creation_date=timezone.now(),
-                    firmware_version='0.1',
-                    campus=self.campus
-                )
+        with self.assertRaises(ValidationError):
+            transductor = EnergyTransductor.objects.create(
+                serial_number='87554321',
+                ip_address='192.168.10.10',
+                geolocation_latitude=20.1,
+                geolocation_longitude=37.9,
+                name="MESP 2",
+                broken=False,
+                active=True,
+                creation_date=timezone.now(),
+                firmware_version='0.1',
+                campus=self.campus,
+                history='Transductor history'
+            )
 
         self.assertEqual(size, len(EnergyTransductor.objects.all()))
 
@@ -143,7 +147,8 @@ class TransductorTestCase(TestCase):
                 active=False,
                 creation_date=timezone.now(),
                 firmware_version='0.1',
-                campus=self.campus
+                campus=self.campus,
+                history='Transductor history'
             )
         )
 
@@ -159,7 +164,8 @@ class TransductorTestCase(TestCase):
             creation_date=timezone.now(),
             firmware_version='0.1',
             model='EnergyTransductorModel',
-            campus=self.campus
+            campus=self.campus,
+            history='Transductor history'
         )
 
         transductor = EnergyTransductor.objects.filter(serial_number='87654321')
@@ -175,7 +181,8 @@ class TransductorTestCase(TestCase):
                 active=False,
                 creation_date=timezone.now(),
                 firmware_version='0.1',
-                campus=self.campus
+                campus=self.campus,
+                history='Transductor history'
             )
 
     def test_retrieve_one_transductors(self):

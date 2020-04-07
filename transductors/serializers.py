@@ -35,7 +35,8 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
             'model',
             'grouping',
             'firmware_version',
-            'url'
+            'url',
+            'history'
         )
 
         read_only_fields = (
@@ -95,7 +96,8 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
                     'geolocation_longitude'
                 ),
                 slave_server=validated_data.get('slave_server'),
-                id_in_slave=id_in_slave
+                id_in_slave=id_in_slave,
+                history=validated_data.get('history')
             )
 
             for group in validated_data.get('grouping'):
@@ -220,3 +222,24 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
 
 class AddToServerSerializer(serializers.Serializer):
     slave_id = serializers.IntegerField()
+
+
+class EnergyTransductorListSerializer(serializers.HyperlinkedModelSerializer):
+    current_precarious_events_count = serializers.IntegerField()
+    current_critical_events_count = serializers.IntegerField()
+    events_last72h = serializers.IntegerField()
+    campus = serializers.CharField()
+    grouping = serializers.ListField(child=serializers.CharField())
+
+    class Meta:
+        model = EnergyTransductor
+        fields = (
+            'campus',
+            'name',
+            'active',
+            'model',
+            'grouping',
+            'current_precarious_events_count',
+            'current_critical_events_count',
+            'events_last72h'
+        )

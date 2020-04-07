@@ -145,6 +145,11 @@ class Transductor(PolymorphicModel):
         blank=True
     )
 
+    history = models.TextField(
+        blank=True,
+        verbose_name=_('history')
+    )
+
     class Meta:
         abstract = True
         verbose_name = _('Meter')
@@ -155,24 +160,6 @@ class Transductor(PolymorphicModel):
     def save(self, *args, **kwargs):
         self.full_clean()
         super(Transductor, self).save()
-
-    # def delete(self, *args, **kwargs):
-    #     slave = self.slave_server
-    #     failed = False
-
-    #     if not kwargs.get('bypass_requests', None):
-    #         # try:
-    #         response = delete_transductor(self, slave)
-    #         # except Exception:
-    #             # failed = True
-
-    #         if not self.__is_success_status(response.status_code):
-    #             failed = True
-
-    #     if not failed:
-    #         super(Transductor, self).delete()
-
-    #     return failed 
 
     def get_measurements(self, datetime):
         raise NotImplementedError
