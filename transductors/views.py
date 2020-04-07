@@ -65,6 +65,7 @@ class EnergyTransductorListViewSet(viewsets.GenericViewSet,
                     timezone.now()
                 ])).count()
             transductorInformation = {
+                'serial_number': transductor.serial_number,
                 'campus': transductor.campus.name,
                 'name': transductor.name,
                 'active': transductor.active,
