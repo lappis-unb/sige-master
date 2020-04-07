@@ -14,6 +14,7 @@ from campi.models import Campus
 from slaves.models import Slave
 from groups.models import Group
 from django.utils.translation import gettext_lazy as _
+from django.core.validators import MinLengthValidator
 
 
 class Transductor(PolymorphicModel):
@@ -92,7 +93,8 @@ class Transductor(PolymorphicModel):
         blank=False,
         null=False,
         verbose_name=_('serial number'),
-        help_text=_('This field is required')
+        help_text=_('This field is required'),
+        validators=[MinLengthValidator(1)]
     )
 
     firmware_version = models.CharField(
@@ -115,8 +117,6 @@ class Transductor(PolymorphicModel):
 
     model = models.CharField(
         max_length=256,
-        blank=False,
-        null=False,
         verbose_name=_('model'),
         help_text=_('This field is required')
     )
@@ -124,7 +124,9 @@ class Transductor(PolymorphicModel):
     grouping = models.ManyToManyField(
         Group,
         verbose_name=_('Grouping'),
-        help_text=_('This field is required')
+        help_text=_('This field is required'),
+        blank=True,
+        null=True
     )
 
     slave_server = models.ForeignKey(
@@ -132,14 +134,15 @@ class Transductor(PolymorphicModel):
         verbose_name=_('Collection Server'),
         default=None,
         null=True,
+        blank=True,
         on_delete=models.DO_NOTHING, 
         related_name='transductors'
     )
 
     id_in_slave = models.IntegerField(
-        default=0,
-        null=False,
-        blank=False
+        default=None,
+        null=True,
+        blank=True
     )
 
     class Meta:
@@ -148,6 +151,10 @@ class Transductor(PolymorphicModel):
 
     def __str__(self):
         raise NotImplementedError
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super(Transductor, self).save()
 
     # def delete(self, *args, **kwargs):
     #     slave = self.slave_server

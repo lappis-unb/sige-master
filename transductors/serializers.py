@@ -80,7 +80,9 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
                     )
                     exception.status_code = 400
                     raise exception
-
+            
+            else:
+                id_in_slave = None
             transductor = EnergyTransductor.objects.create(
                 serial_number=validated_data.get('serial_number'),
                 ip_address=validated_data.get('ip_address'),
@@ -92,7 +94,7 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
                 geolocation_longitude=validated_data.get(
                     'geolocation_longitude'
                 ),
-                slave_server=slave_server,
+                slave_server=validated_data.get('slave_server'),
                 id_in_slave=id_in_slave
             )
 
