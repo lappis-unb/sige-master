@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     'events',
     'rosetta',
     'groups',
+    'fcm_django',
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
@@ -234,3 +235,16 @@ MATERIAL_ADMIN_SITE = {
 
 # debug configuration to view how emails are being sent
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+
+FCM_DJANGO_SETTINGS = {
+        "APP_VERBOSE_NAME": "[string for AppConfig's verbose_name]",
+         # default: _('FCM Django')
+        "FCM_SERVER_KEY": os.getenv('API_KEY'),
+         # true if you want to have only one active device per registered user at a time
+         # default: False
+         # devices to which notifications cannot be sent,
+         # are deleted upon receiving error response from FCM
+         # default: False
+        "DELETE_INACTIVE_DEVICES": True,
+}

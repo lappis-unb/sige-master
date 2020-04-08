@@ -21,7 +21,8 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
             'model',
             'grouping',
             'firmware_version',
-            'url'
+            'url',
+            'history'
         )
 
         read_only_fields = (
@@ -54,7 +55,8 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
                 geolocation_latitude=validated_data.get('geolocation_latitude'),
                 geolocation_longitude=validated_data.get(
                     'geolocation_longitude'
-                )
+                ),
+                history=validated_data.get('history')
             )
 
             for group in validated_data.get('grouping'):
@@ -97,6 +99,7 @@ class EnergyTransductorListSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = EnergyTransductor
         fields = (
+            'serial_number',
             'campus',
             'name',
             'active',
