@@ -43,17 +43,16 @@ def create_transductor(transductor_data, slave_server):
 def update_transductor(transductor_id, transductor_data, slave_server):
     protocol = "http://"
     endpoint = "/energy-transductors/"
-    transductor_id = transductor_data.get("id")
 
     address = protocol\
         + slave_server.ip_address\
         + ":"\
         + slave_server.port\
         + endpoint\
-        + transductor_id\
+        + str(transductor_id)\
         + "/"
 
-    return requests.post(address, 
+    return requests.put(address, 
                          json=__get_transductor_data(
                              transductor_data, slave_server),
                          timeout=1
@@ -68,7 +67,7 @@ def delete_transductor(transductor_id, transductor, slave_server):
         + ":"\
         + slave_server.port\
         + endpoint\
-        + transductor.transductor_id\
+        + str(transductor_id)\
         + "/"
 
     return requests.delete(address, timeout=1)

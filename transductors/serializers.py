@@ -81,7 +81,7 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
                     )
                     exception.status_code = 400
                     raise exception
-            
+
             else:
                 id_in_slave = None
             transductor = EnergyTransductor.objects.create(
@@ -151,36 +151,38 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
                             instance.id_in_slave, instance, old_slave_server)
 
                 except Exception:
-                    error_messages = _(
+                    error_message = _(
                         'Could not disconnect from server %s.' 
                         ' Try it again latter'
                         % old_slave_server.name)
 
-                    errors.append(error_messages)
+                    errors.append(error_message)
                 try:
                     if new_slave_server is not None:
                         response = create_transductor(
                             validated_data, new_slave_server)
+                        r = response.json()
+                        instance.id_in_slave = r['id']
+
                 except Exception:
                     error_message = _(
-                        'Could not connect with server %s. try it again latter'
+                        'Could not connect with server %s. Try it again latter'
                         % new_slave_server.name)
 
-                    errors.append(error_messages)
-                r = response.json()
-                instance.id_in_slave = r['id']
+                    errors.append(error_message)
 
         else:
             try:
                 if old_slave_server is not None:
                     update_transductor(
-                        instance.id, validated_data, old_slave_server)
+                        instance.id_in_slave, validated_data, old_slave_server)
+
             except Exception:
                 error_message = _(
                     'Could not connect with server %s. Try it again latter'
                     % new_slave_server.name)
 
-                errors.append(error_messages)
+                errors.append(error_message)
 
         if errors.__len__() > 0:
             exception = APIException(
@@ -207,17 +209,6 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
 
         instance.save()
         return instance
-
-    def destroy(self, request, *args, **kwargs):
-        try:
-            instance = self.get_object()
-            slave_server = instance.slave_server
-            if slave_server is not None:
-                delete_transductor(instance.id_in_slave, instance, slave_server)            
-            instance.delete()
-        except Exception:
-            pass
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class AddToServerSerializer(serializers.Serializer):
