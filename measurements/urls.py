@@ -94,30 +94,6 @@ graph_router.register(
 )
 
 graph_router.register(
-    r'quarterly-consumption-peak',
-    ConsumptionPeakViewSet,
-    basename='quarterlyconsumptionpeak'
-)
-
-graph_router.register(
-    r'quarterly-consumption-off-peak',
-    ConsumptionOffPeakViewSet,
-    basename='quarterlyconsumptionoffpeak'
-)
-
-graph_router.register(
-    r'quarterly-generated-energy-peak',
-    GenerationPeakViewSet,
-    basename='quarterlygenerationpeak'
-)
-
-graph_router.register(
-    r'quarterly-generated-energy-off-peak',
-    GenerationOffPeakViewSet,
-    basename='quarterlygenerationoffpeak'
-)
-
-graph_router.register(
     r'quarterly-daily-consumption',
     DailyConsumptionViewSet,
     basename='quarterlydailyconsumption'
@@ -139,4 +115,16 @@ graph_router.register(
     r'quarterly-total-consumption',
     TotalConsumtionViewSet,
     basename='quarterlytotalconsumption'
+)
+
+graph_router.register(
+    r'quarterly-total-inductive-power',
+    TotalInductivePowerViewSet,
+    basename='quarterlytotalinductivepower'
+)
+
+graph_router.register(
+    r'quarterly-total-capacitive-power',
+    TotalCapacitivePowerViewSet,
+    basename='quarterlytotalcapacitivepower'
 )

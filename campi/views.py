@@ -10,8 +10,3 @@ class CampusViewSet(viewsets.ModelViewSet):
     queryset = Campus.objects.all()
     serializer_class = CampusSerializer
     permission_classes = (permissions.AllowAny,)
-
-
-# class RealTimeMeasurementViewSet(MeasurementViewSet):
-#     serializer_class = RealTimeMeasurementSerializer
-#     queryset = RealTimeMeasurement.objects.select_related('transductor').all()
