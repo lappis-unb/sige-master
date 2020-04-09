@@ -10,6 +10,10 @@ from polymorphic.models import PolymorphicModel
 from slaves.models import Slave
 from transductors.models import EnergyTransductor
 
+from fcm_django.fcm import fcm_send_topic_message
+
+TOPIC_NAME = 'ALL'
+
 
 class Event(PolymorphicModel):
     """
@@ -61,6 +65,42 @@ class VoltageRelatedEvent(Event):
 
     class Meta:
         verbose_name = _('voltage related')
+        
+    def save_event(self, transductor, event_dict):
+        """
+        Saves a failed connection event related to a transductor
+        """
+        self.transductor = transductor
+        self.data = event_dict['data']
+        self.created_at = event_dict['created_at']
+        self.ended_at = event_dict['ended_at']
+        self.save()
+
+        body = self.transductor.name + '\n' 
+        counter = 0
+        
+        if self.__class__.__name__ == 'PhaseDropEvent':
+            for key, value in self.data.items():
+                body += 'Fase ' + key[-1].upper()
+                counter += 1
+                if counter < len(self.data):
+                    body += ', '
+        else:
+            for key, value in self.data.items():
+                body += key[-1].upper() + ' - ' + str(value) + 'V'
+                counter += 1
+                if counter < len(self.data):
+                    body += ', '
+
+        fcm_send_topic_message(
+            topic_name=TOPIC_NAME,
+            data_message={
+                'title': str(self._meta.verbose_name).capitalize(),
+                'body': body,
+                'transducer': self.pk 
+            }
+        )
+        return self
 
 
 class FailedConnectionTransductorEvent(Event):
@@ -80,15 +120,26 @@ class FailedConnectionTransductorEvent(Event):
     class Meta:
         verbose_name = _('failed connection with meter')
 
-    @staticmethod
-    def save_event(transductor):
+    def save_event(self, transductor, event_dict):
         """
         Saves a failed connection event related to a transductor
         """
-        new_event = FailedConnectionTransductorEvent()
-        new_event.transductor = transductor
-        new_event.save()
-        return new_event
+        self.transductor = transductor
+        self.data = event_dict['data']
+        self.created_at = event_dict['created_at']
+        self.ended_at = event_dict['ended_at']
+        self.save()
+        body = self.transductor.name 
+        
+        fcm_send_topic_message(
+            topic_name=TOPIC_NAME,
+            data_message={
+                'title': str(self._meta.verbose_name).capitalize(),
+                'body': body,
+                'transducer': self.pk 
+            }
+        )
+        return self
 
 
 class FailedConnectionSlaveEvent(Event):
@@ -108,15 +159,16 @@ class FailedConnectionSlaveEvent(Event):
     class Meta:
         verbose_name = _('failed connection with slave server')
 
-    @staticmethod
-    def save_event(slave):
+    def save_event(self, slave):
         """
         Saves a failed connection event related to a slave
         """
-        new_event = FailedConnectionSlaveEvent()
-        new_event.slave = slave
-        new_event.save()
-        return new_event
+        self.slave = slave
+        self.data = {}
+        self.created_at = timezone.now()
+        self.ended_at = None        
+        self.save()
+        return self
 
 
 class CriticalVoltageEvent(VoltageRelatedEvent):

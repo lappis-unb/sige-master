@@ -20,7 +20,7 @@ END
 }
 
 echo '======= CHECKING FOR UNINSTALLED PKGs AND INSTALLING'
-pip freeze || pip install -r requirements.txt
+pip install -r requirements.txt
 
 until function_postgres_ready; do
   >&2 echo "======= POSTGRES IS UNAVAILABLE, WAITING"
@@ -28,20 +28,17 @@ until function_postgres_ready; do
 done
 echo "======= POSTGRES IS UP, CONNECTING"
 
-echo '======= RUNNING PIP INSTALL'
-pip install --no-cache-dir -r requirements.txt
-
 echo '======= MAKING MIGRATIONS'
-python3 manage.py makemigrations
+python manage.py makemigrations
 
 echo '======= RUNNING MIGRATIONS'
-python3 manage.py migrate
+python manage.py migrate
 
-# echo '======= RUNNING SEED'
-# python3 seed_db.py
+echo '======= RUNNING SEED'
+python seed_db.py
 
 echo '======= STARTING CRON'
 cron
 
 echo '======= RUNNING SERVER'
-python3 manage.py runserver 0.0.0.0:8001
+python manage.py runserver 0.0.0.0:8001

@@ -1,4 +1,4 @@
-FROM python:3.6
+FROM python:3.6.0
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -31,11 +31,7 @@ COPY crons/crontab /etc/cron.d/smi-cron
 
 RUN chmod 0644 /etc/cron.d/smi-cron
 
-RUN touch /var/log/cron.log
-
 RUN /usr/bin/crontab /etc/cron.d/smi-cron
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-CMD ['echo '======= RUNNING SEED'']
-CMD ['python', 'seed_db.py']

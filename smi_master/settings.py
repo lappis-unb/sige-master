@@ -64,11 +64,12 @@ INSTALLED_APPS = [
     'slaves',
     'measurements',
     'transductors',
-    # 'users',
+    'users',
     'corsheaders',
     'events',
     'rosetta',
     'groups',
+    'fcm_django',
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
@@ -84,7 +85,17 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
 CORS_ORIGIN_ALLOW_ALL = True
+
+CORS_ALLOW_HEADERS = [
+    'content-disposition', 
+    'accept-encoding',
+    'content-type',
+    'accept',
+    'origin',
+    'authorization'
+]
 
 ROOT_URLCONF = 'smi_master.urls'
 
@@ -189,7 +200,7 @@ USE_L10N = True
 
 STATIC_URL = '/static/'
 
-# AUTH_USER_MODEL = 'users.CustomUser'
+AUTH_USER_MODEL = 'users.CustomUser'
 
 LOCALE_PATHS = (PROJECT_DIR + '/locale', )
 
@@ -224,3 +235,16 @@ MATERIAL_ADMIN_SITE = {
 
 # debug configuration to view how emails are being sent
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+
+FCM_DJANGO_SETTINGS = {
+        "APP_VERBOSE_NAME": "[string for AppConfig's verbose_name]",
+         # default: _('FCM Django')
+        "FCM_SERVER_KEY": os.getenv('API_KEY'),
+         # true if you want to have only one active device per registered user at a time
+         # default: False
+         # devices to which notifications cannot be sent,
+         # are deleted upon receiving error response from FCM
+         # default: False
+        "DELETE_INACTIVE_DEVICES": True,
+}

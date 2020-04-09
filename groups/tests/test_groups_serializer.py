@@ -101,7 +101,8 @@ class GroupTestCase(TestCase):
             'grouping': [
                 self.serializer_group['url'],
                 self.serializer_another_group['url']
-            ]
+            ],
+            'history': 'Transductor history'
         }
 
         request = self.factory.post('energy-transductors', params)
@@ -124,7 +125,8 @@ class GroupTestCase(TestCase):
             'grouping': [
                 self.serializer_group['url'],
                 self.serializer_other_group['url']
-            ]
+            ],
+            'history': 'Transductor history'
         }
 
         request = self.factory.post('energy-transductors', params)
