@@ -26,9 +26,6 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
         )
 
         read_only_fields = (
-            # 'creation_date',
-            # 'serial_number',
-            # 'firmware_version',
             'active',
             'broken'
         )
