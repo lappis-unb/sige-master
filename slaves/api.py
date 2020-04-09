@@ -13,9 +13,9 @@ def request_measurements(slave, transductor, start_date, measurement_type):
 
     if transductor is not None and start_date is not None:
         params = {
-            "serial_number": transductor.serial_number,
-            "start_date": start_date,
-            "end_date": datetime.now()
+            "id": transductor.id,
+            "start_date": start_date.strftime("%Y-%m-%d %H:%M:%S"),
+            "end_date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
     else:
         params = {}
