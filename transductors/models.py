@@ -11,8 +11,10 @@ from polymorphic.models import PolymorphicModel
 
 from .api import *
 from campi.models import Campus
+from slaves.models import Slave
 from groups.models import Group
 from django.utils.translation import gettext_lazy as _
+from django.core.validators import MinLengthValidator
 
 
 class Transductor(PolymorphicModel):
@@ -37,14 +39,14 @@ class Transductor(PolymorphicModel):
         default=datetime.now,
         verbose_name=_('last minutely collection')
     )
-    
+
     last_quarterly_collection = models.DateTimeField(
         blank=False, 
         null=False,
         default=datetime.now,
         verbose_name=_('last quarterly collection')
     )
-    
+
     last_monthly_collection = models.DateTimeField(
         blank=False, 
         null=False,
@@ -85,13 +87,14 @@ class Transductor(PolymorphicModel):
         verbose_name=_('longitude')
     )
     serial_number = models.CharField(
-        primary_key=True,
+        primary_key=False,
         unique=True,
         max_length=8,
         blank=False,
         null=False,
         verbose_name=_('serial number'),
-        help_text=_('This field is required')
+        help_text=_('This field is required'),
+        validators=[MinLengthValidator(1)]
     )
 
     firmware_version = models.CharField(
@@ -114,16 +117,32 @@ class Transductor(PolymorphicModel):
 
     model = models.CharField(
         max_length=256,
-        blank=False,
-        null=False,
         verbose_name=_('model'),
         help_text=_('This field is required')
     )
 
     grouping = models.ManyToManyField(
         Group,
-        verbose_name=_('grouping'),
-        help_text=_('This field is required')
+        verbose_name=_('Grouping'),
+        help_text=_('This field is required'),
+        blank=True,
+        null=True
+    )
+
+    slave_server = models.ForeignKey(
+        Slave,
+        verbose_name=_('Collection Server'),
+        default=None,
+        null=True,
+        blank=True,
+        on_delete=models.DO_NOTHING, 
+        related_name='transductors'
+    )
+
+    id_in_slave = models.IntegerField(
+        default=None,
+        null=True,
+        blank=True
     )
 
     history = models.TextField(
@@ -141,39 +160,6 @@ class Transductor(PolymorphicModel):
     def save(self, *args, **kwargs):
         self.full_clean()
         super(Transductor, self).save()
-
-    def update(self, *args, **kwargs):
-        self.full_clean()
-        failed = False
-
-        for slave in self.slave_servers.all():
-            if not kwargs.get('bypass_requests', None):
-                response = update_transductor(self, slave)
-                if not self.__is_success_status(response.status_code):
-                    failed = True
-
-        if not failed:
-            super(Transductor, self).save()
-        else:
-            # FIXME: Raise exception
-            print("Couldn't update this transductor in all Slave Servers")
-
-    def delete(self, *args, **kwargs):
-        self.active = False
-
-        failed = False
-        for slave in self.slave_servers.all():
-            if not kwargs.get('bypass_requests', None):
-                response = slave.remove_transductor(self)
-                if not self.__successfully_deleted(response.status_code):
-                    failed = True
-
-        if not failed:
-            self.full_clean()
-            super(Transductor, self).delete()
-        else:
-            # FIXME: Raise exception
-            print("Couldn't delete this transductor in all Slave Servers")
 
     def get_measurements(self, datetime):
         raise NotImplementedError
