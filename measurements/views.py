@@ -1,6 +1,8 @@
 from django.utils import timezone
 import numpy as np
 import os
+import csv
+import codecs
 from .lttb import downsample
 
 from django.db.models.query import QuerySet
@@ -10,6 +12,9 @@ from rest_framework import viewsets
 from rest_framework import mixins
 
 from rest_framework.exceptions import APIException
+from rest_framework.exceptions import NotAcceptable
+
+from rest_framework.decorators import api_view
 
 from transductors.models import EnergyTransductor
 
@@ -29,6 +34,9 @@ from .serializers import QuarterlyMeasurementSerializer
 from .serializers import MonthlyMeasurementSerializer
 from .serializers import QuarterlySerializer
 from .serializers import RealTimeMeasurementSerializer
+
+from django.http import StreamingHttpResponse
+from django.utils.translation import ugettext as _
 
 
 #  this viewset don't inherits from viewsets.ModelViewSet because it
@@ -448,5 +456,102 @@ class RealTimeMeasurementViewSet(MeasurementViewSet):
                 exception.status_code = 400
                 raise exception
         else:
-            queryset = RealTimeMeasurement.objects.all()
+            queryset = RealTimeMeasurement.objects.select_related(
+                'transductor'
+            ).all()
+
+        return queryset
+
+
+class Echo:
+    def write(self, value):
+        return value
+
+
+class MeasurementResults(mixins.RetrieveModelMixin,
+                         mixins.ListModelMixin,
+                         viewsets.GenericViewSet):
+    @api_view(['GET'])
+    def mount_csv_measurement(request):
+        class_name = request.query_params.get('class_name')
+        fields = request.query_params.get('fields')
+        start_date = request.query_params.get('start_date')
+
+        queryset = None
+
+        if class_name == 'minutely':
+            queryset = MeasurementResults.build_csv(
+                request, MinutelyMeasurement, fields, start_date
+            )
+        elif class_name == 'quarterly':
+            queryset = MeasurementResults.build_csv(
+                request, QuarterlyMeasurement, fields, start_date
+            )
+        elif class_name == 'monthly':
+            queryset = MeasurementResults.build_csv(
+                request, MonthlyMeasurement, fields, start_date
+            )
+
+        if queryset:
+            pseudo_buffer = Echo()
+            pseudo_buffer.write(codecs.BOM_UTF8)
+
+            writer = csv.writer(pseudo_buffer)
+            response = StreamingHttpResponse(
+                (writer.writerow(measurement) for measurement in queryset),
+                content_type='text/csv'
+            )
+            response['Content-Disposition'] = (
+                'attachment; filename="measurement_dataset.csv"'
+            )
+            response['Content-Transfer-Encoding'] = 'binary'
+
+            return response
+        else:
+            exception = APIException(
+                'Class name was not specified in request params.'
+            )
+            exception.status_code = 400
+            raise exception
+
+    @staticmethod
+    def build_csv(request, class_name, fields, start_date):
+        all_fields = {
+            measurement.name: measurement.verbose_name
+            for measurement in class_name._meta.get_fields()
+        }
+
+        if start_date is None:
+            raise NotAcceptable(
+                'Start date param is needed to create the csv file.'
+            )
+
+        if fields is not None:
+            columns = fields.split(',')
+        else:
+            columns = []
+
+        queryset = list(
+            class_name.objects.filter(
+                collection_date__gte=start_date
+            ).values_list(*columns)
+        )
+
+        if columns:
+            queryset.insert(
+                0,
+                [
+                    all_fields[column] for column in columns
+                    if column in all_fields
+                ]
+            )
+        else:
+            queryset.insert(
+                0,
+                [
+                    measurement.verbose_name
+                    for measurement in class_name._meta.get_fields()
+                ]
+            )
+
         return queryset
