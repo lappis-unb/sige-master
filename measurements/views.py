@@ -223,7 +223,7 @@ class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
         end_date = self.request.query_params.get('end_date')
         campus = self.request.query_params.get('campus')
         group = self.request.query_params.get('group')
-        serial_number = self.request.query_params.get('serial_number')
+        transductor_id = self.request.query_params.get('id')
 
         try:
             if start_date is not None and end_date is None:
@@ -241,7 +241,7 @@ class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
 
             if serial_number:
                 transductor = EnergyTransductor.objects.get(
-                    pk=int(serial_number)
+                    pk=int(transductor_id)
                 )
                 self.queryset = self.queryset.filter(
                     transductor=transductor
