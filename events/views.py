@@ -68,11 +68,11 @@ class VoltageRelatedEventViewSet(EventViewSet):
     serializer_class = VoltageRelatedEventSerializer
 
     def specific_query(self):
-        serial_number = self.request.query_params.get('serial_number')
+        transductor_id = self.request.query_params.get('id')
 
         try:
             transductor = EnergyTransductor.objects.get(
-                serial_number=serial_number
+                id=transductor_id
             )
             self.queryset = self.queryset.filter(
                 transductor=transductor
@@ -106,11 +106,11 @@ class FailedConnectionTransductorEventViewSet(EventViewSet):
     serializer_class = FailedConnectionTransductorEventSerializer
 
     def specific_query(self):
-        serial_number = self.request.query_params.get('serial_number')
+        transductor_id = self.request.query_params.get('id')
 
         try:
             transductor = EnergyTransductor.objects.get(
-                serial_number=serial_number
+                id=transductor_id
             )
             self.queryset = self.queryset.filter(
                 transductor=transductor
@@ -136,8 +136,7 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
     }
 
     def list(self, request):
-        serial_number = self.request.query_params.get('serial_number')
-        campus = self.request.query_params.get('campus')
+        transductor_id = self.request.query_params.get('id')
         type = self.request.query_params.get('type')
 
         if type == 'period':
@@ -176,10 +175,10 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
                 FailedConnectionSlaveEvent
             )
 
-        if serial_number:
+        if transductor_id:
             try:
                 transductor = EnergyTransductor.objects.get(
-                    serial_number=serial_number
+                    id=transductor_id
                 )
 
                 voltage_related_events = voltage_related_events.filter(
@@ -260,7 +259,7 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
                 event['id'] = element.pk
                 event['location'] = transductor.name
                 event['campus'] = transductor.campus.acronym
-                event['transductor'] = transductor.serial_number
+                event['transductor'] = transductor.id
                 event['data'] = {'slave': element.slave.pk}
                 event['start_time'] = element.created_at
                 event['end_time'] = element.ended_at

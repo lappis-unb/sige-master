@@ -6,8 +6,6 @@ from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 
-from transductors.models import EnergyTransductor
-
 """
     TODO Make get all measurements and list
     transductor models methods
@@ -28,10 +26,11 @@ class Slave(models.Model):
         verbose_name=_('IP access port')
     )
 
-    location = models.CharField(
+    name = models.CharField(
         max_length=50,
         verbose_name=_('Location'),
-        help_text=_('This field is required')
+        help_text=_('This field is required'),
+        unique=True
     )
 
     broken = models.BooleanField(
@@ -39,18 +38,11 @@ class Slave(models.Model):
         verbose_name=_('Broken')
     )
 
-    transductors = models.ManyToManyField(
-        EnergyTransductor,
-        related_name='slave_servers',
-        verbose_name=_('Meters'),
-        help_text=_('This field is required')
-    )
-
     class Meta:
         verbose_name = _('Slave server')
 
     def __str__(self):
-        return self.ip_address
+        return self.name
 
     def save(self, *args, **kwargs):
         self.full_clean()

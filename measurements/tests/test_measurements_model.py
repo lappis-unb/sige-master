@@ -6,7 +6,6 @@ from django.db import IntegrityError
 from measurements.models import MinutelyMeasurement
 from measurements.models import QuarterlyMeasurement
 from measurements.models import MonthlyMeasurement
-from slaves.models import Slave
 from transductors.models import EnergyTransductor
 from campi.models import Campus
 from datetime import datetime
@@ -16,12 +15,6 @@ from django.utils import timezone
 class MeasurementsTestCase(TestCase):
 
     def setUp(self):
-        self.slave = Slave.objects.create(
-            ip_address="1.1.1.1",
-            location="UED FGA",
-            broken=False
-        )
-
         self.campus = Campus.objects.create(
             name='UnB - Faculdade Gama',
             acronym='FGA',
@@ -34,8 +27,6 @@ class MeasurementsTestCase(TestCase):
             firmware_version="0.1",
             campus=self.campus
         )
-
-        self.transductor.slave_servers.add(self.slave)
 
         self.time = timezone.now()
 

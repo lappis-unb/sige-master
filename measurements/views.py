@@ -64,16 +64,17 @@ class MeasurementViewSet(mixins.RetrieveModelMixin,
             end_date = end_date.strftime("%Y-%m-%d %H:%M:%S")
             params['end_date'] = str(end_date)
 
-        serial_number = self.request.query_params.get('serial_number')
-        if serial_number:
-            params['serial_number'] = serial_number
+        transductor_id = self.request.query_params.get('id')
+
+        if transductor_id:
+            params['id'] = transductor_id
         transductor = None
 
         MeasurementParamsValidator.validate_query_params(params)
 
         try:
             transductor = EnergyTransductor.objects.get(
-                serial_number=serial_number
+                id=transductor_id
             )
             self.queryset = self.model.objects.filter(
                 transductor=transductor,
@@ -700,17 +701,17 @@ class RealTimeMeasurementViewSet(MeasurementViewSet):
     serializer_class = RealTimeMeasurementSerializer
 
     def get_queryset(self):
-        serial_number = self.request.query_params.get('serial_number')
-        if serial_number:
+        transductor_id = self.request.query_params.get('id')
+        if transductor_id:
             try:
                 transductor = EnergyTransductor.objects.get(
-                    serial_number=serial_number)
+                    id=transductor_id)
                 queryset = RealTimeMeasurement.objects.filter(
                     transductor=transductor)
             except Exception:
                 exception = APIException(
-                    serial_number,
-                    _('This serial_number does not match with any Transductor'),
+                    transductor_id,
+                    _('This id does not match with any Transductor'),
                 )
                 exception.status_code = 400
                 raise exception

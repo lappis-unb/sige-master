@@ -38,7 +38,7 @@ class EventTestCase(TestCase):
         self.slave = Slave.objects.create(
             ip_address='666.666.666.666',
             port=80,
-            location='Somewhere near Wkïskh - Czech Republic',
+            name='Somewhere near Wkïskh - Czech Republic',
             broken=False
         )
 
