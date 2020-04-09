@@ -496,7 +496,6 @@ class MeasurementResults(mixins.RetrieveModelMixin,
             pseudo_buffer.write(codecs.BOM_UTF8)
 
             writer = csv.writer(pseudo_buffer)
-
             response = StreamingHttpResponse(
                 (writer.writerow(measurement) for measurement in queryset),
                 content_type='text/csv'
@@ -533,7 +532,7 @@ class MeasurementResults(mixins.RetrieveModelMixin,
 
         queryset = list(
             class_name.objects.filter(
-                collection_time__gte=start_date
+                collection_date__gte=start_date
             ).values_list(*columns)
         )
 
@@ -553,3 +552,5 @@ class MeasurementResults(mixins.RetrieveModelMixin,
                     for measurement in class_name._meta.get_fields()
                 ]
             )
+
+        return queryset
