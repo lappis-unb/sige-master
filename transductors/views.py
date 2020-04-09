@@ -9,6 +9,8 @@ from rest_framework import serializers, viewsets, permissions, status
 from .api import *
 from slaves.models import Slave
 from .models import EnergyTransductor
+from .serializers import EnergyTransductorSerializer, AddToServerSerializer
+from django.http import Http404
 from .serializers import EnergyTransductorSerializer, \
     AddToServerSerializer, EnergyTransductorListSerializer
 
@@ -24,26 +26,25 @@ class EnergyTransductorViewSet(viewsets.ModelViewSet):
     serializer_class = EnergyTransductorSerializer
     permission_classes = (permissions.AllowAny,)
 
-    @action(detail=True, methods=['post'])
-    def add_to_server(self, request, pk=None):
-        serializer_class = AddToServerSerializer(data=request.data)
-        if serializer_class.is_valid():
-            slave_server = Slave.objects.get(
-                id=serializer_class.data["slave_id"]
-            )
-            response = slave_server.add_transductor(self.get_object())
-            return Response(data=json.loads(response.content),
-                            status=response.status_code)
-        else:
-            return Response(data=serializer_class.errors,
-                            status=status.HTTP_400_BAD_REQUEST)
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        try:
+            if instance.slave_server is not None:
+                response = delete_transductor(
+                    instance.id_in_slave, instance, instance.slave_server)
+                if response.status_code is not 204:
+                    return Response(status=status.HTTP_400_BAD_REQUEST) 
+            instance.delete()
+        except Http404:
+            pass
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class EnergyTransductorListViewSet(viewsets.GenericViewSet, 
                                    mixins.RetrieveModelMixin, 
                                    mixins.ListModelMixin):
     serializer_class = EnergyTransductorListSerializer
-    
+
     def get_queryset(self):
         transductors = EnergyTransductor.objects.all()
         slaves = Slave.objects.all()
