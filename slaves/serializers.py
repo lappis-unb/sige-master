@@ -10,7 +10,7 @@ class SlaveSerializer(serializers.HyperlinkedModelSerializer):
             'id',
             'ip_address',
             'port',
-            'location',
+            'name',
             'broken',
             'url'
         )

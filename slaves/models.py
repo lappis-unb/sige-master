@@ -1,37 +1,47 @@
 from django.db import models
-from django.contrib.postgres.fields import ArrayField
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
+from django.contrib.postgres.fields import ArrayField
+from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ObjectDoesNotExist
 
-from transductors.models import EnergyTransductor
-
-'''
+"""
     TODO Make get all measurements and list
     transductor models methods
-'''
+"""
 
 
 class Slave(models.Model):
 
     ip_address = models.CharField(
         max_length=50,
+        verbose_name=_('IP address'),
+        help_text=_('This field is required')
     )
 
     port = models.CharField(
         max_length=5,
-        default="80"
+        default="80",
+        verbose_name=_('IP access port')
     )
 
-    location = models.CharField(max_length=50)
-    broken = models.BooleanField(default=True)
-
-    transductors = models.ManyToManyField(
-        EnergyTransductor, related_name='slave_servers'
+    name = models.CharField(
+        max_length=50,
+        verbose_name=_('Location'),
+        help_text=_('This field is required'),
+        unique=True
     )
+
+    broken = models.BooleanField(
+        default=False,
+        verbose_name=_('Broken')
+    )
+
+    class Meta:
+        verbose_name = _('Slave server')
 
     def __str__(self):
-        return self.ip_address
+        return self.name
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -61,7 +71,7 @@ class Slave(models.Model):
         if old_status is True and new_status is False:
             try:
                 related_event = FailedConnectionSlaveEvent.objects.filter(
-                    transductor=self,
+                    slave=self,
                     ended_at__isnull=True
                 ).last()
                 related_event.ended_at = timezone.now()

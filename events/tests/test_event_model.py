@@ -21,9 +21,6 @@ class EventTestCase(TestCase):
         self.campus = Campus.objects.create(
             name='UnB - Faculdade Gama',
             acronym='FGA',
-            phone='(61) 3107-8901',
-            address='Área Especial de Indústria Projeção A',
-            website_address='http://fga.unb.br/'
         )
 
         self.transductor = EnergyTransductor.objects.create(
@@ -32,7 +29,6 @@ class EventTestCase(TestCase):
             broken=False,
             active=True,
             model='TR4020',
-            physical_location='predio 2 sala 44',
             geolocation_longitude=-24.4556,
             geolocation_latitude=-24.45996,
             firmware_version='0.1',
@@ -42,7 +38,7 @@ class EventTestCase(TestCase):
         self.slave = Slave.objects.create(
             ip_address='666.666.666.666',
             port=80,
-            location='Somewhere near Wkïskh - Czech Republic',
+            name='Somewhere near Wkïskh - Czech Republic',
             broken=False
         )
 

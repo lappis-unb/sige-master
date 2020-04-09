@@ -14,47 +14,43 @@ class TestSlavesModels(TestCase):
     def setUp(self):
         self.slave = Slave.objects.create(
             ip_address="1.1.1.1",
-            location="UED FGA",
+            name="UED FGA",
             broken=False
         )
 
         self.slave_1 = Slave.objects.create(
             ip_address="1.1.1.2",
-            location="UAC FGA",
+            name="UAC FGA",
             broken=False
         )
 
         self.campus = Campus.objects.create(
             name='UnB - Faculdade Gama',
             acronym='FGA',
-            phone='(61) 3107-8901',
-            address='Área Especial de Indústria Projeção A',
-            website_address='http://fga.unb.br/'
         )
 
         self.energy_transductor = EnergyTransductor.objects.create(
             serial_number='87654321',
             ip_address='192.168.1.1',
-            physical_location="MESP",
             geolocation_latitude=20.1,
             geolocation_longitude=37.9,
             name="MESP 1",
             broken=True,
             active=False,
             creation_date=timezone.now(),
-            calibration_date=timezone.now(),
             firmware_version='0.1',
             model='EnergyTransductorModel',
             campus=self.campus
         )
 
+        # Jango Fett would be proud
         self.slave_1.transductors.add(self.energy_transductor)
 
     def test_should_create_new_slave(self):
         slaves_before = len(Slave.objects.all())
         Slave.objects.create(
             ip_address="1.1.1.3",
-            location="MESP FGA",
+            name="MESP FGA",
             broken=False
         )
         slaves_after = len(Slave.objects.all())
@@ -70,21 +66,21 @@ class TestSlavesModels(TestCase):
         slave = Slave.objects.get(ip_address="1.1.1.1")
 
         original_ip_address = slave.ip_address
-        original_location = slave.location
+        original_name = slave.name
         original_broken = slave.broken
 
         slave.ip_address = "2.2.2.2"
-        slave.location = "FAU Darcy Ribeiro"
+        slave.name = "FAU Darcy Ribeiro"
         slave.broken = True
 
         slave.save()
 
         new_ip_address = slave.ip_address
-        new_location = slave.location
+        new_name = slave.name
         new_broken = slave.broken
 
         self.assertNotEqual(original_ip_address, new_ip_address)
-        self.assertNotEqual(original_location, new_location)
+        self.assertNotEqual(original_name, new_name)
         self.assertNotEqual(original_broken, new_broken)
 
     def test_should_update_a_speficic_slave_with_dns(self):

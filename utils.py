@@ -11,3 +11,9 @@ web_site_validator = RegexValidator(
     '(-?[a-zA-Z0-9])*\.)+[\w]{2,}(\/\S*)?$',
     'Invalid website format'
 )
+
+
+class ValidationException(Exception):
+    def __init__(self, message):
+        super(ValidationException, self).__init__(message)
+        self.message = message

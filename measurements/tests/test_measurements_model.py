@@ -6,7 +6,6 @@ from django.db import IntegrityError
 from measurements.models import MinutelyMeasurement
 from measurements.models import QuarterlyMeasurement
 from measurements.models import MonthlyMeasurement
-from slaves.models import Slave
 from transductors.models import EnergyTransductor
 from campi.models import Campus
 from datetime import datetime
@@ -16,18 +15,9 @@ from django.utils import timezone
 class MeasurementsTestCase(TestCase):
 
     def setUp(self):
-        self.slave = Slave.objects.create(
-            ip_address="1.1.1.1",
-            location="UED FGA",
-            broken=False
-        )
-
         self.campus = Campus.objects.create(
             name='UnB - Faculdade Gama',
             acronym='FGA',
-            phone='(61) 3107-8901',
-            address='Área Especial de Indústria Projeção A',
-            website_address='http://fga.unb.br/'
         )
 
         self.transductor = EnergyTransductor.objects.create(
@@ -37,8 +27,6 @@ class MeasurementsTestCase(TestCase):
             firmware_version="0.1",
             campus=self.campus
         )
-
-        self.transductor.slave_servers.add(self.slave)
 
         self.time = timezone.now()
 
@@ -73,7 +61,7 @@ class MeasurementsTestCase(TestCase):
             dht_current_b=8,
             dht_current_c=8,
             transductor=self.transductor,
-            collection_time=self.time
+            collection_date=self.time
         )
 
         self.quarterly_measurement = QuarterlyMeasurement.objects.create(
@@ -86,7 +74,7 @@ class MeasurementsTestCase(TestCase):
             capacitive_power_peak_time=8,
             capacitive_power_off_peak_time=8,
             transductor=self.transductor,
-            collection_time=self.time
+            collection_date=self.time
         )
 
         self.monthly_measurement = MonthlyMeasurement.objects.create(
@@ -102,32 +90,44 @@ class MeasurementsTestCase(TestCase):
             active_max_power_off_peak_time=8,
             reactive_max_power_peak_time=8,
             reactive_max_power_off_peak_time=8,
+            active_max_power_list_peak=[
+                0.0, 0.0, 0.0, 0.0
+            ],
             active_max_power_list_peak_time=[
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"}
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0)
+            ],
+            active_max_power_list_off_peak=[
+                0.0, 0.0, 0.0, 0.0
             ],
             active_max_power_list_off_peak_time=[
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"}
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0)
+            ],
+            reactive_max_power_list_peak=[
+                0.0, 0.0, 0.0, 0.0
             ],
             reactive_max_power_list_peak_time=[
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"}
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0)
+            ],
+            reactive_max_power_list_off_peak=[
+                0.0, 0.0, 0.0, 0.0,
             ],
             reactive_max_power_list_off_peak_time=[
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"}
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0)
             ],
             transductor=self.transductor,
-            collection_time=self.time
+            collection_date=self.time
         )
 
     # Minutely measurements tests
@@ -165,13 +165,13 @@ class MeasurementsTestCase(TestCase):
             dht_current_b=8,
             dht_current_c=8,
             transductor=self.transductor,
-            collection_time=timezone.now()
+            collection_date=timezone.now()
         )
         after = len(MinutelyMeasurement.objects.all())
 
         self.assertEqual(before + 1, after)
 
-    def test_should_not_create_minutely_measurement_without_collection_time(
+    def test_should_not_create_minutely_measurement_without_collection_date(
             self):
         new_measurement = MinutelyMeasurement()
         new_measurement.transductor = self.transductor
@@ -181,7 +181,7 @@ class MeasurementsTestCase(TestCase):
 
     def test_should_not_create_minutely_measurement_without_transductor(self):
         new_measurement = MinutelyMeasurement()
-        new_measurement.collection_time = timezone.now()
+        new_measurement.collection_date = timezone.now()
 
         with self.assertRaises(IntegrityError):
             new_measurement.save()
@@ -203,13 +203,13 @@ class MeasurementsTestCase(TestCase):
             capacitive_power_peak_time=8,
             capacitive_power_off_peak_time=8,
             transductor=self.transductor,
-            collection_time=timezone.now()
+            collection_date=timezone.now()
         )
         after = len(QuarterlyMeasurement.objects.all())
 
         self.assertEqual(before + 1, after)
 
-    def test_should_not_create_quarterly_measurement_without_collection_time(
+    def test_should_not_create_quarterly_measurement_without_collection_date(
             self):
         new_measurement = QuarterlyMeasurement()
         new_measurement.transductor = self.transductor
@@ -219,7 +219,7 @@ class MeasurementsTestCase(TestCase):
 
     def test_should_not_create_quarterly_measurement_without_transductor(self):
         new_measurement = QuarterlyMeasurement()
-        new_measurement.collection_time = timezone.now()
+        new_measurement.collection_date = timezone.now()
 
         with self.assertRaises(IntegrityError):
             new_measurement.save()
@@ -244,38 +244,50 @@ class MeasurementsTestCase(TestCase):
             active_max_power_off_peak_time=8,
             reactive_max_power_peak_time=8,
             reactive_max_power_off_peak_time=8,
+            active_max_power_list_peak=[
+                0.0, 0.0, 0.0, 0.0
+            ],
             active_max_power_list_peak_time=[
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"}
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0)
+            ],
+            active_max_power_list_off_peak=[
+                0.0, 0.0, 0.0, 0.0
             ],
             active_max_power_list_off_peak_time=[
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"}
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0)
+            ],
+            reactive_max_power_list_peak=[
+                0.0, 0.0, 0.0, 0.0
             ],
             reactive_max_power_list_peak_time=[
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"}
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0)
+            ],
+            reactive_max_power_list_off_peak=[
+                0.0, 0.0, 0.0, 0.0,
             ],
             reactive_max_power_list_off_peak_time=[
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"}
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0)
             ],
             transductor=self.transductor,
-            collection_time=timezone.now()
+            collection_date=timezone.now()
         )
         after = len(MonthlyMeasurement.objects.all())
 
         self.assertEqual(before + 1, after)
 
-    def test_should_not_create_monthly_measurement_without_collection_time(
+    def test_should_not_create_monthly_measurement_without_collection_date(
             self):
         new_measurement = MonthlyMeasurement()
         new_measurement.transductor = self.transductor
@@ -285,7 +297,7 @@ class MeasurementsTestCase(TestCase):
 
     def test_should_not_create_monthly_measurement_without_transductor(self):
         new_measurement = MonthlyMeasurement()
-        new_measurement.collection_time = timezone.now()
+        new_measurement.collection_date = timezone.now()
 
         with self.assertRaises(IntegrityError):
             new_measurement.save()
