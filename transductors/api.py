@@ -53,10 +53,10 @@ def update_transductor(transductor_id, transductor_data, slave_server):
         + "/"
 
     return requests.put(address, 
-                         json=__get_transductor_data(
-                             transductor_data, slave_server),
-                         timeout=1
-                         )
+                        json=__get_transductor_data(
+                            transductor_data, slave_server),
+                        timeout=1
+                        )
 
 
 def delete_transductor(transductor_id, transductor, slave_server):
