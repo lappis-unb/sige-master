@@ -239,7 +239,7 @@ class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
                     transductor__grouping__in=[group]
                 )
 
-            if serial_number:
+            if transductor_id:
                 transductor = EnergyTransductor.objects.get(
                     pk=int(transductor_id)
                 )
