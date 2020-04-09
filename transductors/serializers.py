@@ -74,7 +74,7 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
                     id_in_slave = r['id']
                 except Exception:
                     error_message = _(
-                        'Could not connect with server %s. try it again latter'
+                        'Could not connect with server %s. Try it again latter'
                         % slave_server.name)
                     exception = APIException(
                         error_message
@@ -126,13 +126,13 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
         if new_slave_server != old_slave_server:
             if not check_connection(old_slave_server):
                 error_message = _(
-                    'Could not disconnect from server %s. try it again latter'
+                    'Could not disconnect from server %s. Try it again latter'
                     % old_slave_server.name)
                 errors.append(error_message)
 
             if not check_connection(new_slave_server):
                 error_message = _(
-                    'Could not connect wit h server %s. try it again latter' 
+                    'Could not connect with server %s. Try it again latter' 
                     % new_slave_server.name)
 
                 errors.append(error_message)
@@ -153,7 +153,7 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
                 except Exception:
                     error_messages = _(
                         'Could not disconnect from server %s.' 
-                        'try it again latter'
+                        ' Try it again latter'
                         % old_slave_server.name)
 
                     errors.append(error_messages)
@@ -177,7 +177,7 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
                         instance.id, validated_data, old_slave_server)
             except Exception:
                 error_message = _(
-                    'Could not connect with server %s. try it again latter'
+                    'Could not connect with server %s. Try it again latter'
                     % new_slave_server.name)
 
                 errors.append(error_messages)
