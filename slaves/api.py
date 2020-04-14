@@ -15,8 +15,8 @@ def request_measurements(measurement_type, slave, transductor=None,
     if transductor is not None and start_date is not None:
         params = {
             "id": transductor.id,
-            "start_date": start_date,
-            "end_date": datetime.now()
+            "start_date": start_date.strftime("%Y-%m-%d %H:%M:%S"),
+            "end_date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
     else:
         params = {}

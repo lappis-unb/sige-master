@@ -11,6 +11,7 @@ from campi import views as campi_views
 from users import views as users_views
 from events import urls as events_routes
 from transductors import views as energy_transductor_views
+from measurements.views import MeasurementResults
 
 from slaves import views as slaves_views
 from measurements import urls as measurements_routes
@@ -60,6 +61,7 @@ urlpatterns = [
         auth_views.PasswordResetCompleteView.as_view(),
         name='password_reset_complete'
     ),
+    path('csv-export/', MeasurementResults.mount_csv_measurement),
     path('', include(router.urls)),
     path('graph/', include(measurements_routes.graph_router.urls))
 ]
