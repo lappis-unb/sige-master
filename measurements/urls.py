@@ -113,7 +113,7 @@ graph_router.register(
 
 graph_router.register(
     r'quarterly-total-consumption',
-    TotalConsumtionViewSet,
+    TotalConsumptionViewSet,
     basename='quarterlytotalconsumption'
 )
 

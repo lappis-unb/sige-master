@@ -16,19 +16,20 @@ class MeasurementParamsValidator():
                 ('end_date', MeasurementParamsValidator.validate_end_date)]
 
     @staticmethod
-    def validate_query_params(params):
+    def validate_query_params(params, ignore=[]):
         fields = MeasurementParamsValidator.get_fields()
         errors = {}
         for field in fields:
-            try:
-                validation_function = field[1] 
-                param = params[field[0]]
-                validation_function(param)
+            if field[0] not in ignore:
+                try:
+                    validation_function = field[1] 
+                    param = params[field[0]]
+                    validation_function(param)
 
-            except KeyError:
-                errors[field[0]] = _('It must have an %s argument' % field[0])
-            except ValidationException as e:
-                errors[field[0]] = e
+                except KeyError:
+                    errors[field[0]] = _('It must have an %s argument' % field[0])
+                except ValidationException as e:
+                    errors[field[0]] = e
 
         exception = APIException(
             errors,

@@ -225,11 +225,30 @@ class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
     information = ''
 
     def list(self, request):
-        start_date = self.request.query_params.get('start_date')
-        end_date = self.request.query_params.get('end_date')
         campus = self.request.query_params.get('campus')
         group = self.request.query_params.get('group')
+
+        params = {}
+
+        start_date = self.request.query_params.get('start_date')
+        if start_date:
+            params['start_date'] = start_date
+        
+        end_date = self.request.query_params.get('end_date')
+        if end_date:
+            params['end_date'] = end_date
+        else:
+            end_date = timezone.now()
+            end_date = end_date.strftime("%Y-%m-%d %H:%M:%S")
+            params['end_date'] = str(end_date)
+
         transductor_id = self.request.query_params.get('id')
+
+        if transductor_id:
+            params['id'] = transductor_id
+        transductor = None
+
+        MeasurementParamsValidator.validate_query_params(params, ignore=['id'])
 
         try:
             if start_date is not None and end_date is None:
@@ -515,7 +534,7 @@ class FrequencyViewSet(MinutelyMeasurementViewSet):
     fields = ['frequency_a']
 
 
-class TotalConsumtionViewSet(QuarterlyMeasurementViewSet):
+class TotalConsumptionViewSet(QuarterlyMeasurementViewSet):
     serializer_class = QuarterlySerializer
     fields = ['consumption_peak_time', 'consumption_off_peak_time']
     information = 'consumption'
