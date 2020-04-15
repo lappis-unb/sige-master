@@ -42,6 +42,7 @@ from .serializers import QuarterlyMeasurementSerializer
 from .serializers import MonthlyMeasurementSerializer
 from .serializers import QuarterlySerializer
 from .serializers import RealTimeMeasurementSerializer
+from .serializers import TaxSerializer
 
 from django.http import StreamingHttpResponse
 from django.utils.translation import ugettext as _
@@ -903,3 +904,8 @@ class MeasurementResults(mixins.RetrieveModelMixin,
             )
 
         return queryset
+
+
+class TaxViewSet(viewsets.ModelViewSet):
+    queryset = Tax.objects.all()
+    serializer_class = TaxSerializer

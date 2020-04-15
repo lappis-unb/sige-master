@@ -27,7 +27,9 @@ class MeasurementParamsValidator():
                     validation_function(param)
 
                 except KeyError:
-                    errors[field[0]] = _('It must have an %s argument' % field[0])
+                    errors[field[0]] = _(
+                        'It must have an %s argument' % field[0]
+                    )
                 except ValidationException as e:
                     errors[field[0]] = e
 

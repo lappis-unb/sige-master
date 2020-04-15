@@ -14,6 +14,11 @@ router.register(
     RealTimeMeasurementViewSet,
     basename='realtime-measurements'
 )
+router.register(
+    r'tax',
+    TaxViewSet,
+    basename='tax'
+)
 
 graph_router = routers.DefaultRouter()
 

@@ -18,10 +18,12 @@ class Tax(models.Model):
     )
 
     registration_date = models.DateTimeField(
-        null=True,
-        blank=True,
+        default=timezone.now(),
         verbose_name=_('registration date')
     )
+
+    class Meta:
+        verbose_name = _('Tax')
 
 
 class Measurement(PolymorphicModel):

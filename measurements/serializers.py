@@ -4,6 +4,7 @@ from .models import MinutelyMeasurement
 from .models import QuarterlyMeasurement
 from .models import MonthlyMeasurement
 from .models import EnergyTransductor
+from .models import Tax
 
 from django.db.models import Sum
 
@@ -175,3 +176,14 @@ class RealTimeMeasurementSerializer(serializers.HyperlinkedModelSerializer):
         )
 
         return info['total_consumption']
+
+
+class TaxSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Tax
+        fields = (
+            'id',
+            'calue_peak',
+            'value_off_peak',
+            'url'
+        )
