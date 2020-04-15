@@ -337,7 +337,7 @@ class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
         )
 
         if type == 'hourly':
-            for i in range(0, len(measurements) - 1):
+            for i in range(0, len(measurements)):
                 actual = measurements[i]['collection_date']
 
                 last_hour = (
@@ -629,7 +629,7 @@ class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
         )
 
         if type == 'daily':
-            for i in range(0, len(measurements) - 1):
+            for i in range(0, len(measurements)):
                 actual = measurements[i]['collection_date']
 
                 last_day = (
@@ -669,19 +669,19 @@ class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
                         actual, measurements, measurements_list, i, type
                     )
 
-            last = measurements_list[len(measurements_list) - 1][0]
-            measurements_list[len(measurements_list) - 1][0] = (
+            last = measurements_list[-1][0]
+            measurements_list[-1][0] = (
                 timezone.datetime(
                     last.year, last.month, 1,
                     0, 0, 0
                 ).strftime('%m/%d/%Y %H:%M:%S')
             )
         elif type == 'yearly':
-            for i in range(0, len(measurements) - 1):
+            for i in range(0, len(measurements)):
                 actual = measurements[i]['collection_date']
 
                 last_year = (
-                    measurements_list[len(measurements_list) - 1][0].year
+                    measurements_list[-1][0].year
                 )
 
                 if actual.year == last_year:
@@ -693,8 +693,8 @@ class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
                         actual, measurements, measurements_list, i, type
                     )
 
-            last = measurements_list[len(measurements_list) - 1][0]
-            measurements_list[len(measurements_list) - 1][0] = (
+            last = measurements_list[-1][0]
+            measurements_list[-1][0] = (
                 timezone.datetime(
                     last.year, 1, 1,
                     0, 0, 0
@@ -708,18 +708,18 @@ class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
     def build_data(
             self, actual, measurements, measurements_list, index
     ):
-        measurements_list[len(measurements_list) - 1][0] = (
+        measurements_list[-1][0] = (
             measurements[index]['collection_date']
         )
         if actual.hour in range(0, 17) \
            or actual.hour in range(21, 23):
             value_off_peak = measurements[index]['tax__value_off_peak']
-            measurements_list[len(measurements_list) - 1][1] += \
+            measurements_list[-1][1] += \
                 measurements[index][self.fields[1]] \
                 * value_off_peak if value_off_peak else 1
         else:
             value_peak = measurements[index]['tax__value_peak']
-            measurements_list[len(measurements_list) - 1][2] += \
+            measurements_list[-1][2] += \
                 measurements[index][self.fields[0]] \
                 * value_peak if value_peak else 1
 
@@ -734,29 +734,29 @@ class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
         last = measurements_list[len(measurements_list) - 1][0]
 
         if type == 'daily':
-            measurements_list[len(measurements_list) - 1][0] = (
+            measurements_list[-1][0] = (
                 timezone.datetime(
                     last.year, last.month, last.day,
                     0, 0, 0
                 ).strftime('%m/%d/%Y %H:%M:%S')
             )
         elif type == 'monthly':
-            measurements_list[len(measurements_list) - 1][0] = (
+            measurements_list[-1][0] = (
                 timezone.datetime(
                     last.year, last.month, 1,
                     0, 0, 0
                 ).strftime('%m/%d/%Y %H:%M:%S')
             )
         elif type == 'yearly':
-            measurements_list[len(measurements_list) - 1][0] = (
+            measurements_list[-1][0] = (
                 timezone.datetime(
                     last.year, 1, 1,
                     0, 0, 0
                 ).strftime('%m/%d/%Y %H:%M:%S')
             )
 
-        measurements_list[len(measurements_list) - 1][0] = (
-            measurements_list[len(measurements_list) - 1][0]
+        measurements_list[-1][0] = (
+            measurements_list[-1][0]
             .strftime('%m/%d/%Y %H:%M:%S')
         )
 
