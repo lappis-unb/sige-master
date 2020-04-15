@@ -7,6 +7,7 @@ class GroupTypeSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = GroupType
         fields = (
+            'id',
             'name',
             'url'
         )
@@ -16,6 +17,7 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Group
         fields = (
+            'id',
             'name',
             'type',
             'url'
