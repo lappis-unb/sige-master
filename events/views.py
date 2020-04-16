@@ -138,6 +138,7 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
     def list(self, request):
         transductor_id = self.request.query_params.get('id')
         type = self.request.query_params.get('type')
+        campus = self.request.query_params.get('campus')
 
         if type == 'period':
             # Initially defined to be filtered for 3 days
@@ -244,10 +245,10 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
         slave_events = []
 
         for element in failed_connection_slave_events:
-            if serial_number:
+            if transductor_id:
                 transductors = (
                     element.slave.transductors.select_related('campus').filter(
-                        serial_number=serial_number
+                        pk=transductor_id
                     )
                 )
             else:
