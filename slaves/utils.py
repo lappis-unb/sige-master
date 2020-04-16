@@ -191,7 +191,9 @@ class DataCollector():
                     last_event.data = event_dict['data']
                     last_event.save()
                 else:
-                    last_event.data = event_dict['data']
+                    if event_dict['data']:
+                        last_event.data = event_dict['data']
+
                     last_event.ended_at = event_dict['ended_at']
                     last_event.save()
             else:
