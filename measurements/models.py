@@ -18,7 +18,7 @@ class Tax(models.Model):
     )
 
     registration_date = models.DateTimeField(
-        default=timezone.now(),
+        default=timezone.now,
         verbose_name=_('registration date')
     )
 
