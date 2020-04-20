@@ -11,6 +11,7 @@ from django.db.models.query import QuerySet
 from rest_framework import serializers
 from rest_framework import viewsets
 from rest_framework import mixins
+from rest_framework import permissions
 
 from rest_framework.response import Response
 
@@ -249,10 +250,19 @@ class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
             params['id'] = transductor_id
         transductor = None
 
-        MeasurementParamsValidator.validate_query_params(params, ignore=['id'])
+        try:
+            MeasurementParamsValidator.validate_query_params(
+                params, ignore=['id']
+            )
+        except APIException as exception:
+            start_date = None
+            end_date = None
+            fields = exception.get_full_details()
+            if not fields['start_date'] and not fields['end_date']:
+                raise exception
 
         try:
-            if start_date is not None and end_date is None:
+            if start_date is not None and end_date is not None:
                 self.queryset = self.queryset.filter(
                     collection_date__range=(start_date, end_date)
                 )
@@ -756,11 +766,6 @@ class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
                 ).strftime('%m/%d/%Y %H:%M:%S')
             )
 
-        measurements_list[-1][0] = (
-            measurements_list[-1][0]
-            .strftime('%m/%d/%Y %H:%M:%S')
-        )
-
         if actual.hour in range(0, 17) \
            or actual.hour in range(21, 23):
             value_off_peak = measurements[index]['tax__value_off_peak']
@@ -909,3 +914,4 @@ class MeasurementResults(mixins.RetrieveModelMixin,
 class TaxViewSet(viewsets.ModelViewSet):
     queryset = Tax.objects.all()
     serializer_class = TaxSerializer
+    permission_classes = (permissions.AllowAny,)

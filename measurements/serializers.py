@@ -183,7 +183,7 @@ class TaxSerializer(serializers.HyperlinkedModelSerializer):
         model = Tax
         fields = (
             'id',
-            'calue_peak',
+            'value_peak',
             'value_off_peak',
             'url'
         )
