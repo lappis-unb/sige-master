@@ -88,10 +88,10 @@ class FailedConnectionSlaveEventViewSet(EventViewSet):
     serializer_class = FailedConnectionSlaveEventSerializer
 
     def specific_query(self):
-        ip_address = self.request.query_params.get('ip_address')
+        slave_id = self.request.query_params.get('slave')
 
         try:
-            slave = Slave.objects.get(ip_address=slave_ip)
+            slave = Slave.objects.get(pk=slave_id)
             self.queryset = self.queryset.filter(
                 slave=slave
             )
@@ -185,6 +185,7 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
                 voltage_related_events = voltage_related_events.filter(
                     transductor=transductor
                 )
+
                 failed_connection_transductor_events = (
                     failed_connection_transductor_events.filter(
                         transductor=transductor
@@ -198,7 +199,8 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
                 )
             except EnergyTransductor.DoesNotExist:
                 exception = APIException(
-                    'Serial number does not match with any EnergyTransductor'
+                    'Energy transductor id does not match '
+                    'with any EnergyTransductor'
                 )
                 exception.status_code = 404
                 raise exception
@@ -239,7 +241,8 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
 
         events['transductor_connection_fail'] = []
         self.build_transductor_related_event(
-            events, failed_connection_transductor_events, self.events[type]
+            events, failed_connection_transductor_events, 
+            'transductor_connection_fail'
         )
 
         slave_events = []
