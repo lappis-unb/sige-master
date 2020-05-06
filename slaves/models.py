@@ -3,6 +3,7 @@ from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from django.contrib.postgres.fields import ArrayField
 from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 
 """
@@ -67,7 +68,6 @@ class Slave(models.Model):
         from events.models import FailedConnectionSlaveEvent
 
         old_status = self.broken
-
         if old_status is True and new_status is False:
             try:
                 related_event = FailedConnectionSlaveEvent.objects.filter(
@@ -76,13 +76,12 @@ class Slave(models.Model):
                 ).last()
                 related_event.ended_at = timezone.now()
                 related_event.save()
-
             except FailedConnectionSlaveEvent.DoesNotExist as e:
                 pass
 
         elif old_status is False and new_status is True:
-            evt = FailedConnectionSlaveEvent()
-            evt.save_event(self)
+            event = FailedConnectionSlaveEvent()
+            event.save_event(self)
 
         self.broken = new_status
         self.save(update_fields=['broken'])

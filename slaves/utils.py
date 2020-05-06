@@ -20,6 +20,7 @@ from measurements.models import MinutelyMeasurement
 from measurements.models import QuarterlyMeasurement
 from measurements.models import MonthlyMeasurement
 from measurements.models import RealTimeMeasurement
+from measurements.models import Tax
 
 
 class CheckTransductorsAndSlaves():
@@ -165,7 +166,8 @@ class DataCollector():
                 msm['capacitive_power_off_peak_time']
             ),
             collection_date=msm['transductor_collection_date'],
-            transductor_id=transductor.id
+            transductor_id=transductor.id,
+            tax=Tax.objects.last()
         )
 
     @staticmethod
@@ -191,7 +193,9 @@ class DataCollector():
                     last_event.data = event_dict['data']
                     last_event.save()
                 else:
-                    last_event.data = event_dict['data']
+                    if event_dict['data']:
+                        last_event.data = event_dict['data']
+
                     last_event.ended_at = event_dict['ended_at']
                     last_event.save()
             else:

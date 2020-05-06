@@ -22,7 +22,7 @@ from django.db.models import Q
 
 
 class EnergyTransductorViewSet(viewsets.ModelViewSet):
-    queryset = EnergyTransductor.objects.all()
+    queryset = EnergyTransductor.objects
     serializer_class = EnergyTransductorSerializer
     permission_classes = (permissions.AllowAny,)
 

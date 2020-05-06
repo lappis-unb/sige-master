@@ -13,6 +13,7 @@ from rest_framework.exceptions import APIException
 from django.core.exceptions import ObjectDoesNotExist
 
 from .models import *
+from campi.models import Campus
 
 from .serializers import VoltageRelatedEventSerializer
 from .serializers import FailedConnectionSlaveEventSerializer
@@ -21,7 +22,6 @@ from .serializers import AllEventSerializer
 
 from django.utils import timezone
 from django.db.models import Q
-from itertools import chain
 
 
 class EventViewSet(mixins.RetrieveModelMixin,
@@ -88,10 +88,10 @@ class FailedConnectionSlaveEventViewSet(EventViewSet):
     serializer_class = FailedConnectionSlaveEventSerializer
 
     def specific_query(self):
-        ip_address = self.request.query_params.get('ip_address')
+        slave_id = self.request.query_params.get('slave')
 
         try:
-            slave = Slave.objects.get(ip_address=slave_ip)
+            slave = Slave.objects.get(pk=slave_id)
             self.queryset = self.queryset.filter(
                 slave=slave
             )
@@ -138,6 +138,7 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
     def list(self, request):
         transductor_id = self.request.query_params.get('id')
         type = self.request.query_params.get('type')
+        campus = self.request.query_params.get('campus')
 
         if type == 'period':
             # Initially defined to be filtered for 3 days
@@ -184,6 +185,7 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
                 voltage_related_events = voltage_related_events.filter(
                     transductor=transductor
                 )
+
                 failed_connection_transductor_events = (
                     failed_connection_transductor_events.filter(
                         transductor=transductor
@@ -197,7 +199,33 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
                 )
             except EnergyTransductor.DoesNotExist:
                 exception = APIException(
-                    'Serial number does not match with any EnergyTransductor'
+                    'Energy transductor id does not match '
+                    'with any EnergyTransductor'
+                )
+                exception.status_code = 404
+                raise exception
+        elif campus:
+            try:
+                transductors = EnergyTransductor.objects.filter(
+                    campus=Campus.objects.get(pk=int(campus))
+                )
+
+                voltage_related_events = voltage_related_events.filter(
+                    transductor__in=transductors
+                )
+                failed_connection_transductor_events = (
+                    failed_connection_transductor_events.filter(
+                        transductor__in=transductors
+                    )
+                )
+                failed_connection_slave_events = (
+                    failed_connection_slave_events.filter(
+                        slave__transductors__in=transductors
+                    )
+                )
+            except Campus.DoesNotExist:
+                exception = APIException(
+                    'Campus id does not match with any Campus'
                 )
                 exception.status_code = 404
                 raise exception
@@ -213,16 +241,17 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
 
         events['transductor_connection_fail'] = []
         self.build_transductor_related_event(
-            events, failed_connection_transductor_events, self.events[type]
+            events, failed_connection_transductor_events, 
+            'transductor_connection_fail'
         )
 
         slave_events = []
 
         for element in failed_connection_slave_events:
-            if serial_number:
+            if transductor_id:
                 transductors = (
                     element.slave.transductors.select_related('campus').filter(
-                        serial_number=serial_number
+                        pk=transductor_id
                     )
                 )
             else:
@@ -243,10 +272,19 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
         events['slave_connection_fail'] = slave_events
 
         events['count'] = \
-            len(events['slave_connection_fail']) + \
-            len(events['transductor_connection_fail']) +\
-            len(events['phase_drop']) + \
-            len(events['critical_tension'])
+            len(events['slave_connection_fail']) \
+            + len(events['transductor_connection_fail']) \
+            + len(events['phase_drop']) \
+            + len(events['critical_tension'])
+
+        events['critical_events_count'] = \
+            len(events['critical_tension']) \
+            + len(events['phase_drop'])
+
+        events['light_events_count'] = \
+            len(events['slave_connection_fail']) \
+            + len(events['transductor_connection_fail']) \
+            + len(events['precarious_tension'])
 
         return Response(events, status=200)
 

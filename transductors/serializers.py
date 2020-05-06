@@ -29,6 +29,7 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
             'geolocation_latitude',
             'geolocation_longitude',
             'campus',
+            'firmware_version',
             'name',
             'broken',
             'active',
@@ -61,6 +62,7 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
                 try:
                     slave_server = validated_data.get('slave_server')
                     response = create_transductor(validated_data, slave_server)
+                    print(response.status_code)
                     if response.status_code != 201:
                         error_message = _(
                             'The collection server %s is unavailable' 
@@ -71,10 +73,11 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
                         exception.status_code = 400
                         raise exception
                     r = response.json()
+                    print(r)
                     id_in_slave = r['id']
                 except Exception:
                     error_message = _(
-                        'Could not connect with server %s. Try it again latter'
+                        'Could not connect with server %s. Try it again later'
                         % slave_server.name)
                     exception = APIException(
                         error_message
@@ -126,13 +129,13 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
         if new_slave_server != old_slave_server:
             if not check_connection(old_slave_server):
                 error_message = _(
-                    'Could not disconnect from server %s. Try it again latter'
+                    'Could not disconnect from server %s. Try it again later'
                     % old_slave_server.name)
                 errors.append(error_message)
 
             if not check_connection(new_slave_server):
                 error_message = _(
-                    'Could not connect with server %s. Try it again latter' 
+                    'Could not connect with server %s. Try it again later' 
                     % new_slave_server.name)
 
                 errors.append(error_message)
@@ -153,7 +156,7 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
                 except Exception:
                     error_message = _(
                         'Could not disconnect from server %s.' 
-                        ' Try it again latter'
+                        ' Try it again later'
                         % old_slave_server.name)
 
                     errors.append(error_message)
@@ -166,7 +169,7 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
 
                 except Exception:
                     error_message = _(
-                        'Could not connect with server %s. Try it again latter'
+                        'Could not connect with server %s. Try it again later'
                         % new_slave_server.name)
 
                     errors.append(error_message)
@@ -179,7 +182,7 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
 
             except Exception:
                 error_message = _(
-                    'Could not connect with server %s. Try it again latter'
+                    'Could not connect with server %s. Try it again later'
                     % new_slave_server.name)
 
                 errors.append(error_message)
