@@ -16,7 +16,9 @@ class Seeder:
             os.system('./manage.py flush --no-input')
 
     def create_slave(self):
-        slave_api = input('\t- Please insert the IPAddress of your local slave: ')
+        slave_api = input(
+            '\t- Please insert the IPAddress of your local slave: '
+        )
         self.slave = Slave.objects.bulk_create([
             Slave(
                 ip_address=slave_api,
@@ -43,7 +45,6 @@ class Seeder:
             )])
         print('\t  Successfully created', len(self.campus), 'campus', '\n')
         
-    
     def create_group_types(self):
         print('\t- Creating group types')
         self.group_types = GroupType.objects.bulk_create([
@@ -53,8 +54,12 @@ class Seeder:
             GroupType(
                 name='Gleba',
             )])
-        print('\t  Successfully created', len(self.group_types), 'group types', '\n')
-        
+        print(
+            '\t  Successfully created',
+            len(self.group_types), 
+            'group types', 
+            '\n'
+        )
 
     def create_group(self):
         print('\t- Creating groups')
@@ -70,11 +75,10 @@ class Seeder:
             )])
         print('\t  Successfully created', len(self.groups), 'groups', '\n')
         
-
     def create_energyTransductor(self):
         print('\t- Creating Transductors')
         slave = Slave.objects.first()
-        campus= Campus.objects.all()
+        campus = Campus.objects.all()
         group = Group.objects.first()
         self.energyTransductors = EnergyTransductor.objects.bulk_create([
             EnergyTransductor(
@@ -121,66 +125,71 @@ class Seeder:
                 name="FT I",
                 model="MD30",
             )])
-        print('\t  Successfully created', len(self.energyTransductors), 'energy transductors', '\n')
+        print(
+            '\t  Successfully created', 
+            len(self.energyTransductors), 
+            'energy transductors',
+            '\n'
+        )
         
-
     def create_events(self):
         print('\t- Creating Events')
         t = EnergyTransductor.objects.all()
         self.events.append([
-        CriticalVoltageEvent.objects.create(
+            CriticalVoltageEvent.objects.create(
                 transductor=t[0]
-        ),
-        CriticalVoltageEvent.objects.create(
+            ),
+            CriticalVoltageEvent.objects.create(
                 transductor=t[1]
-        ),
-        CriticalVoltageEvent.objects.create(
+            ),
+            CriticalVoltageEvent.objects.create(
                 transductor=t[2]
-        ),
-        PrecariousVoltageEvent.objects.create(
+            ),
+            PrecariousVoltageEvent.objects.create(
                 transductor=t[0],
                 data={
-                    "voltage_a": random.randint(150,200), 
-                    "voltage_b": random.randint(150,200), 
-                    "voltage_c": random.randint(150,200)}
-        ),
-        PrecariousVoltageEvent.objects.create(
+                    "voltage_a": random.randint(150, 200),
+                    "voltage_b": random.randint(150, 200),
+                    "voltage_c": random.randint(150, 200)}
+            ),
+            PrecariousVoltageEvent.objects.create(
                 transductor=t[1],
                 data={
-                    "voltage_a": random.randint(150,200), 
-                    "voltage_b": random.randint(150,200), 
-                    "voltage_c": random.randint(150,200)}
-        ),
-        PrecariousVoltageEvent.objects.create(
+                    "voltage_a": random.randint(150, 200),
+                    "voltage_b": random.randint(150, 200),
+                    "voltage_c": random.randint(150, 200)}
+            ),
+            PrecariousVoltageEvent.objects.create(
                 transductor=t[2],
                 data={
-                    "voltage_a": random.randint(150,200), 
-                    "voltage_b": random.randint(150,200), 
-                    "voltage_c": random.randint(150,200)}
-        ),
-        PhaseDropEvent.objects.create(
+                    "voltage_a": random.randint(150, 200),
+                    "voltage_b": random.randint(150, 200),
+                    "voltage_c": random.randint(150, 200)}
+            ),
+            PhaseDropEvent.objects.create(
                 transductor=t[0]
-        ),
-        PhaseDropEvent.objects.create(
+            ),
+            PhaseDropEvent.objects.create(
                 transductor=t[1]
-        ),
-        PhaseDropEvent.objects.create(
+            ),
+            PhaseDropEvent.objects.create(
                 transductor=t[2]
-        )])
+            )
+        ])
         print('\t  Successfully created', len(self.events), 'events', '\n')
     
     def create_quartely_measurements(self):
         print('\t- Creating QuarterlyMeasurement...')
         t = EnergyTransductor.objects.all()
         now = datetime.now()
-        for i in range(7*24*4):
+        for i in range(7 * 24 * 4):
             QuarterlyMeasurement.objects.create(
-                transductor=t[i%len(self.energyTransductors)],
+                transductor=t[i % len(self.energyTransductors)],
                 collection_date=now,
                 consumption_peak_time=random.random() * 1000,
                 consumption_off_peak_time=random.random() * 1000
             )
-            now = now - timedelta(seconds=60*15)
+            now = now - timedelta(seconds=60 * 15)
         print('\t  Successfully created 7 days of quartely measurements', '\n')
         
     def create_minutely_measurements(self):
@@ -189,9 +198,9 @@ class Seeder:
         now = datetime.now()
         """ TODO Improve ranges """ 
         days = 1
-        for i in range(days*24*60):
+        for i in range(days * 24 * 60):
             MinutelyMeasurement.objects.create(
-                transductor=t[i%len(self.energyTransductors)],
+                transductor=t[i % len(self.energyTransductors)],
                 collection_date=now,
                 frequency_a=random.randrange(221),
                 voltage_a=random.randrange(221),
@@ -224,7 +233,12 @@ class Seeder:
                 dht_current_c=random.randrange(221)
             )
             now = now - timedelta(seconds=60)
-        print('\t  Successfully created', days, 'days of quartely measurements', '\n')
+        print(
+            '\t  Successfully created', 
+            days, 
+            'days of quartely measurements', 
+            '\n'
+        )
  
     def seed(self):
         self.create_slave()
@@ -235,6 +249,7 @@ class Seeder:
         self.create_events()
         self.create_quartely_measurements()
         self.create_minutely_measurements()
+
 
 if __name__ == '__main__':
     import os
