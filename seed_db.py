@@ -7,6 +7,8 @@ class Seeder:
         self.group_types = []
         self.groups = []
         self.energyTransductors = []
+        self.minutelyMeasurements = []
+        self.events = []
 
     def clear_db(self):
         if '--flush' in sys.argv:
@@ -120,6 +122,38 @@ class Seeder:
             ),
         ])
 
+    def create_events(self):
+        print('\t- Creating Events')
+        t = EnergyTransductor.objects.all()
+        self.events.append([
+        CriticalVoltageEvent.objects.create(
+                transductor=t[0]
+        ),
+        CriticalVoltageEvent.objects.create(
+                transductor=t[1]
+        ),
+        CriticalVoltageEvent.objects.create(
+                transductor=t[2]
+        ),
+        PrecariousVoltageEvent.objects.create(
+                transductor=t[0]
+        ),
+        PrecariousVoltageEvent.objects.create(
+                transductor=t[1]
+        ),
+        PrecariousVoltageEvent.objects.create(
+                transductor=t[2]
+        ),
+        PhaseDropEvent.objects.create(
+                transductor=t[0]
+        ),
+        PhaseDropEvent.objects.create(
+                transductor=t[1]
+        ),
+        PhaseDropEvent.objects.create(
+                transductor=t[2]
+        )])
+
 
     def seed(self):
         self.create_slave()
@@ -127,6 +161,7 @@ class Seeder:
         self.create_group_types()
         self.create_group()
         self.create_energyTransductor()
+        self.create_events()
 
 
 
@@ -141,6 +176,9 @@ if __name__ == '__main__':
     from slaves.models import Slave
     from groups.models import GroupType, Group
     from transductors.models import EnergyTransductor
+    from events.models import *
+    from measurements.models import *
+    from datetime import datetime
 
     seeder = Seeder()
 
