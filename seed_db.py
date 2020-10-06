@@ -138,13 +138,25 @@ class Seeder:
                 transductor=t[2]
         ),
         PrecariousVoltageEvent.objects.create(
-                transductor=t[0]
+                transductor=t[0],
+                data={
+                    "voltage_a": random.randint(150,200), 
+                    "voltage_b": random.randint(150,200), 
+                    "voltage_c": random.randint(150,200)}
         ),
         PrecariousVoltageEvent.objects.create(
-                transductor=t[1]
+                transductor=t[1],
+                data={
+                    "voltage_a": random.randint(150,200), 
+                    "voltage_b": random.randint(150,200), 
+                    "voltage_c": random.randint(150,200)}
         ),
         PrecariousVoltageEvent.objects.create(
-                transductor=t[2]
+                transductor=t[2],
+                data={
+                    "voltage_a": random.randint(150,200), 
+                    "voltage_b": random.randint(150,200), 
+                    "voltage_c": random.randint(150,200)}
         ),
         PhaseDropEvent.objects.create(
                 transductor=t[0]
@@ -176,7 +188,8 @@ class Seeder:
         t = EnergyTransductor.objects.all()
         now = datetime.now()
         """ TODO Improve ranges """ 
-        for i in range(7*24*60):
+        days = 1
+        for i in range(days*24*60):
             MinutelyMeasurement.objects.create(
                 transductor=t[i%len(self.energyTransductors)],
                 collection_date=now,
@@ -211,7 +224,7 @@ class Seeder:
                 dht_current_c=random.randrange(221)
             )
             now = now - timedelta(seconds=60)
-        print('\t  Successfully created 7 days of quartely measurements', '\n')
+        print('\t  Successfully created', days, 'days of quartely measurements', '\n')
  
     def seed(self):
         self.create_slave()
