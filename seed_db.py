@@ -24,6 +24,7 @@ class Seeder:
                 name="Local slave"
             )
         ])
+        print('\t  Successfully created', len(self.slave), 'slaves', '\n')
 
     def create_campus(self):
         print('\t- Creating campus')
@@ -39,9 +40,9 @@ class Seeder:
                 acronym='FGA',
                 geolocation_latitude=-15.9894,
                 geolocation_longitude=-48.0443,
-            ),
-            
-        ])
+            )])
+        print('\t  Successfully created', len(self.campus), 'campus', '\n')
+        
     
     def create_group_types(self):
         print('\t- Creating group types')
@@ -51,9 +52,9 @@ class Seeder:
             ),
             GroupType(
                 name='Gleba',
-            ),
-            
-        ])
+            )])
+        print('\t  Successfully created', len(self.group_types), 'group types', '\n')
+        
 
     def create_group(self):
         print('\t- Creating groups')
@@ -66,9 +67,9 @@ class Seeder:
             Group(
                 name='ICC',
                 type=group_type
-            ),
-            
-        ])
+            )])
+        print('\t  Successfully created', len(self.groups), 'groups', '\n')
+        
 
     def create_energyTransductor(self):
         print('\t- Creating Transductors')
@@ -119,8 +120,9 @@ class Seeder:
                 firmware_version="1.42",
                 name="FT I",
                 model="MD30",
-            ),
-        ])
+            )])
+        print('\t  Successfully created', len(self.energyTransductors), 'energy transductors', '\n')
+        
 
     def create_events(self):
         print('\t- Creating Events')
@@ -153,8 +155,64 @@ class Seeder:
         PhaseDropEvent.objects.create(
                 transductor=t[2]
         )])
-
-
+        print('\t  Successfully created', len(self.events), 'events', '\n')
+    
+    def create_quartely_measurements(self):
+        print('\t- Creating QuarterlyMeasurement...')
+        t = EnergyTransductor.objects.all()
+        now = datetime.now()
+        for i in range(7*24*4):
+            QuarterlyMeasurement.objects.create(
+                transductor=t[i%len(self.energyTransductors)],
+                collection_date=now,
+                consumption_peak_time=random.random() * 1000,
+                consumption_off_peak_time=random.random() * 1000
+            )
+            now = now - timedelta(seconds=60*15)
+        print('\t  Successfully created 7 days of quartely measurements', '\n')
+        
+    def create_minutely_measurements(self):
+        print('\t- Creating MinutelyMeasurement...')
+        t = EnergyTransductor.objects.all()
+        now = datetime.now()
+        """ TODO Improve ranges """ 
+        for i in range(7*24*60):
+            MinutelyMeasurement.objects.create(
+                transductor=t[i%len(self.energyTransductors)],
+                collection_date=now,
+                frequency_a=random.randrange(221),
+                voltage_a=random.randrange(221),
+                voltage_b=random.randrange(221),
+                voltage_c=random.randrange(221),
+                current_a=random.randrange(221),
+                current_b=random.randrange(221),
+                current_c=random.randrange(221),
+                active_power_a=random.randrange(221),
+                active_power_b=random.randrange(221),
+                active_power_c=random.randrange(221),
+                total_active_power=random.randrange(221),
+                reactive_power_a=random.randrange(221),
+                reactive_power_b=random.randrange(221),
+                reactive_power_c=random.randrange(221),
+                total_reactive_power=random.randrange(221),
+                apparent_power_a=random.randrange(221),
+                apparent_power_b=random.randrange(221),
+                apparent_power_c=random.randrange(221),
+                total_apparent_power=random.randrange(221),
+                power_factor_a=random.randrange(221),
+                power_factor_b=random.randrange(221),
+                power_factor_c=random.randrange(221),
+                total_power_factor=random.randrange(221),
+                dht_voltage_a=random.randrange(221),
+                dht_voltage_b=random.randrange(221),
+                dht_voltage_c=random.randrange(221),
+                dht_current_a=random.randrange(221),
+                dht_current_b=random.randrange(221),
+                dht_current_c=random.randrange(221)
+            )
+            now = now - timedelta(seconds=60)
+        print('\t  Successfully created 7 days of quartely measurements', '\n')
+ 
     def seed(self):
         self.create_slave()
         self.create_campus()
@@ -162,8 +220,8 @@ class Seeder:
         self.create_group()
         self.create_energyTransductor()
         self.create_events()
-
-
+        self.create_quartely_measurements()
+        self.create_minutely_measurements()
 
 if __name__ == '__main__':
     import os
@@ -178,7 +236,8 @@ if __name__ == '__main__':
     from transductors.models import EnergyTransductor
     from events.models import *
     from measurements.models import *
-    from datetime import datetime
+    from datetime import datetime, timedelta
+    import random
 
     seeder = Seeder()
 
