@@ -101,4 +101,6 @@ class EnergyTransductorListViewSet(viewsets.GenericViewSet,
         response = []
         for item in transductorList.values():
             response.append(item)
-        return response
+
+        # Sorting response by (campus, name)
+        return sorted(response, key=lambda item: (item['campus'], item['name']))
