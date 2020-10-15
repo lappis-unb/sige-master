@@ -1,6 +1,7 @@
 from django.db import models
 from campi.models import Campus
 
+
 class Line(models.Model):
     start_lat = models.FloatField(null=False, blank=False)
     start_lng = models.FloatField(null=False, blank=False)

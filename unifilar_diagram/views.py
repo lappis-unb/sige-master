@@ -20,4 +20,3 @@ class LineViewSet(viewsets.ModelViewSet):
             self.queryset = self.queryset.filter(campus=campus)
 
         return self.queryset
-
