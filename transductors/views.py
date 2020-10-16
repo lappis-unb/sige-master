@@ -29,9 +29,9 @@ class EnergyTransductorViewSet(viewsets.ModelViewSet):
     def get_queryset(self): 
         # Returning transductors sorted by campus and then by name
         return sorted(
-                EnergyTransductor.objects.all(), 
-                key=lambda item: (item.campus, item.name)
-            )
+            EnergyTransductor.objects.all(), 
+            key=lambda item: (item.campus, item.name)
+        )
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
