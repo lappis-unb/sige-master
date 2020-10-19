@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     'events',
     'rosetta',
     'groups',
+    'unifilar_diagram',
     'fcm_django',
 ]
 
