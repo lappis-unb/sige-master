@@ -93,5 +93,5 @@ def __get_transductor_data(transductor, slave_server):
         "measurement_quarterlymeasurement": [],
         "measurement_monthlymeasurement": [],
         "firmware_version": transductor.get('firmware_version'),
-        "port":transductor.get('port')
+        "port": transductor.get('port')
     }
