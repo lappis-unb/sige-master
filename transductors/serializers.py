@@ -228,6 +228,7 @@ class EnergyTransductorListSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = EnergyTransductor
         fields = (
+            'id',
             'serial_number',
             'campus',
             'name',

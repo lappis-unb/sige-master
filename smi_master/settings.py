@@ -36,7 +36,7 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['file'],
-            'level': 'DEBUG',
+            'level': 'INFO',
             'propagate': True,
         },
     },
@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     'events',
     'rosetta',
     'groups',
+    'unifilar_diagram',
     'fcm_django',
 ]
 
