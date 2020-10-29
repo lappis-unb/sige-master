@@ -111,4 +111,4 @@ At this point we'll need to get our server key to send push notifcations to this
 Finally put the server key in [dev-env](https://gitlab.com/lappis-unb/projects/SMI/smi-master/-/blob/development/dev-env)
 as API_KEY. at this moment we already can send push notifications to our app!
 
-* We use [firebase topics](https://firebase.google.com/docs/cloud-messaging/android/topic-messaging), to manage who will reaceive notifcation, Our group should the same of client.
+* We use [firebase topics](https://firebase.google.com/docs/cloud-messaging/android/topic-messaging), to manage who will reaceive notifcation, [Our topic](https://gitlab.com/lappis-unb/projects/SMI/smi-master/-/blob/development/events/models.py#L15) should the same of client.
