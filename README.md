@@ -86,3 +86,29 @@ sudo docker inspect slave-api
 You may create a transductor by sending a POST to '/energy_transductors/' ([shortcut](http://localhost:8001/energy_transductors/)).
 
 A created transductor is only registred locally on master server, for registering it to a slave server, POST to '/energy_transductors/(transductor's serial number)/add_to_server/' and the post's body must contain { "slave_id" : (target slave id) }.
+
+### Send push notifications 
+
+#### 1. Create a firebase project: 
+***If you already have an project then you can skip this step***
+
+After sign into your firebase console, follow the steps to create a new project.
+
+![Firebase console](images/Firebase_console.png)
+
+Add an app to our firebase project 
+
+![Add project to firebase console](images/add_project.png)
+
+After finished steps to add a project, go to configurations.
+
+![Go To configurations](images/firebase_configurations.png)
+
+At this point we'll need to get our server key to send push notifcations to this app
+
+![Server Key](images/server_key.png)
+
+Finally put the server key in [dev-env](https://gitlab.com/lappis-unb/projects/SMI/smi-master/-/blob/development/dev-env)
+as API_KEY. at this moment we already can send push notifications to our app!
+
+* We use [firebase topics](https://firebase.google.com/docs/cloud-messaging/android/topic-messaging), to manage who will reaceive notifcation, [Our topic](https://gitlab.com/lappis-unb/projects/SMI/smi-master/-/blob/development/events/models.py#L15) should the same of client.
