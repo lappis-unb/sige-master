@@ -105,6 +105,12 @@ graph_router.register(
 )
 
 graph_router.register(
+    r'consumption-curve',
+    ConsumptionCurveViewSet,
+    basename='consumptioncurve'
+)
+
+graph_router.register(
     r'cost-consumption',
     CostConsumptionViewSet,
     basename='costconsumption'

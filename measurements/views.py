@@ -595,6 +595,40 @@ class DailyConsumptionViewSet(QuarterlyMeasurementViewSet):
 
         return response
 
+class ConsumptionCurveViewSet(QuarterlyMeasurementViewSet):
+    serializer_class = QuarterlySerializer
+    fields = ['consumption_peak_time', 'consumption_off_peak_time']
+
+    def mount_data_list(self, transductor=[]):
+        consumption = {
+            'total_consumption': 0,
+        }
+
+        daily_consumption = [0] * 24
+        monthly_consumption = [0] * 31
+        yearly_consumption = [0] * 12
+
+        for field in self.fields:
+            measurements = self.queryset.values(
+                field, 'collection_date'
+            )
+
+            # The start_date and end_date in request.query_params have to be the same day
+            if(self.request.query_params.get('period') == 'daily'):
+                self.daily_consumption(consumption, measurements, daily_consumption, field)
+
+        if(self.request.query_params.get('period') == 'daily'):
+            consumption['consumption_per_period'] = daily_consumption
+
+        return [consumption]
+
+    def daily_consumption(self, consumption, measurements, daily_consumption, field):
+        for measurement in measurements:
+            hour = measurement['collection_date'].hour
+            daily_consumption[int(hour)] += measurement[field]
+
+            # Updating total consumption
+            consumption['total_consumption'] += measurement[field]
 
 class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
     serializer_class = QuarterlySerializer
