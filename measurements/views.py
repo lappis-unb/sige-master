@@ -235,7 +235,7 @@ class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
         start_date = self.request.query_params.get('start_date')
         if start_date:
             params['start_date'] = start_date
-        
+
         end_date = self.request.query_params.get('end_date')
         if end_date:
             params['end_date'] = end_date
@@ -318,7 +318,7 @@ class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
         measurements = self.queryset.order_by('collection_date').values(
             self.fields[0], self.fields[1], 'collection_date'
         )
-        
+
         if measurements:
             response = self.apply_algorithm(
                 measurements
@@ -604,6 +604,37 @@ class ConsumptionCurveViewSet(QuarterlyMeasurementViewSet):
             'total_consumption': 0,
         }
 
+        start_date = self.request.query_params.get('start_date')
+        end_date = self.request.query_params.get('end_date')
+        campus = self.request.query_params.get('campus')
+        group = self.request.query_params.get('group')
+
+        try:
+            if start_date is not None and end_date is not None:
+                self.queryset = self.queryset.filter(
+                    collection_date__range=(start_date, end_date)
+                )
+
+            if campus:
+                campus = Campus.objects.get(
+                    pk=int(campus)
+                )
+                self.queryset = self.queryset.filter(
+                    transductor__campus__in=[campus]
+                )
+
+
+            if group:
+                group = Group.objects.get(
+                    pk=int(group)
+                )
+                self.queryset = self.queryset.filter(
+                    transductor__grouping__in=[group]
+                )
+
+        except APIException as exception:
+            raise Exception
+
         daily_consumption = [0] * 24
         monthly_consumption = [0] * 31
         yearly_consumption = [0] * 12
@@ -644,7 +675,7 @@ class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
             self.fields[0], self.fields[1], 'collection_date',
             'tax__value_peak', 'tax__value_off_peak'
         )
-        
+
         if measurements:
             response = self.apply_algorithm(
                 measurements
