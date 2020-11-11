@@ -595,6 +595,7 @@ class DailyConsumptionViewSet(QuarterlyMeasurementViewSet):
 
         return response
 
+
 class ConsumptionCurveViewSet(QuarterlyMeasurementViewSet):
     serializer_class = QuarterlySerializer
     fields = ['consumption_peak_time', 'consumption_off_peak_time']
@@ -623,7 +624,6 @@ class ConsumptionCurveViewSet(QuarterlyMeasurementViewSet):
                     transductor__campus__in=[campus]
                 )
 
-
             if group:
                 group = Group.objects.get(
                     pk=int(group)
@@ -633,7 +633,7 @@ class ConsumptionCurveViewSet(QuarterlyMeasurementViewSet):
                 )
 
         except APIException as exception:
-            raise Exception
+            raise exception
 
         daily_consumption = [0] * 24
         monthly_consumption = [0] * 31
@@ -644,22 +644,46 @@ class ConsumptionCurveViewSet(QuarterlyMeasurementViewSet):
                 field, 'collection_date'
             )
 
-            # The start_date and end_date in request.query_params have to be the same day
+            # The start_date and end_date in request.
+            # query_params have to be the same day
             if(self.request.query_params.get('period') == 'daily'):
-                self.daily_consumption(consumption, measurements, daily_consumption, field)
+                self.daily_consumption(
+                    consumption,
+                    measurements,
+                    daily_consumption,
+                    field
+                )
+            elif(self.request.query_params.get('period') == 'monthly'):
+                # self.hourly_consumption(
+                #     consumption,
+                #     measurements,
+                #     daily_consumption,
+                #     field
+                # )
+                pass
 
-        if(self.request.query_params.get('period') == 'daily'):
+        period = self.request.query_params.get('period')
+        if(period == 'daily'):
             consumption['consumption_per_period'] = daily_consumption
+        elif(period == 'hourly'):
+            consumption
 
         return [consumption]
 
-    def daily_consumption(self, consumption, measurements, daily_consumption, field):
+    def daily_consumption(
+        self,
+        consumption,
+        measurements,
+        daily_consumption,
+        field
+    ):
         for measurement in measurements:
             hour = measurement['collection_date'].hour
             daily_consumption[int(hour)] += measurement[field]
 
             # Updating total consumption
             consumption['total_consumption'] += measurement[field]
+
 
 class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
     serializer_class = QuarterlySerializer
