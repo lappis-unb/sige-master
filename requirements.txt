@@ -45,3 +45,4 @@ django-rosetta
 django-material==1.6.3
 django-material-admin
 fcm-django
+python-dateutil==2.8.1

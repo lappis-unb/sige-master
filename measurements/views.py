@@ -5,6 +5,9 @@ import os
 import csv
 import codecs
 from .lttb import downsample
+import locale
+from dateutil import relativedelta
+from datetime import datetime, timedelta
 
 from django.db.models.query import QuerySet
 
@@ -601,88 +604,65 @@ class ConsumptionCurveViewSet(QuarterlyMeasurementViewSet):
     fields = ['consumption_peak_time', 'consumption_off_peak_time']
 
     def mount_data_list(self, transductor=[]):
-        consumption = {
-            'total_consumption': 0,
-        }
+        consumption = []
 
         start_date = self.request.query_params.get('start_date')
         end_date = self.request.query_params.get('end_date')
         campus = self.request.query_params.get('campus')
         group = self.request.query_params.get('group')
+        period = self.request.query_params.get('period')
 
-        try:
-            if start_date is not None and end_date is not None:
-                self.queryset = self.queryset.filter(
-                    collection_date__range=(start_date, end_date)
-                )
+        if end_date is None:
+            end_date = timezone.now()
+            end_date = end_date.strftime("%Y-%m-%d %H:%M:%S")
 
-            if campus:
-                campus = Campus.objects.get(
-                    pk=int(campus)
-                )
-                self.queryset = self.queryset.filter(
-                    transductor__campus__in=[campus]
-                )
+        start_date_compare = datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S")
+        end_date_compare = datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")
+        delta = relativedelta.relativedelta(end_date_compare, start_date_compare)
 
-            if group:
-                group = Group.objects.get(
-                    pk=int(group)
-                )
-                self.queryset = self.queryset.filter(
-                    transductor__grouping__in=[group]
-                )
+        # The start_date and end_date in request.
+        # query_params have to be the same day
+        if(self.request.query_params.get('period') == 'hourly'):
+            consumption = self.hourly_consumption_format()
+        elif(self.request.query_params.get('period') == 'daily'):
+            consumption = self.daily_consumption_format(delta, start_date_compare)
 
-        except APIException as exception:
-            raise exception
+        return consumption
 
-        daily_consumption = [0] * 24
-        monthly_consumption = [0] * 31
-        yearly_consumption = [0] * 12
+    def hourly_consumption_format(self):
+        hourly_consumption = {}
+
+        for i in range(24):
+            hourly_consumption[str(i) + 'h'] = 0
 
         for field in self.fields:
             measurements = self.queryset.values(
                 field, 'collection_date'
             )
+            for measurement in measurements:
+                hour = measurement['collection_date'].hour
+                hourly_consumption[str(hour) + 'h'] += measurement[field]
 
-            # The start_date and end_date in request.
-            # query_params have to be the same day
-            if(self.request.query_params.get('period') == 'daily'):
-                self.daily_consumption(
-                    consumption,
-                    measurements,
-                    daily_consumption,
-                    field
-                )
-            elif(self.request.query_params.get('period') == 'monthly'):
-                # self.hourly_consumption(
-                #     consumption,
-                #     measurements,
-                #     daily_consumption,
-                #     field
-                # )
-                pass
+        return hourly_consumption
 
-        period = self.request.query_params.get('period')
-        if(period == 'daily'):
-            consumption['consumption_per_period'] = daily_consumption
-        elif(period == 'hourly'):
-            consumption
+    def daily_consumption_format(self, delta, start_date):
+        daily_consumption = {}
+        current_date = start_date
 
-        return [consumption]
+        for i in range(abs(int(delta.days)) + 1):
+            daily_consumption[str(current_date.strftime('%d/%m/%y'))] = 0
+            current_date = current_date + timedelta(days=1)
 
-    def daily_consumption(
-        self,
-        consumption,
-        measurements,
-        daily_consumption,
-        field
-    ):
-        for measurement in measurements:
-            hour = measurement['collection_date'].hour
-            daily_consumption[int(hour)] += measurement[field]
 
-            # Updating total consumption
-            consumption['total_consumption'] += measurement[field]
+        for field in self.fields:
+            measurement = measurements = self.queryset.values(
+                field, 'collection_date'
+            )
+            for measurement in measurements:
+                day = str(measurement['collection_date'].strftime('%d/%m/%y'))
+                daily_consumption[day] += measurement[field]
+
+        return daily_consumption
 
 
 class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
