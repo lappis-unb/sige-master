@@ -626,6 +626,8 @@ class ConsumptionCurveViewSet(QuarterlyMeasurementViewSet):
             consumption = self.hourly_consumption_format()
         elif(self.request.query_params.get('period') == 'daily'):
             consumption = self.daily_consumption_format(delta, start_date_compare)
+        elif(self.request.query_params.get('period') == 'monthly'):
+            consumption = self.monthly_consumption_format(delta, start_date_compare)
 
         return consumption
 
@@ -664,6 +666,23 @@ class ConsumptionCurveViewSet(QuarterlyMeasurementViewSet):
 
         return daily_consumption
 
+    def monthly_consumption_format(self, delta, start_date):
+        monthly_consumption = {}
+        current_date = start_date
+
+        for i in range(abs(int(delta.months)) + 1):
+            monthly_consumption[str(current_date.strftime('%m/%y'))] = 0
+            current_date = current_date + relativedelta.relativedelta(months=1)
+
+        for field in self.fields:
+            measurement = measurements = self.queryset.values(
+                field, 'collection_date'
+            )
+            for measurement in measurements:
+                month = str(measurement['collection_date'].strftime('%m/%y'))
+                monthly_consumption[month] += measurement[field]
+
+        return monthly_consumption
 
 class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
     serializer_class = QuarterlySerializer
