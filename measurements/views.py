@@ -268,7 +268,6 @@ class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
 
         return date_params
 
-
     def validate_date_params(self, date_params):
         try:
             MeasurementParamsValidator.validate_query_params(
@@ -304,8 +303,8 @@ class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
         if group:
             try:
                 group = Group.objects.get(
-                        pk=int(group)
-                    )
+                    pk=int(group)
+                )
                 self.queryset = self.queryset.filter(
                     transductor__grouping__in=[group]
                 )
@@ -318,7 +317,7 @@ class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
     def filter_queryset_by_transductor(self):
         transductor_id = self.request.query_params.get('id')
         
-        # Filter queryset by transductor only if transductor id is in query_params
+        # Filter queryset by transductor only if id is in query_params
         if transductor_id:
             try:
                 transductor = EnergyTransductor.objects.get(
