@@ -270,13 +270,25 @@ class DataCollector():
             for transductor in slave.transductors.all():
                 collection_date = datetime.now()
                 if kwargs.get('minutely', None):
-                    collectMinutelyMeasurements(slave, transductor, collection_date)
+                    collectMinutelyMeasurements(
+                        slave,
+                        transductor,
+                        collection_date
+                    )
 
                 if kwargs.get('quarterly', None):
-                    collectQuarterlyMeasurements(slave, transductor, collection_date)
+                    collectQuarterlyMeasurements(
+                        slave,
+                        transductor,
+                        collection_date
+                    )
 
                 if kwargs.get('monthly', None):
-                    collectMonthlyMeasurements(slave, transductor, collection_date)
+                    collectMonthlyMeasurements(
+                        slave,
+                        transductor,
+                        collection_date
+                    )
 
     @staticmethod
     def collectRealTimeMeasurements(slave):
