@@ -308,7 +308,7 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
             event['id'] = element.pk
             event['location'] = element.transductor.name
             event['campus'] = element.transductor.campus.acronym
-            event['transductor'] = element.transductor.serial_number
+            event['transductor'] = element.transductor.id
             event['data'] = element.data
             event['start_time'] = element.created_at
             event['end_time'] = element.ended_at
