@@ -265,90 +265,106 @@ class DataCollector():
         collection_date = datetime.now()
         for slave in slaves:
             if kwargs.get('realtime', None):
-                realtime_response = request_measurements(
-                    'realtime-measurements',
-                    slave
-                )
-
-                measurement = json.loads(realtime_response.content)
-                for transductor_data in measurement:
-                    try:
-                        transductor = EnergyTransductor.objects.get(
-                            id=transductor_data['transductor_id']
-                        )
-                        DataCollector.build_realtime_measurements(
-                            transductor_data, transductor
-                        )
-                    except Exception as exception:
-                        print(exception)
+                collectRealTimeMeasurements(slave)
 
             for transductor in slave.transductors.all():
                 collection_date = datetime.now()
                 if kwargs.get('minutely', None):
-                    # Get response and save it in the master database
-                    minutely_response = request_measurements(
-                        "minutely-measurements",
-                        slave,
-                        transductor,
-                        transductor.last_minutely_collection,
-                        collection_date
-                    )
-
-                    measurements = json.loads(minutely_response.content)
-
-                    for msm in measurements:
-                        # Create MinutelyMeasurement object
-                        try:
-                            DataCollector.build_minutely_measurements(
-                                msm, transductor
-                            )
-                        except Exception as exception:
-                            pass
-                    transductor.last_minutely_collection = collection_date
-                    transductor.save()
+                    collectMinutelyMeasurements(slave, transductor, collection_date)
 
                 if kwargs.get('quarterly', None):
-                    quarterly_response = request_measurements(
-                        "quarterly-measurements",
-                        slave,
-                        transductor,
-                        transductor.last_quarterly_collection,
-                        collection_date
-                    )
-
-                    measurements = json.loads(quarterly_response.content)
-
-                    for msm in measurements:
-                        # Create QuarterlyMeasurement object
-                        # try:
-                        DataCollector.build_quarterly_measurements(
-                            msm, transductor
-                        )
-                        # except Exception:
-                        # pass
-
-                    transductor.last_quarterly_collection = collection_date
-                    transductor.save()
+                    collectQuarterlyMeasurements(slave, transductor, collection_date)
 
                 if kwargs.get('monthly', None):
-                    monthly_response = request_measurements(
-                        "monthly-measurements",
-                        slave,
-                        transductor,
-                        transductor.last_monthly_collection,
-                        collection_date
-                    )
+                    collectMonthlyMeasurements(slave, transductor, collection_date)
 
-                    measurements = json.loads(monthly_response.content)
+    @staticmethod
+    def collectRealTimeMeasurements(slave):
+        realtime_response = request_measurements(
+            'realtime-measurements',
+            slave
+        )
 
-                    for msm in measurements:
-                        # Create MonthlyMeasurement object
-                        # try:
-                        DataCollector.build_monthly_measurements(
-                            msm, transductor
-                        )
-                        # except Exception:
-                        #     pass
+        measurement = json.loads(realtime_response.content)
+        for transductor_data in measurement:
+            try:
+                transductor = EnergyTransductor.objects.get(
+                    id=transductor_data['transductor_id']
+                )
+                DataCollector.build_realtime_measurements(
+                    transductor_data, transductor
+                )
+            except Exception as exception:
+                print(exception)
 
-                    transductor.last_monthly_collection = collection_date
-                    transductor.save()
+    @staticmethod
+    def collectMinutelyMeasurements(slave, transductor, collection_date):
+        # Get response and save it in the master database
+        minutely_response = request_measurements(
+            "minutely-measurements",
+            slave,
+            transductor,
+            transductor.last_minutely_collection,
+            collection_date
+        )
+
+        measurements = json.loads(minutely_response.content)
+
+        for msm in measurements:
+            # Create MinutelyMeasurement object
+            try:
+                DataCollector.build_minutely_measurements(
+                    msm, transductor
+                )
+            except Exception as exception:
+                pass
+        transductor.last_minutely_collection = collection_date
+        transductor.save()
+
+    @staticmethod
+    def collectQuarterlyMeasurements(slave, transductor, collection_date):
+        quarterly_response = request_measurements(
+            "quarterly-measurements",
+            slave,
+            transductor,
+            transductor.last_quarterly_collection,
+            collection_date
+        )
+
+        measurements = json.loads(quarterly_response.content)
+
+        for msm in measurements:
+            # Create QuarterlyMeasurement object
+            # try:
+            DataCollector.build_quarterly_measurements(
+                msm, transductor
+            )
+            # except Exception:
+            # pass
+
+        transductor.last_quarterly_collection = collection_date
+        transductor.save()
+
+    @staticmethod
+    def collectMonthlyMeasurements(slave, transductor, collection_date):
+        monthly_response = request_measurements(
+            "monthly-measurements",
+            slave,
+            transductor,
+            transductor.last_monthly_collection,
+            collection_date
+        )
+
+        measurements = json.loads(monthly_response.content)
+
+        for msm in measurements:
+            # Create MonthlyMeasurement object
+            # try:
+            DataCollector.build_monthly_measurements(
+                msm, transductor
+            )
+            # except Exception:
+            #     pass
+
+        transductor.last_monthly_collection = collection_date
+        transductor.save()
