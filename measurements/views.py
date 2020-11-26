@@ -398,7 +398,7 @@ class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
                 timezone.datetime(
                     last.year, last.month, last.day,
                     last.hour, 0, 0
-                ).strftime('%m/%d/%Y %H:%M:%S')
+                )
             )
 
     def get_daily_measurements(self, measurements, measurements_list):
@@ -413,7 +413,7 @@ class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
                     actual, measurements, measurements_list, i
                 )
             else:
-                last.hour = 0
+                last = last.replace(hour=0)
                 self.finish_data(
                     actual, last, measurements, measurements_list, i
                 )
@@ -423,7 +423,7 @@ class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
                 timezone.datetime(
                     last.year, last.month, last.day,
                     0, 0, 0
-                ).strftime('%m/%d/%Y %H:%M:%S')
+                )
             )
 
     def build_data(
@@ -445,7 +445,7 @@ class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
             timezone.datetime(
                 last.year, last.month, last.day,
                 last.hour, 0, 0
-            ).strftime('%m/%d/%Y %H:%M:%S')
+            )
         )
 
         measurements_list.append(
