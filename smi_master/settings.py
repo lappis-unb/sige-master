@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     'events',
     'rosetta',
     'groups',
+    'unifilar_diagram',
     'fcm_django',
 ]
 
@@ -102,7 +103,7 @@ ROOT_URLCONF = 'smi_master.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

@@ -5,6 +5,9 @@ import os
 import csv
 import codecs
 from .lttb import downsample
+import locale
+from dateutil import relativedelta
+from datetime import datetime, timedelta
 
 from django.db.models.query import QuerySet
 
@@ -235,7 +238,7 @@ class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
         start_date = self.request.query_params.get('start_date')
         if start_date:
             params['start_date'] = start_date
-        
+
         end_date = self.request.query_params.get('end_date')
         if end_date:
             params['end_date'] = end_date
@@ -318,7 +321,7 @@ class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
         measurements = self.queryset.order_by('collection_date').values(
             self.fields[0], self.fields[1], 'collection_date'
         )
-        
+
         if measurements:
             response = self.apply_algorithm(
                 measurements
@@ -596,6 +599,100 @@ class DailyConsumptionViewSet(QuarterlyMeasurementViewSet):
         return response
 
 
+class ConsumptionCurveViewSet(QuarterlyMeasurementViewSet):
+    serializer_class = QuarterlySerializer
+    fields = ['consumption_peak_time', 'consumption_off_peak_time']
+
+    def mount_data_list(self, transductor=[]):
+        consumption = []
+
+        start_date = self.request.query_params.get('start_date')
+        end_date = self.request.query_params.get('end_date')
+        campus = self.request.query_params.get('campus')
+        group = self.request.query_params.get('group')
+        period = self.request.query_params.get('period')
+
+        if end_date is None:
+            end_date = timezone.now()
+            end_date = end_date.strftime("%Y-%m-%d %H:%M:%S")
+
+        start_date_compare = datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S")
+        end_date_compare = datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")
+        delta = relativedelta.relativedelta(
+            end_date_compare,
+            start_date_compare
+        )
+
+        # The start_date and end_date in request.
+        # query_params have to be the same day
+        if(self.request.query_params.get('period') == 'hourly'):
+            consumption = self.hourly_consumption_format()
+        elif(self.request.query_params.get('period') == 'daily'):
+            consumption = self.daily_consumption_format(
+                delta,
+                start_date_compare
+            )
+        elif(self.request.query_params.get('period') == 'monthly'):
+            consumption = self.monthly_consumption_format(
+                delta,
+                start_date_compare
+            )
+
+        return consumption
+
+    def hourly_consumption_format(self):
+        hourly_consumption = {}
+
+        for i in range(24):
+            hourly_consumption[str(i) + 'h'] = 0
+
+        for field in self.fields:
+            measurements = self.queryset.values(
+                field, 'collection_date'
+            )
+            for measurement in measurements:
+                hour = measurement['collection_date'].hour
+                hourly_consumption[str(hour) + 'h'] += measurement[field]
+
+        return hourly_consumption
+
+    def daily_consumption_format(self, delta, start_date):
+        daily_consumption = {}
+        current_date = start_date
+
+        for i in range(abs(int(delta.days)) + 1):
+            daily_consumption[str(current_date.strftime('%d/%m/%y'))] = 0
+            current_date = current_date + timedelta(days=1)
+
+        for field in self.fields:
+            measurement = measurements = self.queryset.values(
+                field, 'collection_date'
+            )
+            for measurement in measurements:
+                day = str(measurement['collection_date'].strftime('%d/%m/%y'))
+                daily_consumption[day] += measurement[field]
+
+        return daily_consumption
+
+    def monthly_consumption_format(self, delta, start_date):
+        monthly_consumption = {}
+        current_date = start_date
+
+        for i in range(abs(int(delta.months)) + 1):
+            monthly_consumption[str(current_date.strftime('%m/%y'))] = 0
+            current_date = current_date + relativedelta.relativedelta(months=1)
+
+        for field in self.fields:
+            measurement = measurements = self.queryset.values(
+                field, 'collection_date'
+            )
+            for measurement in measurements:
+                month = str(measurement['collection_date'].strftime('%m/%y'))
+                monthly_consumption[month] += measurement[field]
+
+        return monthly_consumption
+
+
 class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
     serializer_class = QuarterlySerializer
     fields = ['consumption_peak_time', 'consumption_off_peak_time']
@@ -610,7 +707,7 @@ class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
             self.fields[0], self.fields[1], 'collection_date',
             'tax__value_peak', 'tax__value_off_peak'
         )
-        
+
         if measurements:
             response = self.apply_algorithm(
                 measurements

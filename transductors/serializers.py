@@ -196,6 +196,8 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
 
         instance.serial_number = validated_data.get('serial_number')
         instance.ip_address = validated_data.get('ip_address')
+        instance.port = validated_data.get('port')
+        instance.history = validated_data.get('history')
         instance.firmware_version = validated_data.get('firmware_version')
         instance.campus = validated_data.get('campus')
         instance.name = validated_data.get('name')
