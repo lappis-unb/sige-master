@@ -30,7 +30,7 @@ class EnergyTransductorViewSet(viewsets.ModelViewSet):
         # Returning transductors sorted by campus and then by name
         return sorted(
             EnergyTransductor.objects.all(), 
-            key=lambda item: (item.campus, item.name)
+            key=lambda item: (item.campus.name, item.name)
         )
 
     def destroy(self, request, *args, **kwargs):
