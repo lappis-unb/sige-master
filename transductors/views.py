@@ -26,6 +26,13 @@ class EnergyTransductorViewSet(viewsets.ModelViewSet):
     serializer_class = EnergyTransductorSerializer
     permission_classes = (permissions.AllowAny,)
 
+    def get_queryset(self): 
+        # Returning transductors sorted by campus and then by name
+        return sorted(
+            EnergyTransductor.objects.all(), 
+            key=lambda item: (item.campus.name, item.name)
+        )
+
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         try:
