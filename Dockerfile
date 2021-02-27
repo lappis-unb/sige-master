@@ -33,5 +33,7 @@ RUN chmod 0644 /etc/cron.d/smi-cron
 
 RUN /usr/bin/crontab /etc/cron.d/smi-cron
 
+RUN pip install --upgrade pip
+RUN pip install wheel
 RUN pip install --no-cache-dir -r requirements.txt
 
