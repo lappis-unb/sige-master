@@ -67,7 +67,6 @@ INSTALLED_APPS = [
     'users',
     'corsheaders',
     'events',
-    'rosetta',
     'groups',
     'unifilar_diagram',
     'fcm_django',
@@ -90,7 +89,7 @@ MIDDLEWARE = [
 CORS_ORIGIN_ALLOW_ALL = True
 
 CORS_ALLOW_HEADERS = [
-    'content-disposition', 
+    'content-disposition',
     'accept-encoding',
     'content-type',
     'accept',
