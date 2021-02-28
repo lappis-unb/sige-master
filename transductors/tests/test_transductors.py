@@ -1,4 +1,3 @@
-import pytest
 from django.utils import timezone
 from django.test import TestCase
 from django.db.utils import IntegrityError

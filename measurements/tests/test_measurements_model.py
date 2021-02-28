@@ -1,4 +1,3 @@
-import pytest
 from django.test import TestCase
 from django.conf import settings
 from django.db import IntegrityError
