@@ -36,7 +36,7 @@ docker:
 test:
   stage: test
   script:
-    - pytest
+    - pytest .
 
 stylesheet:
   stage: test
