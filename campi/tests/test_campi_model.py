@@ -1,11 +1,9 @@
-import pytest
 from django.test import TestCase
 from django.db import IntegrityError
 from django.core.exceptions import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
-from django.conf import settings
 
-from campi.models import Campus
+from ..models import Campus
 
 
 class CampiTestCase(TestCase):
