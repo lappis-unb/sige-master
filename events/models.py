@@ -1,5 +1,5 @@
 from django.db import models
-from django.conf import settings
+# from django.conf import settings
 from django.utils import timezone
 from django.core.validators import RegexValidator
 from django.contrib.postgres.fields import JSONField
@@ -19,7 +19,7 @@ class Event(PolymorphicModel):
     """
     Defines a new event object
     """
-    settings.USE_TZ = False
+    # settings.USE_TZ = False
     ended_at = models.DateTimeField(
         null=True,
         blank=True,
@@ -65,7 +65,7 @@ class VoltageRelatedEvent(Event):
 
     class Meta:
         verbose_name = _('voltage related')
-        
+
     def save_event(self, transductor, event_dict):
         """
         Saves a failed connection event related to a transductor
@@ -76,9 +76,9 @@ class VoltageRelatedEvent(Event):
         self.ended_at = event_dict['ended_at']
         self.save()
 
-        body = self.transductor.name + '\n' 
+        body = self.transductor.name + '\n'
         counter = 0
-        
+
         if self.__class__.__name__ == 'PhaseDropEvent':
             for key, value in self.data.items():
                 body += 'Fase ' + key[-1].upper()
@@ -97,7 +97,7 @@ class VoltageRelatedEvent(Event):
             data_message={
                 'title': str(self._meta.verbose_name).capitalize(),
                 'body': body,
-                'transducer': self.pk 
+                'transducer': self.pk
             }
         )
         return self
@@ -129,14 +129,14 @@ class FailedConnectionTransductorEvent(Event):
         self.created_at = event_dict['created_at']
         self.ended_at = event_dict['ended_at']
         self.save()
-        body = self.transductor.name 
-        
+        body = self.transductor.name
+
         fcm_send_topic_message(
             topic_name=TOPIC_NAME,
             data_message={
                 'title': str(self._meta.verbose_name).capitalize(),
                 'body': body,
-                'transducer': self.pk 
+                'transducer': self.pk
             }
         )
         return self
@@ -166,7 +166,7 @@ class FailedConnectionSlaveEvent(Event):
         self.slave = slave
         self.data = {}
         self.created_at = timezone.now()
-        self.ended_at = None        
+        self.ended_at = None
         self.save()
         return self
 
