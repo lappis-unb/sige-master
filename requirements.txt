@@ -12,3 +12,4 @@ psycopg2==2.7.*
 python-dateutil==2.8.*
 Unipath==1.1.*
 pycodestyle==2.6.*
+pytest==6.2.*
