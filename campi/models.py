@@ -5,7 +5,6 @@ from django.utils.translation import gettext_lazy as _
 from utils import web_site_validator
 from utils import phone_validator
 
-
 class Campus(models.Model):
 
     class Meta:
@@ -48,3 +47,15 @@ class Campus(models.Model):
     def save(self, *args, **kwargs):
         self.full_clean()
         super(Campus, self).save(*args, **kwargs)
+
+class Tariff(models.Model):
+    start_date = models.DateField()
+    campus = models.ForeignKey(Campus, models.CASCADE)
+    regular_tariff = models.FloatField(max_length=10)
+    high_tariff = models.FloatField(max_length=10)
+
+    class Meta:
+        unique_together = [['start_date', 'campus']]
+
+    def __str__(self):
+        return '[%s] %s' % (self.campus, self.start_date)

@@ -17,6 +17,7 @@ from slaves import views as slaves_views
 from measurements import urls as measurements_routes
 from events import urls as events_routes
 from groups import urls as groups_routes
+from campi import urls as campi_urls
 from unifilar_diagram import urls as unifilar_diagram_routes
 
 from transductors import urls as transductors_routes
@@ -24,7 +25,7 @@ from transductors import urls as transductors_routes
 from .views import login
 
 router = DefaultRouter()
-router.register(r'campi', campi_views.CampusViewSet)
+# router.register(r'campi', campi_views.CampusViewSet)
 router.register(r'slave', slaves_views.SlaveViewSet)
 router.register(r'users', users_views.UserViewSet)
 
@@ -33,6 +34,9 @@ router.registry.extend(events_routes.router.registry)
 router.registry.extend(groups_routes.router.registry)
 router.registry.extend(transductors_routes.router.registry)
 router.registry.extend(unifilar_diagram_routes.router.registry)
+# router.registry.extend(campi_urls.router.registry)
+# router.registry.extend(campi_urls.campi_router.registry)
+
 
 # django-admin custom titles
 # admin.site.index_title = _('')
@@ -64,5 +68,6 @@ urlpatterns = [
     ),
     path('csv-export/', MeasurementResults.mount_csv_measurement),
     path('', include(router.urls)),
-    path('graph/', include(measurements_routes.graph_router.urls))
+    path('graph/', include(measurements_routes.graph_router.urls)),
+    path('', include(campi_urls.urls)),
 ]
