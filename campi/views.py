@@ -11,6 +11,7 @@ class CampusViewSet(viewsets.ModelViewSet):
     serializer_class = CampusSerializer
     permission_classes = (permissions.AllowAny,)
 
+
 class TariffViewSet(viewsets.ModelViewSet):
     queryset = Tariff.objects.all()
     serializer_class = TariffSerializer

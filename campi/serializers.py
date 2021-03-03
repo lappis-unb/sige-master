@@ -46,6 +46,7 @@ class CampusSerializer(serializers.HyperlinkedModelSerializer):
 
         return response
 
+
 class TariffSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Tariff
