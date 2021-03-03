@@ -21,17 +21,17 @@ class CampiTestCase(APITestCase):
 
     def _create_campi_tarif(self):
         return Tariff.objects.create(
-            campus = self.campus,
-            start_date = '2020-03-02',
-            regular_tariff =  2.50,
-            high_tariff = 3.50
+            campus=self.campus,
+            start_date='2020-03-02',
+            regular_tariff=2.50,
+            high_tariff=3.50
         )
 
     def test_create_campi_tariff(self):
 
         tariff_data = {
             'start_date': '2020-03-02',
-            'campus': 'http://testserver/campi/1/',
+            'campus': 'http://testserver/campi/%s/' % (self.campus.pk),
             'regular_tariff': 2.50,
             'high_tariff': 3.50
         }
@@ -94,37 +94,23 @@ class CampiTestCase(APITestCase):
         )
 
     def test_list_all_campi_tariff(self):
-        Tariff.objects.create(
-            campus = self.campus,
-            start_date = '2020-03-02',
-            regular_tariff =  2.50,
-            high_tariff = 3.50
-        )
-
-        Tariff.objects.create(
-            campus = self.campus,
-            start_date = '2021-03-02',
-            regular_tariff =  3.50,
-            high_tariff = 4.50
-        )
-
-        Tariff.objects.create(
-            campus = self.campus,
-            start_date = '2022-03-02',
-            regular_tariff =  5.50,
-            high_tariff = 6.50
-        )
+        Tariff.objects.bulk_create([
+            Tariff(campus=self.campus, start_date='2020-03-02',
+                   regular_tariff=2.50, high_tariff=3.50),
+            Tariff(campus=self.campus, start_date='2021-03-02',
+                   regular_tariff=3.50, high_tariff=4.50),
+            Tariff(campus=self.campus, start_date='2022-03-02',
+                   regular_tariff=4.50, high_tariff=5.50),
+        ])
 
         response = self.client.get(
             path=self.url_list,
             format='json',
         )
 
-        self.assertEqual(
-            len(response.data),
-            3,
-            msg='The number of tariffs returned is different than 3'
-        )
+        self.assertEqual(len(response.data), 3,
+                         msg='The number of tariffs returned ' \
+                              'is different than 3')
 
     def test_delete_campi_tarrif(self):
         tariff = self._create_campi_tarif()
