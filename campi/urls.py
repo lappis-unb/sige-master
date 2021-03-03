@@ -12,7 +12,7 @@ app_name = "campi"
 router = routers.DefaultRouter()
 router.register(r'campi', CampusViewSet)
 
-campi_router = routers.NestedSimpleRouter(router, r'campi', lookup='campi')
+campi_router = routers.NestedDefaultRouter(router, r'campi', lookup='campi')
 campi_router.register(r'tariffs', TariffViewSet, basename='tariffs')
 
 
