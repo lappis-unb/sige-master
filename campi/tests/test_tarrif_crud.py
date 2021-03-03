@@ -108,9 +108,11 @@ class CampiTestCase(APITestCase):
             format='json',
         )
 
-        self.assertEqual(len(response.data), 3,
-                         msg='The number of tariffs returned ' \
-                              'is different than 3')
+        self.assertEqual(
+            first=len(response.data),
+            second=3,
+            msg='The number of tariffs returned is different than 3'
+        )
 
     def test_delete_campi_tarrif(self):
         tariff = self._create_campi_tarif()
