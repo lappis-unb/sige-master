@@ -70,6 +70,7 @@ INSTALLED_APPS = [
     'rosetta',
     'groups',
     'unifilar_diagram',
+    'django_rest_passwordreset',
     'fcm_django',
 ]
 

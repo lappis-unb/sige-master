@@ -45,4 +45,5 @@ django-rosetta
 django-material==1.6.3
 django-material-admin
 fcm-django
+django_rest_passwordreset==1.1.0
 python-dateutil==2.8.1
