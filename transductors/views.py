@@ -44,10 +44,11 @@ class EnergyTransductorViewSet(viewsets.ModelViewSet):
                 'Campus Id does not match with any campus'
             )
 
-        return sorted(
-            transductors, 
-            key=lambda item: (item.campus.name, item.name)
-        )
+        # return sorted(
+        #     transductors, 
+        #     key=lambda item: (item.campus.name, item.name)
+        # )
+        return transductors
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
