@@ -8,6 +8,7 @@ from rest_framework import serializers, viewsets, permissions, status
 
 from .api import *
 from slaves.models import Slave
+from campi.models import Campus
 from .models import EnergyTransductor
 from .serializers import EnergyTransductorSerializer, AddToServerSerializer
 from django.http import Http404
@@ -27,9 +28,24 @@ class EnergyTransductorViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.AllowAny,)
 
     def get_queryset(self): 
-        # Returning transductors sorted by campus and then by name
+        campus_id = self.request.query_params.get('campus_id')
+
+        transductors = []
+        try:
+            if campus_id:
+                campus = Campus.objects.get(id=campus_id)
+                transductors = self.queryset.filter(
+                    campus=campus
+                )
+            else:
+                transductors = EnergyTransductor.objects.all()
+        except EnergyTransductor.DoesNotExist:
+            raise APIException(
+                'Campus Id does not match with any campus'
+            )
+
         return sorted(
-            EnergyTransductor.objects.all(), 
+            transductors, 
             key=lambda item: (item.campus.name, item.name)
         )
 
