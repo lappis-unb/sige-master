@@ -43,7 +43,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('rosetta/', include('rosetta.urls')),
     path('login/', login),
-    path('password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
+    path('password_reset/', 
+        include('django_rest_passwordreset.urls', namespace='password_reset')),
     path('csv-export/', MeasurementResults.mount_csv_measurement),
     path('', include(router.urls)),
     path('graph/', include(measurements_routes.graph_router.urls))
