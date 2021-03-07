@@ -41,7 +41,6 @@ admin.site.site_title = _('Energy monitoring system')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('rosetta/', include('rosetta.urls')),
     path('login/', login),
     path(
         'password_reset/',
