@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from .models import CustomUser
 
+class CustomTokenSerializer(serializers.Serializer):
+    token = serializers.CharField()
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     password = serializers.CharField(write_only=True)

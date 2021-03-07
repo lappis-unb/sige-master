@@ -1,8 +1,10 @@
 from rest_framework import viewsets
 from rest_framework import serializers
 from rest_framework import permissions
+from rest_framework.views import APIView
 
-from rest_framework.status import HTTP_409_CONFLICT
+from rest_framework.response import Response
+from rest_framework.status import HTTP_404_NOT_FOUND
 from rest_framework.decorators import api_view
 from rest_framework.decorators import permission_classes
 
@@ -10,8 +12,13 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.conf import settings
 from django.dispatch import receiver
+from django.utils import timezone
 
 from django_rest_passwordreset.signals import reset_password_token_created
+from django_rest_passwordreset.views import get_password_reset_token_expiry_time
+from django_rest_passwordreset.models import ResetPasswordToken
+
+from datetime import timedelta
 
 from .serializers import *
 from .models import CustomUser
@@ -34,6 +41,39 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAdminUser | CurrentUserOnly]
+
+class PasswordTokenVerificationView(APIView):
+
+    serializer_class = CustomTokenSerializer
+    permission_classes = (permissions.AllowAny,)
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        token = serializer.validated_data['token']
+
+        # get token validation time
+        password_reset_token_validation_time = get_password_reset_token_expiry_time()
+
+        # find token
+        reset_password_token = ResetPasswordToken.objects.filter(key=token).first()
+
+        if reset_password_token is None:
+            return Response({'status': 'invalid'}, status=HTTP_404_NOT_FOUND)
+
+        # check expiry date
+        expiry_date = reset_password_token.created_at + timedelta(hours=password_reset_token_validation_time)
+
+        if timezone.now() > expiry_date:
+            # delete expired token
+            reset_password_token.delete()
+            return Response({'status': 'expired'}, status=HTTP_404_NOT_FOUND)
+
+        # check if user has password to change
+        if not reset_password_token.user.has_usable_password():
+            return Response({'status': 'irrelevant'})
+
+        return Response({'status': 'OK'})
 
 @receiver(reset_password_token_created)
 def password_reset_token_created(sender, reset_password_token, *args, **kwargs):
