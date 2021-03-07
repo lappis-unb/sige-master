@@ -43,9 +43,25 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('rosetta/', include('rosetta.urls')),
     path('login/', login),
+    path('password_reset/validate_token/', 
+        users_views.PasswordTokenVerificationView.as_view()),
     path('password_reset/', 
         include('django_rest_passwordreset.urls', namespace='password_reset')),
     path('csv-export/', MeasurementResults.mount_csv_measurement),
     path('', include(router.urls)),
     path('graph/', include(measurements_routes.graph_router.urls))
 ]
+
+"""
+    The password_reset/ actually adds two routes: 
+    
+    POST password_reset/reset_password/ 
+    Path to get the email with the link to reset the password, where the user
+    need to send the email param in req body
+
+    &&
+    
+    POST password_reset/confirm/ 
+    Path to reset the password, where the user need to send the received token
+    and the new password.
+"""
