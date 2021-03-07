@@ -73,9 +73,9 @@ class EnergyTransductorListViewSet(viewsets.GenericViewSet,
         slaves = Slave.objects.all()
         transductorList = {}
         for transductor in transductors:
-            crit = transductor.events_failedconnectiontransductorevent.filter(
+            prec = transductor.events_failedconnectiontransductorevent.filter(
                 ended_at__isnull=True).count()
-            prec = transductor.events_voltagerelatedevent.filter(
+            crit = transductor.events_voltagerelatedevent.filter(
                 ended_at__isnull=True).count()
             last72h = transductor. \
                 events_failedconnectiontransductorevent.filter(
