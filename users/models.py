@@ -1,8 +1,3 @@
-from django.contrib.auth.models import AbstractUser
-from django.db import models
-from django.utils.translation import ugettext_lazy as _
-
-# A new class is imported. ##
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
