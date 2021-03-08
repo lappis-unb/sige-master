@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Campus
+from .models import Campus, Tariff
 from groups.models import Group
 from transductors.models import EnergyTransductor
 
@@ -45,3 +45,15 @@ class CampusSerializer(serializers.HyperlinkedModelSerializer):
             response.append(data)
 
         return response
+
+
+class TariffSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Tariff
+        fields = (
+            'id',
+            'start_date',
+            'campus',
+            'regular_tariff',
+            'high_tariff'
+        )
