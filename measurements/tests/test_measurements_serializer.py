@@ -1,6 +1,5 @@
 import sys
 import pytz
-import pytest
 
 from django.test import Client, TestCase
 from django.conf import settings
@@ -84,7 +83,7 @@ class MeasurementsTestCase(TestCase):
         url += '&end_date=2000-01-01 23:59:00'
         self.assertEqual(
             self.client.get(
-                url  
+                url
             ).status_code,
             200)
 

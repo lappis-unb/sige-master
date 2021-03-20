@@ -8,6 +8,7 @@ from rest_framework import serializers, viewsets, permissions, status
 
 from .api import *
 from slaves.models import Slave
+from campi.models import Campus
 from .models import EnergyTransductor
 from .serializers import EnergyTransductorSerializer, AddToServerSerializer
 from django.http import Http404
@@ -27,11 +28,27 @@ class EnergyTransductorViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.AllowAny,)
 
     def get_queryset(self): 
-        # Returning transductors sorted by campus and then by name
-        return sorted(
-            EnergyTransductor.objects.all(), 
-            key=lambda item: (item.campus.name, item.name)
-        )
+        campus_id = self.request.query_params.get('campus_id')
+
+        transductors = []
+        try:
+            if campus_id:
+                campus = Campus.objects.get(id=campus_id)
+                transductors = self.queryset.filter(
+                    campus=campus
+                )
+            else:
+                transductors = EnergyTransductor.objects.all()
+        except EnergyTransductor.DoesNotExist:
+            raise APIException(
+                'Campus Id does not match with any campus'
+            )
+
+        # return sorted(
+        #     transductors, 
+        #     key=lambda item: (item.campus.name, item.name)
+        # )
+        return transductors
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -57,9 +74,9 @@ class EnergyTransductorListViewSet(viewsets.GenericViewSet,
         slaves = Slave.objects.all()
         transductorList = {}
         for transductor in transductors:
-            crit = transductor.events_failedconnectiontransductorevent.filter(
+            prec = transductor.events_failedconnectiontransductorevent.filter(
                 ended_at__isnull=True).count()
-            prec = transductor.events_voltagerelatedevent.filter(
+            crit = transductor.events_voltagerelatedevent.filter(
                 ended_at__isnull=True).count()
             last72h = transductor. \
                 events_failedconnectiontransductorevent.filter(

@@ -67,7 +67,6 @@ INSTALLED_APPS = [
     'users',
     'corsheaders',
     'events',
-    'rosetta',
     'groups',
     'unifilar_diagram',
     'django_rest_passwordreset',
@@ -91,7 +90,7 @@ MIDDLEWARE = [
 CORS_ORIGIN_ALLOW_ALL = True
 
 CORS_ALLOW_HEADERS = [
-    'content-disposition', 
+    'content-disposition',
     'accept-encoding',
     'content-type',
     'accept',
@@ -130,7 +129,7 @@ WSGI_APPLICATION = 'smi_master.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': env('POSTGRES_DB'),
         'USER': env('POSTGRES_USER'),
         'PASSWORD': env('POSTGRES_PASSWORD'),
@@ -200,7 +199,7 @@ LOCALE_PATHS = (os.path.join(BASE_DIR, 'locale/'),)
 
 USE_L10N = True
 
-# USE_TZ = True
+USE_TZ = False
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
