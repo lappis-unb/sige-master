@@ -34,8 +34,8 @@ python manage.py makemigrations
 echo '======= RUNNING MIGRATIONS'
 python manage.py migrate
 
-#echo '======= RUNNING SEED'
-#python seed_db.py
+echo '======= RUNNING SEED'
+python manage.py loaddata db.json
 
 echo '======= STARTING CRON'
 cron
