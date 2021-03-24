@@ -4,6 +4,7 @@ import re
 import os
 import csv
 import codecs
+from copy import copy
 from .lttb import downsample
 import locale
 from dateutil import relativedelta
@@ -127,109 +128,90 @@ class MinutelyMeasurementViewSet(MeasurementViewSet):
     def threephasic_measurement_collections(self, transductor):
         is_filtered = self.request.query_params.get('is_filtered')
 
-        list_a = self._format_measurements(self.queryset.values_list(
-            'collection_date', self.fields[0]
-        ))
-        list_b = self._format_measurements(self.queryset.values_list(
-            'collection_date', self.fields[1]
-        ))
-        list_c = self._format_measurements(self.queryset.values_list(
-            'collection_date', self.fields[2]
-        ))
+        measurements_a = self._get_formatted_measurements(self.fields[0])
+        measurements_b = self._get_formatted_measurements(self.fields[1])
+        measurements_c = self._get_formatted_measurements(self.fields[2])
 
         if is_filtered == 'True':
-            list_a = self.apply_filter(self.fields[0])
-            list_b = self.apply_filter(self.fields[1])
-            list_c = self.apply_filter(self.fields[2])
-        else:
-            list_a = self.queryset.values_list(
-                self.fields[0], 'collection_date'
-            )
-            list_a = (
-                [
-                    [element[1].strftime('%m/%d/%Y %H:%M:%S'), element[0]]
-                    for element in list_a
-                ]
-            )
-            list_b = self.queryset.values_list(
-                self.fields[1], 'collection_date'
-            )
-            list_b = (
-                [
-                    [element[1].strftime('%m/%d/%Y %H:%M:%S'), element[0]]
-                    for element in list_b
-                ]
-            )
-            list_c = self.queryset.values_list(
-                self.fields[2], 'collection_date'
-            )
-            list_c = (
-                [
-                    [element[1].strftime('%m/%d/%Y %H:%M:%S'), element[0]]
-                    for element in list_c
-                ]
-            )
+            measurements_a['measurements'] = self._apply_filter(
+                measurements_a['measurements'])
+            measurements_b['measurements'] = self._apply_filter(
+                measurements_b['measurements'])
+            measurements_c['measurements'] = self._apply_filter(
+                measurements_c['measurements'])
 
-        minutely_measurements = {}
-        minutely_measurements['transductor'] = transductor
-        minutely_measurements['phase_a'] = list_a
-        minutely_measurements['phase_b'] = list_b
-        minutely_measurements['phase_c'] = list_c
+        minutely_measurements = {
+            'transductor': transductor,
+            'phase_a': measurements_a,
+            'phase_b': measurements_b,
+            'phase_c': measurements_c
+        }
 
         return [minutely_measurements]
 
     def simple_measurement_collections(self, transductor):
         is_filtered = self.request.query_params.get('is_filtered')
 
-        if is_filtered == 'True':
-            list_measurement = self.apply_filter(self.fields[0])
-        else:
-            list_measurement = self.queryset.values_list(
-                self.fields[0], 'collection_date'
-            )
+        measurements = self._get_formatted_measurements(self.fields[0])
 
-        minutely_measurements = {}
-        minutely_measurements['transductor'] = transductor
-        minutely_measurements['measurements'] = list_measurement
+        if is_filtered == 'True':
+            measurements['measurements'] = self._apply_filter(
+                measurements['measurements'])
+
+        minutely_measurements = {
+            'transductor': transductor,
+            'measurements': measurements
+        }
 
         return [minutely_measurements]
 
-    def _format_measurements(self, measurements):
+    def _get_formatted_measurements(self, value_field):
         formatted_measurements = {
-            "min": 0,
+            "min": 1e9,
             "max": 0,
             "measurements": []
         }
+        measurements = self.queryset.values(
+            value_field, 'collection_date'
+        )
 
         if measurements and len(measurements):
             for measurement in measurements:
-                measurement_value = measurement[1]
+                measurement_value = measurement[value_field]
                 if measurement_value < formatted_measurements['min']:
                     formatted_measurements['min'] = measurement_value
                 elif measurement_value > formatted_measurements['max']:
                     formatted_measurements['max'] = measurement_value
 
             formatted_measurements["measurements"] = \
-                self._add_missing_values(measurements)
+                self._get_measurements_with_missing_values(
+                    measurements, value_field)
 
         return formatted_measurements
 
-    def _add_missing_values(self, measurements, missing_values_fill=0) -> list:
+    def _get_measurements_with_missing_values(
+        self, measurements: list, value_field: str,
+        missing_values_fill=0
+    ):
         size = len(measurements)
-        start_date_in_minutes = \
-            self._get_minutes_from_date(measurements[0][0])
-        end_date_in_minutes = \
-            self._get_minutes_from_date(measurements[size - 1][0])
+        start_date_in_minutes = self._get_minutes_from_date(
+            measurements[0]['collection_date']
+        )
+        end_date_in_minutes = self._get_minutes_from_date(
+            measurements[size - 1]['collection_date']
+        )
         new_measurements = []
         original_measurements_count = 0
         missing_start = -1
 
-        for minute in range(start_date_in_minutes, end_date_in_minutes):
+        for minute in range(start_date_in_minutes, end_date_in_minutes + 1):
             original_measurement_minute = self._get_minutes_from_date(
-                measurements[original_measurements_count][0])
+                measurements[original_measurements_count]['collection_date'])
 
             if original_measurement_minute == minute:
-                original_value = measurements[original_measurements_count][1]
+                original_value = \
+                    measurements[original_measurements_count][value_field]
+                original_measurements_count += 1
                 missing_end = minute
 
                 if missing_start > -1 and missing_end > -1:
@@ -240,27 +222,28 @@ class MinutelyMeasurementViewSet(MeasurementViewSet):
                             missing_values_fill
                         ))
                     missing_start = -1
-                new_measurements.append(
+                new_measurements.append([
                     self._get_date_from_minutes(minute),
                     original_value
-                )
+                ])
             elif missing_start <= -1:
                 missing_start = minute
 
         return new_measurements
 
-    def _get_missing_values_filled(self, missing_start=0, missing_end=0,
-                                   missing_values_fill=0, missing_tolerance=10):
+    def _get_missing_values_filled(self, missing_start=0,
+                                   missing_end=0, missing_values_fill=0,
+                                   missing_tolerance=10) -> list:
         missing_values = []
-        if abs(missing_start - missing_end >= missing_tolerance):
+        if abs(missing_start - missing_end) >= missing_tolerance:
             for missing_minute in range(missing_start, missing_end):
-                missing_values.append(
+                missing_values.append([
                     self._get_date_from_minutes(missing_minute),
                     missing_values_fill
-                )
+                ])
         return missing_values
 
-    def _get_minutes_from_date(self, date):
+    def _get_minutes_from_date(self, date) -> int:
         return int(timezone.datetime.timestamp(date) / 60)
 
     def _get_date_from_minutes(self, minutes):
@@ -268,17 +251,15 @@ class MinutelyMeasurementViewSet(MeasurementViewSet):
             .utcfromtimestamp(minutes * 60) \
             .strftime('%m/%d/%Y %H:%M:%S')
 
-    def apply_filter(self, value):
-        filtered_values = self.queryset.values(
-            value, 'collection_date'
-        )
+    def _apply_filter(self, measurements) -> list:
+        filtered_values = copy(measurements)
         indexes = range(len(filtered_values))
         filtered_values = (
             [
                 [
                     counter,
-                    item[value],
-                    timezone.datetime.timestamp(item['collection_date'])
+                    item[1],
+                    timezone.datetime.timestamp(item[0])
                 ]
                 for counter, item in zip(indexes, filtered_values)
             ]

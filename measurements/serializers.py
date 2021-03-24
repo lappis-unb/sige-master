@@ -107,9 +107,9 @@ class ThreePhaseSerializer(MinutelyMeasurementSerializer):
     >>> queryset = MinutelyMeasurement.objects.all()
         serializer_class = MinutelyApparentPowerThreePhase
     """
-    phase_a = serializers.ListField(default=[])
-    phase_b = serializers.ListField(default=[])
-    phase_c = serializers.ListField(default=[])
+    phase_a = serializers.DictField(default={})
+    phase_b = serializers.DictField(default={})
+    phase_c = serializers.DictField(default={})
 
     class Meta:
         model = MinutelyMeasurement
@@ -123,7 +123,7 @@ class ThreePhaseSerializer(MinutelyMeasurementSerializer):
 
 
 class MeasurementSerializer(MinutelyMeasurementSerializer):
-    measurements = serializers.ListField(default=[])
+    measurements = serializers.DictField(default={})
 
     class Meta:
         model = MinutelyMeasurement
