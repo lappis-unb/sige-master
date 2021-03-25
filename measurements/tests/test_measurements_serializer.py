@@ -97,6 +97,8 @@ class MeasurementsTestCase(TestCase):
                 [
                     "id",
                     "transductor",
+                    "min",
+                    "max",
                     "phase_a",
                     "phase_b",
                     "phase_c"

@@ -5,7 +5,6 @@ import os
 import csv
 import codecs
 from copy import copy
-from .lttb import downsample
 import locale
 from dateutil import relativedelta
 from datetime import datetime, timedelta
@@ -51,6 +50,9 @@ from .serializers import TaxSerializer
 
 from django.http import StreamingHttpResponse
 from django.utils.translation import ugettext as _
+
+from .missing_values import get_measurements_with_missing_values
+from .lttb import downsample
 
 
 #  this viewset don't inherits from viewsets.ModelViewSet because it
@@ -128,12 +130,18 @@ class MinutelyMeasurementViewSet(MeasurementViewSet):
     def threephasic_measurement_collections(self, transductor):
         is_filtered = self.request.query_params.get('is_filtered')
 
-        measurements_a = \
-            self._get_measurements_with_missing_values(self.fields[0])
-        measurements_b = \
-            self._get_measurements_with_missing_values(self.fields[1])
-        measurements_c = \
-            self._get_measurements_with_missing_values(self.fields[2])
+        measurements_a = get_measurements_with_missing_values(
+            self.queryset.values(self.fields[0], 'collection_date'),
+            self.fields[0]
+        )
+        measurements_b = get_measurements_with_missing_values(
+            self.queryset.values(self.fields[1], 'collection_date'),
+            self.fields[1]
+        )
+        measurements_c = get_measurements_with_missing_values(
+            self.queryset.values(self.fields[2], 'collection_date'),
+            self.fields[2]
+        )
 
         if is_filtered == 'True':
             measurements_a = self._apply_filter(measurements_a)
@@ -166,8 +174,10 @@ class MinutelyMeasurementViewSet(MeasurementViewSet):
     def simple_measurement_collections(self, transductor):
         is_filtered = self.request.query_params.get('is_filtered')
 
-        measurements = \
-            self._get_measurements_with_missing_values(self.fields[0])
+        measurements = get_measurements_with_missing_values(
+            self.queryset.values(self.fields[0], 'collection_date'),
+            self.fields[0]
+        )
 
         if is_filtered == 'True':
             measurements = self._apply_filter(measurements)
@@ -182,72 +192,6 @@ class MinutelyMeasurementViewSet(MeasurementViewSet):
         }
 
         return [minutely_measurements]
-
-    def _get_measurements_with_missing_values(
-        self, value_field: str, missing_values_fill=0
-    ):
-        measurements = self.queryset.values(
-            value_field, 'collection_date'
-        )
-        new_measurements = []
-
-        if measurements and len(measurements):
-            size = len(measurements)
-            start_date_in_minutes = self._get_minutes_from_date(
-                measurements[0]['collection_date']
-            )
-            end_date_in_minutes = self._get_minutes_from_date(
-                measurements[size - 1]['collection_date']
-            )
-            original_measurements_count = 0
-            missing_start = -1
-
-            for minute in range(start_date_in_minutes, end_date_in_minutes + 1):
-                original_measurement_minute = self._get_minutes_from_date(
-                    measurements[original_measurements_count]['collection_date']
-                )
-
-                if original_measurement_minute == minute:
-                    original_value = \
-                        measurements[original_measurements_count][value_field]
-                    original_measurements_count += 1
-                    missing_end = minute
-
-                    if missing_start > -1 and missing_end > -1:
-                        new_measurements.extend(
-                            self._get_missing_values_filled(
-                                missing_start,
-                                missing_end,
-                                missing_values_fill
-                            ))
-                        missing_start = -1
-                    new_measurements.append([
-                        self._get_date_from_minutes(minute),
-                        original_value
-                    ])
-                elif missing_start <= -1:
-                    missing_start = minute
-
-        return new_measurements
-
-    def _get_missing_values_filled(self, missing_start=0,
-                                   missing_end=0, missing_values_fill=0,
-                                   missing_tolerance=10) -> list:
-        missing_values = []
-        if abs(missing_start - missing_end) >= missing_tolerance:
-            for missing_minute in range(missing_start, missing_end):
-                missing_values.append([
-                    self._get_date_from_minutes(missing_minute),
-                    missing_values_fill
-                ])
-        return missing_values
-
-    def _get_minutes_from_date(self, date) -> int:
-        return int(timezone.datetime.timestamp(date) / 60)
-
-    def _get_date_from_minutes(self, minutes):
-        return timezone.datetime \
-            .fromtimestamp(minutes * 60)
 
     def _apply_filter(self, measurements) -> list:
         filtered_values = copy(measurements)
