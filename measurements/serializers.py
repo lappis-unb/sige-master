@@ -107,15 +107,19 @@ class ThreePhaseSerializer(MinutelyMeasurementSerializer):
     >>> queryset = MinutelyMeasurement.objects.all()
         serializer_class = MinutelyApparentPowerThreePhase
     """
-    phase_a = serializers.DictField(default={})
-    phase_b = serializers.DictField(default={})
-    phase_c = serializers.DictField(default={})
+    max = serializers.FloatField(default=0)
+    min = serializers.FloatField(default=0)
+    phase_a = serializers.ListField(default=[])
+    phase_b = serializers.ListField(default=[])
+    phase_c = serializers.ListField(default=[])
 
     class Meta:
         model = MinutelyMeasurement
         fields = (
             'id',
             'transductor',
+            'max',
+            'min',
             'phase_a',
             'phase_b',
             'phase_c'
@@ -123,13 +127,17 @@ class ThreePhaseSerializer(MinutelyMeasurementSerializer):
 
 
 class MeasurementSerializer(MinutelyMeasurementSerializer):
-    measurements = serializers.DictField(default={})
+    max = serializers.FloatField(default=0)
+    min = serializers.FloatField(default=0)
+    measurements = serializers.ListField(default=[])
 
     class Meta:
         model = MinutelyMeasurement
         fields = (
             'id',
             'transductor',
+            'max',
+            'min',
             'measurements'
         )
 
