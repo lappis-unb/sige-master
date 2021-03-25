@@ -34,21 +34,21 @@ class Transductor(PolymorphicModel):
     )
 
     last_minutely_collection = models.DateTimeField(
-        blank=False, 
+        blank=False,
         null=False,
         default=datetime.now,
         verbose_name=_('last minutely collection')
     )
 
     last_quarterly_collection = models.DateTimeField(
-        blank=False, 
+        blank=False,
         null=False,
         default=datetime.now,
         verbose_name=_('last quarterly collection')
     )
 
     last_monthly_collection = models.DateTimeField(
-        blank=False, 
+        blank=False,
         null=False,
         default=datetime.now,
         verbose_name=_('last monthly collection')
@@ -125,8 +125,7 @@ class Transductor(PolymorphicModel):
         Group,
         verbose_name=_('Grouping'),
         help_text=_('This field is required'),
-        blank=True,
-        null=True
+        blank=True
     )
 
     slave_server = models.ForeignKey(
@@ -135,7 +134,7 @@ class Transductor(PolymorphicModel):
         default=None,
         null=True,
         blank=True,
-        on_delete=models.DO_NOTHING, 
+        on_delete=models.DO_NOTHING,
         related_name='transductors'
     )
 
