@@ -59,9 +59,9 @@ class PasswordTokenVerificationView(APIView):
 
         # find token
         reset_password_token = ResetPasswordToken \
-                                .objects \
-                                .filter(key=token) \
-                                .first()
+                               .objects \
+                               .filter(key=token) \
+                               .first()
 
         if reset_password_token is None:
             return Response({'status': 'invalid'}, status=HTTP_404_NOT_FOUND)
@@ -81,6 +81,7 @@ class PasswordTokenVerificationView(APIView):
 
         return Response({'status': 'OK'})
 
+
 @receiver(reset_password_token_created)
 def password_reset_token_created(sender, reset_password_token, *args, **kwargs):
 
@@ -89,8 +90,8 @@ def password_reset_token_created(sender, reset_password_token, *args, **kwargs):
         'username': reset_password_token.user.username,
         'email': reset_password_token.user.email,
         'reset_password_url': 
-            f"{settings.FRONT_URL}/reset_password/{reset_password_token.key}" +
-            f"?email={reset_password_token.user.email}",
+            f"{settings.FRONT_URL}/reset_password/{reset_password_token.key}"
+            + f"?email={reset_password_token.user.email}",
         'site_name': 'SIGE',
         'site_domain': settings.FRONT_URL
     }
