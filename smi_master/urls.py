@@ -45,9 +45,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('login/', login),
     path('password_reset/validate_token/', 
-        users_views.PasswordTokenVerificationView.as_view()),
+         users_views.PasswordTokenVerificationView.as_view()),
     path('password_reset/', 
-        include('django_rest_passwordreset.urls', namespace='password_reset')),
+         include('django_rest_passwordreset.urls', namespace='password_reset')),
     path('csv-export/', MeasurementResults.mount_csv_measurement),
     path('graph/', include(measurements_routes.graph_router.urls)),
 

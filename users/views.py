@@ -42,6 +42,7 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAdminUser | CurrentUserOnly]
 
+
 class PasswordTokenVerificationView(APIView):
 
     serializer_class = CustomTokenSerializer
@@ -53,16 +54,21 @@ class PasswordTokenVerificationView(APIView):
         token = serializer.validated_data['token']
 
         # get token validation time
-        password_reset_token_validation_time = get_password_reset_token_expiry_time()
+        password_reset_token_validation_time = \
+            get_password_reset_token_expiry_time()
 
         # find token
-        reset_password_token = ResetPasswordToken.objects.filter(key=token).first()
+        reset_password_token = ResetPasswordToken \
+                                .objects \
+                                .filter(key=token) \
+                                .first()
 
         if reset_password_token is None:
             return Response({'status': 'invalid'}, status=HTTP_404_NOT_FOUND)
 
         # check expiry date
-        expiry_date = reset_password_token.created_at + timedelta(hours=password_reset_token_validation_time)
+        expiry_date = reset_password_token.created_at + \
+            timedelta(hours=password_reset_token_validation_time)
 
         if timezone.now() > expiry_date:
             # delete expired token
@@ -90,8 +96,10 @@ def password_reset_token_created(sender, reset_password_token, *args, **kwargs):
     }
 
     # render email text
-    email_html_message = render_to_string('email/user_reset_password.html', context)
-    email_plaintext_message = render_to_string('email/user_reset_password.txt', context)
+    email_html_message = \
+        render_to_string('email/user_reset_password.html', context)
+    email_plaintext_message = \
+        render_to_string('email/user_reset_password.txt', context)
 
     msg = EmailMultiAlternatives(
         # title:
