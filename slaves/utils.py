@@ -86,7 +86,9 @@ class DataCollector():
             active_max_power_off_peak_time=(
                 measure['active_max_power_off_peak_time']
             ),
-            reactive_max_power_peak_time=measure['reactive_max_power_peak_time'],
+            reactive_max_power_peak_time=measure[
+                'reactive_max_power_peak_time'
+            ],
             reactive_max_power_off_peak_time=(
                 measure['reactive_max_power_off_peak_time']
             ),
