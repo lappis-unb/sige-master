@@ -75,7 +75,9 @@ class DataCollector():
             consumption_peak_time=measure['consumption_peak_time'],
             consumption_off_peak_time=measure['consumption_off_peak_time'],
             inductive_power_peak_time=measure['inductive_power_peak_time'],
-            inductive_power_off_peak_time=measure['inductive_power_off_peak_time'],
+            inductive_power_off_peak_time=measure[
+                'inductive_power_off_peak_time'
+            ],
             capacitive_power_peak_time=measure['capacitive_power_peak_time'],
             capacitive_power_off_peak_time=(
                 measure['capacitive_power_off_peak_time']
@@ -115,7 +117,6 @@ class DataCollector():
             collection_date=measure['transductor_collection_date'],
             transductor_id=transductor.id
         )
-
 
     def build_minutely_measurements(measure, transductor):
         MinutelyMeasurement.objects.create(
