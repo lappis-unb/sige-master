@@ -49,7 +49,7 @@ from .serializers import RealTimeMeasurementSerializer
 from .serializers import TaxSerializer
 
 from django.http import StreamingHttpResponse
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext_lazy as _
 
 
 #  this viewset don't inherits from viewsets.ModelViewSet because it

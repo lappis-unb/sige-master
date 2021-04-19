@@ -14,3 +14,4 @@ Unipath==1.1.*
 pycodestyle==2.6.*
 pytest==6.2.*
 drf-nested-routers==0.92.*
+django-rest-passwordreset==1.1.0

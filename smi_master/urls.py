@@ -1,7 +1,7 @@
 from django.urls import path
 from django.urls import include
 from django.contrib import admin
-from django.conf.urls import url
+from django.conf.urls import url, include
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import views as auth_views
 
@@ -44,29 +44,27 @@ admin.site.site_title = _('Energy monitoring system')
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('login/', login),
-    path(
-        'password_reset/',
-        auth_views.PasswordResetView.as_view(),
-        name='password_reset'
-    ),
-    path(
-        'password_reset/done/',
-        auth_views.PasswordResetDoneView.as_view(),
-        name='password_reset_done'
-    ),
-    path(
-        'reset/<uidb64>/<token>/',
-        auth_views.PasswordResetConfirmView.as_view(),
-        name='password_reset_confirm'
-    ),
-    path(
-        'reset/done/',
-        auth_views.PasswordResetCompleteView.as_view(),
-        name='password_reset_complete'
-    ),
+    path('password_reset/validate_token/', 
+         users_views.PasswordTokenVerificationView.as_view()),
+    path('password_reset/', 
+         include('django_rest_passwordreset.urls', namespace='password_reset')),
     path('csv-export/', MeasurementResults.mount_csv_measurement),
     path('graph/', include(measurements_routes.graph_router.urls)),
 
     path('', include(router.urls)),
     path('', include('campi.urls')),
 ]
+
+"""
+    The password_reset/ actually adds two routes: 
+    
+    POST password_reset/reset_password/ 
+    Path to get the email with the link to reset the password, where the user
+    need to send the email param in req body
+
+    &&
+    
+    POST password_reset/confirm/ 
+    Path to reset the password, where the user need to send the received token
+    and the new password.
+"""
