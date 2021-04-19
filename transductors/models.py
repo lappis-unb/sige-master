@@ -13,7 +13,6 @@ from .api import *
 from campi.models import Campus
 from slaves.models import Slave
 from groups.models import Group
-from django.utils.translation import gettext_lazy as _
 from django.core.validators import MinLengthValidator
 
 

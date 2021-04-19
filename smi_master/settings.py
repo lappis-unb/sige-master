@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     'events',
     'groups',
     'unifilar_diagram',
+    'django_rest_passwordreset',
     'fcm_django',
 ]
 
@@ -137,6 +138,11 @@ DATABASES = {
     }
 }
 
+if env('ENVIRONMENT') == 'development':
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
@@ -233,10 +239,6 @@ MATERIAL_ADMIN_SITE = {
     # }
 }
 
-# debug configuration to view how emails are being sent
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
-
 FCM_DJANGO_SETTINGS = {
         "APP_VERBOSE_NAME": "[string for AppConfig's verbose_name]",
          # default: _('FCM Django')
@@ -248,3 +250,12 @@ FCM_DJANGO_SETTINGS = {
          # default: False
         "DELETE_INACTIVE_DEVICES": True,
 }
+
+# Using temp gmail account
+EMAIL_HOST='smtp.gmail.com'
+EMAIL_HOST_USER=env('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD=env('EMAIL_HOST_PASSWORD')
+EMAIL_PORT=587
+EMAIL_USE_TLS=True
+
+FRONT_URL=env('FRONT_URL')
