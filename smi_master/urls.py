@@ -4,6 +4,7 @@ from django.contrib import admin
 from django.conf.urls import url, include
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import views as auth_views
+from rest_framework.documentation import include_docs_urls
 
 from rest_framework_nested.routers import DefaultRouter
 
@@ -42,6 +43,7 @@ admin.site.site_header = _('SMI Site Administration')
 admin.site.site_title = _('Energy monitoring system')
 
 urlpatterns = [
+    path('docs/', include_docs_urls(title='My API title')),
     path('admin/', admin.site.urls),
     path('login/', login),
     path('password_reset/validate_token/', 

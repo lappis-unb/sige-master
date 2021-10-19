@@ -138,11 +138,11 @@ DATABASES = {
     }
 }
 
-if env('ENVIRONMENT') == 'development':
-    DATABASES['default'] = {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+# if env('ENVIRONMENT') == 'development':
+#     DATABASES['default'] = {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#     }
 
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
@@ -259,3 +259,5 @@ EMAIL_PORT=587
 EMAIL_USE_TLS=True
 
 FRONT_URL=env('FRONT_URL')
+
+REST_FRAMEWORK = { 'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema' }
