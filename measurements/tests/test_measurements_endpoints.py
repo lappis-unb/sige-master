@@ -249,14 +249,14 @@ class MeasurementsEndPointsTestCase(TestCase):
 
         self.__api_client.logout()
         self.assertEqual(response.status_code,
-                         status.HTTP_401_UNAUTHORIZED)
+                         status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_post_without_auth_minutely_three_phase(self):
         response = self.__api_client.post(
             self.__minutely_three_phase)
 
         self.assertEqual(response.status_code,
-                         status.HTTP_401_UNAUTHORIZED)
+                         status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_put_with_auth_minutely_three_phase(self):
         self.__api_client.login(email="admin@admin.com", password="admin")
@@ -266,14 +266,14 @@ class MeasurementsEndPointsTestCase(TestCase):
 
         self.__api_client.logout()
         self.assertEqual(response.status_code,
-                         status.HTTP_401_UNAUTHORIZED)
+                         status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_put_without_auth_minutely_three_phase(self):
         response = self.__api_client.put(
             self.__minutely_three_phase)
 
         self.assertEqual(response.status_code,
-                         status.HTTP_401_UNAUTHORIZED)
+                         status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_delete_with_auth_minutely_three_phase(self):
         self.__api_client.login(email="admin@admin.com", password="admin")
@@ -283,11 +283,11 @@ class MeasurementsEndPointsTestCase(TestCase):
 
         self.__api_client.logout()
         self.assertEqual(response.status_code,
-                         status.HTTP_401_UNAUTHORIZED)
+                         status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_delete_without_auth_minutely_three_phase(self):
         response = self.__api_client.delete(
             self.__minutely_three_phase)
 
         self.assertEqual(response.status_code,
-                         status.HTTP_401_UNAUTHORIZED)
+                         status.HTTP_405_METHOD_NOT_ALLOWED)
