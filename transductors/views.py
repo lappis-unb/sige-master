@@ -15,6 +15,8 @@ from django.http import Http404
 from .serializers import EnergyTransductorSerializer, \
     AddToServerSerializer, EnergyTransductorListSerializer
 
+from users.permissions import CurrentADMINUserOnly
+
 from django.utils import timezone
 
 from rest_framework import mixins
@@ -25,7 +27,7 @@ from django.db.models import Q
 class EnergyTransductorViewSet(viewsets.ModelViewSet):
     queryset = EnergyTransductor.objects
     serializer_class = EnergyTransductorSerializer
-    permission_classes = (permissions.AllowAny,)
+    permission_classes = (permissions.AllowAny | CurrentADMINUserOnly,) # Para testes de Admin, retirar os permissions.AllowAny
 
     def get_queryset(self): 
         campus_id = self.request.query_params.get('campus_id')
@@ -80,7 +82,8 @@ class EnergyTransductorListViewSet(viewsets.GenericViewSet,
                                    mixins.RetrieveModelMixin, 
                                    mixins.ListModelMixin):
     serializer_class = EnergyTransductorListSerializer
-
+    permission_classes = (permissions.AllowAny | CurrentADMINUserOnly,) # Para testes de Admin, retirar os permissions.AllowAny
+    
     def get_queryset(self):
         transductors = EnergyTransductor.objects.all()
         slaves = Slave.objects.all()
