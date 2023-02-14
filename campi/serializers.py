@@ -22,7 +22,10 @@ class CampusSerializer(serializers.HyperlinkedModelSerializer):
             'geolocation_longitude',
             'zoom_ratio',
             'groups_related',
-            'url'
+            'url',
+            'contract_type',
+            'off_peak_demand',
+            'peak_demand'
         )
 
     def get_groups_related(self, obj):
