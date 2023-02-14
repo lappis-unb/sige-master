@@ -1,9 +1,11 @@
 from django.db import models
-from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
-from utils import web_site_validator
-from utils import phone_validator
+
+CONTRACT_TYPE_OPTIONS = (
+    ('Verde', 'Verde'),
+    ('Azul', 'Azul')
+)
 
 
 class Campus(models.Model):
@@ -40,6 +42,28 @@ class Campus(models.Model):
         decimal_places=0,
         default=16,
         verbose_name=_('map zoom')
+    )
+
+    contract_type = models.CharField(
+        max_length=10, 
+        choices=CONTRACT_TYPE_OPTIONS,
+        default="Azul",
+        blank=True,
+        verbose_name=_('contract type')
+    )
+
+    off_peak_demand = models.FloatField(
+        default=0.0,
+        null=True,
+        blank=True,
+        verbose_name=_('off peak demand')
+    )
+
+    peak_demand = models.FloatField(
+        default=0.0,
+        null=True,
+        blank=True,
+        verbose_name=_('peak demand')
     )
 
     def __str__(self):
