@@ -1,7 +1,7 @@
 FROM python:3.6.2
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
+    apt-get install -y --force-yes --no-install-recommends \
                         libpq-dev \
                         cron \
                         locales \
