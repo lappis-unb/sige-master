@@ -1,16 +1,23 @@
-# Sistema de Monitoramento de Insumos da Universidade de Brasília - S.M.I.
+# Sistema de Gestão Energética da Universidade de Brasília - SIGE
 
 ## About
 
-The Sistema de Monitoramento de Insumos of the Universidade de Brasília (SMI-UnB), is a web application developed to assist in the monitoring and management of Universidade de Brasília's power consumption and distribution.
+The Energy Management System (Sistema de Gestão Energética SIGE-UnB) developed by Univerity of Brasilia (Brazil) in partnership with CEB (Companhia Energética de Brasília), is a web application developed to assist in the monitoring and management of Universidade de Brasília's power consumption and distribution.
 
 The idea is to monitor, collect and display data of each campus power supply, allowing a much better comprehension of the usage patterns and energy quality received from the distribution station.
 
-The system is divided into three main layers:
+The system is divided into four main layers:
 
-- the presentation layer, which holds the front-end of the application, including the dashboard for researchers.
-- the master layer, which is responsible for all the data management, data processing, and database redundancy.
-- the slave layer is responsible for the communication with energy transductors and data collection.
+- the **web presentation layer**, which holds the front-end of the application, including the dashboard for researchers.
+- the **mobile presentation layer**, which holds the PWA mobile version of the front-end of the application.
+- the **master server** layer, which is responsible for all the data management, data processing, and database redundancy.
+- the **slave server** layer is responsible for the communication with energy transductors and data collection.
+
+This reposotory holds the source code for the **master server** layer.
+
+## License
+
+All SIGE source code is licensed under [GPL v3](https://gitlab.com/lappis-unb/projects/SMI/smi-front/-/blob/development/LICENSE)
 
 ## Installation
 
@@ -79,3 +86,29 @@ sudo docker inspect slave-api
 You may create a transductor by sending a POST to '/energy_transductors/' ([shortcut](http://localhost:8001/energy_transductors/)).
 
 A created transductor is only registred locally on master server, for registering it to a slave server, POST to '/energy_transductors/(transductor's serial number)/add_to_server/' and the post's body must contain { "slave_id" : (target slave id) }.
+
+### Send push notifications 
+
+#### 1. Create a firebase project: 
+***If you already have an project then you can skip this step***
+
+After sign into your firebase console, follow the steps to create a new project.
+
+![Firebase console](images/Firebase_console.png)
+
+Add an app to our firebase project 
+
+![Add project to firebase console](images/add_project.png)
+
+After finished steps to add a project, go to configurations.
+
+![Go To configurations](images/firebase_configurations.png)
+
+At this point we'll need to get our server key to send push notifcations to this app
+
+![Server Key](images/server_key.png)
+
+Finally put the server key in [dev-env](https://gitlab.com/lappis-unb/projects/SMI/smi-master/-/blob/development/dev-env)
+as API_KEY. at this moment we already can send push notifications to our app!
+
+* We use [firebase topics](https://firebase.google.com/docs/cloud-messaging/android/topic-messaging), to manage who will reaceive notifcation, [Our topic](https://gitlab.com/lappis-unb/projects/SMI/smi-master/-/blob/development/events/models.py#L15) should the same of client.

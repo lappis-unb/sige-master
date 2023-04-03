@@ -14,6 +14,11 @@ router.register(
     RealTimeMeasurementViewSet,
     basename='realtime-measurements'
 )
+router.register(
+    r'tax',
+    TaxViewSet,
+    basename='tax'
+)
 
 graph_router = routers.DefaultRouter()
 
@@ -94,25 +99,43 @@ graph_router.register(
 )
 
 graph_router.register(
-    r'quarterly-consumption-peak',
-    ConsumptionPeakViewSet,
-    basename='quarterlyconsumptionpeak'
+    r'quarterly-daily-consumption',
+    DailyConsumptionViewSet,
+    basename='quarterlydailyconsumption'
 )
 
 graph_router.register(
-    r'quarterly-consumption-off-peak',
-    ConsumptionOffPeakViewSet,
-    basename='quarterlyconsumptionoffpeak'
+    r'consumption-curve',
+    ConsumptionCurveViewSet,
+    basename='consumptioncurve'
 )
 
 graph_router.register(
-    r'quarterly-generated-energy-peak',
-    GenerationPeakViewSet,
-    basename='quarterlygenerationpeak'
+    r'cost-consumption',
+    CostConsumptionViewSet,
+    basename='costconsumption'
 )
 
 graph_router.register(
-    r'quarterly-generated-energy-off-peak',
-    GenerationOffPeakViewSet,
-    basename='quarterlygenerationoffpeak'
+    r'quarterly-total-generation',
+    TotalGenerationViewSet,
+    basename='quarterlytotalgeneration'
+)
+
+graph_router.register(
+    r'quarterly-total-consumption',
+    TotalConsumptionViewSet,
+    basename='quarterlytotalconsumption'
+)
+
+graph_router.register(
+    r'quarterly-total-inductive-power',
+    TotalInductivePowerViewSet,
+    basename='quarterlytotalinductivepower'
+)
+
+graph_router.register(
+    r'quarterly-total-capacitive-power',
+    TotalCapacitivePowerViewSet,
+    basename='quarterlytotalcapacitivepower'
 )

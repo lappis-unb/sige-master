@@ -8,3 +8,9 @@ MASTER_SECRET_KEY=some-random-stuff
 ENVIRONMENT=development
 ALLOWED_HOSTS=*
 LIMIT_FILTER=1440
+API_KEY=server_api_key_firebase
+
+EMAIL_HOST_USER=unb.smi.master@gmail.com
+EMAIL_HOST_PASSWORD=g^C4bN4nTDL}obv+
+
+FRONT_URL=http://localhost:8080

@@ -1,4 +1,4 @@
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from rest_framework.exceptions import APIException
 from transductors.models import EnergyTransductor
@@ -10,41 +10,44 @@ class MeasurementParamsValidator():
 
     @staticmethod
     def get_fields():  
-        return [('serial_number', 
-                 MeasurementParamsValidator.validate_serial_number), 
+        return [('id', 
+                 MeasurementParamsValidator.validate_id), 
                 ('start_date', MeasurementParamsValidator.validate_start_date),
                 ('end_date', MeasurementParamsValidator.validate_end_date)]
 
     @staticmethod
-    def validate_query_params(params):
+    def validate_query_params(params, ignore=[]):
         fields = MeasurementParamsValidator.get_fields()
         errors = {}
         for field in fields:
-            try:
-                validation_function = field[1] 
-                param = params[field[0]]
-                validation_function(param)
+            if field[0] not in ignore:
+                try:
+                    validation_function = field[1] 
+                    param = params[field[0]]
+                    validation_function(param)
 
-            except KeyError:
-                errors[field[0]] = _('It must have an %s argument' % field[0])
-            except ValidationException as e:
-                errors[field[0]] = e
+                except KeyError:
+                    errors[field[0]] = _(
+                        'It must have an %s argument' % field[0]
+                    )
+                except ValidationException as e:
+                    errors[field[0]] = e
 
         exception = APIException(
             errors,
-            _('This serial_number does not match with any Transductor'),
+            _('This id does not match with any Transductor'),
         )
         exception.status_code = 400
         if len(errors) != 0:
             raise exception
 
     @staticmethod
-    def validate_serial_number(serial_number):
+    def validate_id(transductor_id):
         try:        
-            EnergyTransductor.objects.get(serial_number=serial_number)
+            EnergyTransductor.objects.get(id=transductor_id)
         except EnergyTransductor.DoesNotExist:
             raise ValidationException(
-                _('This serial_number does not match with any Transductor'),
+                _('This id does not match with any Transductor'),
             )
 
     @staticmethod

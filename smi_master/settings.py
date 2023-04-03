@@ -36,7 +36,7 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['file'],
-            'level': 'DEBUG',
+            'level': 'INFO',
             'propagate': True,
         },
     },
@@ -67,8 +67,10 @@ INSTALLED_APPS = [
     'users',
     'corsheaders',
     'events',
-    'rosetta',
     'groups',
+    'unifilar_diagram',
+    'django_rest_passwordreset',
+    'fcm_django',
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
@@ -88,7 +90,7 @@ MIDDLEWARE = [
 CORS_ORIGIN_ALLOW_ALL = True
 
 CORS_ALLOW_HEADERS = [
-    'content-disposition', 
+    'content-disposition',
     'accept-encoding',
     'content-type',
     'accept',
@@ -101,7 +103,7 @@ ROOT_URLCONF = 'smi_master.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -127,7 +129,7 @@ WSGI_APPLICATION = 'smi_master.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': env('POSTGRES_DB'),
         'USER': env('POSTGRES_USER'),
         'PASSWORD': env('POSTGRES_PASSWORD'),
@@ -136,6 +138,11 @@ DATABASES = {
     }
 }
 
+# if env('ENVIRONMENT') == 'development':
+#     DATABASES['default'] = {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#     }
 
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
@@ -192,7 +199,7 @@ LOCALE_PATHS = (os.path.join(BASE_DIR, 'locale/'),)
 
 USE_L10N = True
 
-# USE_TZ = True
+USE_TZ = False
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
@@ -232,5 +239,25 @@ MATERIAL_ADMIN_SITE = {
     # }
 }
 
-# debug configuration to view how emails are being sent
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+FCM_DJANGO_SETTINGS = {
+        "APP_VERBOSE_NAME": "[string for AppConfig's verbose_name]",
+         # default: _('FCM Django')
+        "FCM_SERVER_KEY": os.getenv('API_KEY'),
+         # true if you want to have only one active device per registered user at a time
+         # default: False
+         # devices to which notifications cannot be sent,
+         # are deleted upon receiving error response from FCM
+         # default: False
+        "DELETE_INACTIVE_DEVICES": True,
+}
+
+# Using temp gmail account
+EMAIL_HOST='smtp.gmail.com'
+EMAIL_HOST_USER=env('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD=env('EMAIL_HOST_PASSWORD')
+EMAIL_PORT=587
+EMAIL_USE_TLS=True
+
+FRONT_URL=env('FRONT_URL')
+
+REST_FRAMEWORK = { 'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema' }

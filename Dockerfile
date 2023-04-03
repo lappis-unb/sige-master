@@ -1,7 +1,7 @@
-FROM python:3.6
+FROM python:3.6.2
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
+    apt-get install -y --force-yes --no-install-recommends \
                         libpq-dev \
                         cron \
                         locales \
@@ -33,7 +33,7 @@ RUN chmod 0644 /etc/cron.d/smi-cron
 
 RUN /usr/bin/crontab /etc/cron.d/smi-cron
 
+RUN pip install --upgrade pip
+RUN pip install wheel
 RUN pip install --no-cache-dir -r requirements.txt
 
-CMD ['echo '======= RUNNING SEED'']
-CMD ['python', 'seed_db.py']

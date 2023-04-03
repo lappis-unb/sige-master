@@ -3,6 +3,10 @@ from rest_framework import serializers
 from .models import MinutelyMeasurement
 from .models import QuarterlyMeasurement
 from .models import MonthlyMeasurement
+from .models import EnergyTransductor
+from .models import Tax
+
+from django.db.models import Sum
 
 
 class MinutelyMeasurementSerializer(serializers.HyperlinkedModelSerializer):
@@ -103,6 +107,8 @@ class ThreePhaseSerializer(MinutelyMeasurementSerializer):
     >>> queryset = MinutelyMeasurement.objects.all()
         serializer_class = MinutelyApparentPowerThreePhase
     """
+    max = serializers.FloatField(default=0)
+    min = serializers.FloatField(default=0)
     phase_a = serializers.ListField(default=[])
     phase_b = serializers.ListField(default=[])
     phase_c = serializers.ListField(default=[])
@@ -112,6 +118,8 @@ class ThreePhaseSerializer(MinutelyMeasurementSerializer):
         fields = (
             'id',
             'transductor',
+            'max',
+            'min',
             'phase_a',
             'phase_b',
             'phase_c'
@@ -119,6 +127,8 @@ class ThreePhaseSerializer(MinutelyMeasurementSerializer):
 
 
 class MeasurementSerializer(MinutelyMeasurementSerializer):
+    max = serializers.FloatField(default=0)
+    min = serializers.FloatField(default=0)
     measurements = serializers.ListField(default=[])
 
     class Meta:
@@ -126,6 +136,8 @@ class MeasurementSerializer(MinutelyMeasurementSerializer):
         fields = (
             'id',
             'transductor',
+            'max',
+            'min',
             'measurements'
         )
 
@@ -142,6 +154,7 @@ class QuarterlySerializer(QuarterlyMeasurementSerializer):
 
 
 class RealTimeMeasurementSerializer(serializers.HyperlinkedModelSerializer):
+    consumption = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = MinutelyMeasurement
@@ -157,4 +170,28 @@ class RealTimeMeasurementSerializer(serializers.HyperlinkedModelSerializer):
                   'total_active_power',
                   'total_reactive_power',
                   'total_power_factor',
+                  'consumption',
                   'url')
+
+    def get_consumption(self, obj):
+        consumptions = ['consumption_peak_time', 'consumption_off_peak_time']
+        info = QuarterlyMeasurement.objects.filter(
+            transductor=EnergyTransductor.objects.get(
+                pk=self.__dict__['_args'][0].last().transductor_id
+            )
+        ).aggregate(
+            total_consumption=(Sum(consumptions[0]) + Sum(consumptions[1]))
+        )
+
+        return info['total_consumption']
+
+
+class TaxSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Tax
+        fields = (
+            'id',
+            'value_peak',
+            'value_off_peak',
+            'url'
+        )

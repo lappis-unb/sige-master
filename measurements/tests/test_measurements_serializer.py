@@ -1,6 +1,5 @@
 import sys
 import pytz
-import pytest
 
 from django.test import Client, TestCase
 from django.conf import settings
@@ -13,7 +12,6 @@ from rest_framework.request import Request
 from rest_framework.test import APIRequestFactory
 
 from campi.models import Campus
-from slaves.models import Slave
 from transductors.models import EnergyTransductor
 from measurements.models import MonthlyMeasurement
 from measurements.models import MinutelyMeasurement
@@ -23,10 +21,6 @@ from measurements.serializers import ThreePhaseSerializer
 
 class MeasurementsTestCase(TestCase):
     def setUp(self):
-        self.slave = Slave.objects.create(
-            ip_address="1.1.1.1", location="UED FGA", broken=False
-        )
-
         self.campus = Campus.objects.create(
             name='UnB - Faculdade Gama',
             acronym='FGA',
@@ -39,8 +33,6 @@ class MeasurementsTestCase(TestCase):
             firmware_version="0.1",
             campus=self.campus
         )
-
-        self.transductor.slave_servers.add(self.slave)
 
         self.time = datetime(2000, 1, 1, 1, 0, 0, 0)
 
@@ -85,12 +77,13 @@ class MeasurementsTestCase(TestCase):
         self.serializer_context = {"request": Request(self.request)}
 
     def test_should_get_active_power(self):
+        url = '/graph/minutely-active-power/?id='
+        url += str(self.transductor.id)
+        url += '&start_date=2000-01-01 00:00:00'
+        url += '&end_date=2000-01-01 23:59:00'
         self.assertEqual(
             self.client.get(
-                '/graph/minutely-active-power/'
-                '?serial_number=12345678'
-                '&start_date=2000-01-01 00:00:00'
-                '&end_date=2000-01-01 23:59:00'
+                url
             ).status_code,
             200)
 
@@ -104,6 +97,8 @@ class MeasurementsTestCase(TestCase):
                 [
                     "id",
                     "transductor",
+                    "min",
+                    "max",
                     "phase_a",
                     "phase_b",
                     "phase_c"

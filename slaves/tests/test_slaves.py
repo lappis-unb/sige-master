@@ -14,13 +14,13 @@ class TestSlavesModels(TestCase):
     def setUp(self):
         self.slave = Slave.objects.create(
             ip_address="1.1.1.1",
-            location="UED FGA",
+            name="UED FGA",
             broken=False
         )
 
         self.slave_1 = Slave.objects.create(
             ip_address="1.1.1.2",
-            location="UAC FGA",
+            name="UAC FGA",
             broken=False
         )
 
@@ -50,7 +50,7 @@ class TestSlavesModels(TestCase):
         slaves_before = len(Slave.objects.all())
         Slave.objects.create(
             ip_address="1.1.1.3",
-            location="MESP FGA",
+            name="MESP FGA",
             broken=False
         )
         slaves_after = len(Slave.objects.all())
@@ -66,21 +66,21 @@ class TestSlavesModels(TestCase):
         slave = Slave.objects.get(ip_address="1.1.1.1")
 
         original_ip_address = slave.ip_address
-        original_location = slave.location
+        original_name = slave.name
         original_broken = slave.broken
 
         slave.ip_address = "2.2.2.2"
-        slave.location = "FAU Darcy Ribeiro"
+        slave.name = "FAU Darcy Ribeiro"
         slave.broken = True
 
         slave.save()
 
         new_ip_address = slave.ip_address
-        new_location = slave.location
+        new_name = slave.name
         new_broken = slave.broken
 
         self.assertNotEqual(original_ip_address, new_ip_address)
-        self.assertNotEqual(original_location, new_location)
+        self.assertNotEqual(original_name, new_name)
         self.assertNotEqual(original_broken, new_broken)
 
     def test_should_update_a_speficic_slave_with_dns(self):

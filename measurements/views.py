@@ -1,17 +1,33 @@
 from django.utils import timezone
 import numpy as np
+import re
 import os
-from .lttb import downsample
+import csv
+import codecs
+from copy import copy
+import locale
+from dateutil import relativedelta
+from datetime import datetime, timedelta
 
 from django.db.models.query import QuerySet
 
 from rest_framework import serializers
 from rest_framework import viewsets
 from rest_framework import mixins
+from rest_framework import permissions
+
+from rest_framework.response import Response
 
 from rest_framework.exceptions import APIException
+from rest_framework.exceptions import NotAcceptable
+
+from rest_framework.decorators import api_view
 
 from transductors.models import EnergyTransductor
+
+from campi.models import Campus
+
+from groups.models import Group
 
 from measurements.utils import MeasurementParamsValidator
 
@@ -21,6 +37,7 @@ from .models import QuarterlyMeasurement
 from .models import MonthlyMeasurement
 from .models import RealTimeMeasurement
 from .models import EnergyTransductor
+from .models import Tax
 
 from .serializers import MeasurementSerializer
 from .serializers import ThreePhaseSerializer
@@ -29,6 +46,13 @@ from .serializers import QuarterlyMeasurementSerializer
 from .serializers import MonthlyMeasurementSerializer
 from .serializers import QuarterlySerializer
 from .serializers import RealTimeMeasurementSerializer
+from .serializers import TaxSerializer
+
+from django.http import StreamingHttpResponse
+from django.utils.translation import ugettext_lazy as _
+
+from .missing_values import get_measurements_with_missing_values
+from .lttb import downsample
 
 
 #  this viewset don't inherits from viewsets.ModelViewSet because it
@@ -54,16 +78,17 @@ class MeasurementViewSet(mixins.RetrieveModelMixin,
             end_date = end_date.strftime("%Y-%m-%d %H:%M:%S")
             params['end_date'] = str(end_date)
 
-        serial_number = self.request.query_params.get('serial_number')
-        if serial_number:
-            params['serial_number'] = serial_number
+        transductor_id = self.request.query_params.get('id')
+
+        if transductor_id:
+            params['id'] = transductor_id
         transductor = None
 
         MeasurementParamsValidator.validate_query_params(params)
 
         try:
             transductor = EnergyTransductor.objects.get(
-                serial_number=serial_number
+                id=transductor_id
             )
             self.queryset = self.model.objects.filter(
                 transductor=transductor,
@@ -105,74 +130,78 @@ class MinutelyMeasurementViewSet(MeasurementViewSet):
     def threephasic_measurement_collections(self, transductor):
         is_filtered = self.request.query_params.get('is_filtered')
 
-        if is_filtered == 'True':
-            list_a = self.apply_filter(self.fields[0])
-            list_b = self.apply_filter(self.fields[1])
-            list_c = self.apply_filter(self.fields[2])
-        else:
-            list_a = self.queryset.values_list(
-                self.fields[0], 'collection_date'
-            )
-            list_a = (
-                [
-                    [element[1].strftime('%m/%d/%Y %H:%M:%S'), element[0]]
-                    for element in list_a
-                ]
-            )
-            list_b = self.queryset.values_list(
-                self.fields[1], 'collection_date'
-            )
-            list_b = (
-                [
-                    [element[1].strftime('%m/%d/%Y %H:%M:%S'), element[0]]
-                    for element in list_b
-                ]
-            )
-            list_c = self.queryset.values_list(
-                self.fields[2], 'collection_date'
-            )
-            list_c = (
-                [
-                    [element[1].strftime('%m/%d/%Y %H:%M:%S'), element[0]]
-                    for element in list_c
-                ]
-            )
+        measurements_a = get_measurements_with_missing_values(
+            self.queryset.values(self.fields[0], 'collection_date'),
+            self.fields[0]
+        )
+        measurements_b = get_measurements_with_missing_values(
+            self.queryset.values(self.fields[1], 'collection_date'),
+            self.fields[1]
+        )
+        measurements_c = get_measurements_with_missing_values(
+            self.queryset.values(self.fields[2], 'collection_date'),
+            self.fields[2]
+        )
 
-        minutely_measurements = {}
-        minutely_measurements['transductor'] = transductor
-        minutely_measurements['phase_a'] = list_a
-        minutely_measurements['phase_b'] = list_b
-        minutely_measurements['phase_c'] = list_c
+        if is_filtered == 'True':
+            measurements_a = self._apply_filter(measurements_a)
+            measurements_b = self._apply_filter(measurements_b)
+            measurements_c = self._apply_filter(measurements_c)
+
+        limits_a = self._get_limits(measurements_a)
+        limits_b = self._get_limits(measurements_b)
+        limits_c = self._get_limits(measurements_c)
+
+        minutely_measurements = {
+            'transductor': transductor,
+            "min": min(
+                limits_a['min'],
+                limits_b['min'],
+                limits_c['min']
+            ),
+            "max": max(
+                limits_a['max'],
+                limits_b['max'],
+                limits_c['max']
+            ),
+            'phase_a': self._format_date_from_measurements(measurements_a),
+            'phase_b': self._format_date_from_measurements(measurements_b),
+            'phase_c': self._format_date_from_measurements(measurements_c)
+        }
 
         return [minutely_measurements]
 
     def simple_measurement_collections(self, transductor):
         is_filtered = self.request.query_params.get('is_filtered')
 
-        if is_filtered == 'True':
-            list_measurement = self.apply_filter(self.fields[0])
-        else:
-            list_measurement = self.queryset.values_list(
-                self.fields[0], 'collection_date'
-            )
+        measurements = get_measurements_with_missing_values(
+            self.queryset.values(self.fields[0], 'collection_date'),
+            self.fields[0]
+        )
 
-        minutely_measurements = {}
-        minutely_measurements['transductor'] = transductor
-        minutely_measurements['measurements'] = list_measurement
+        if is_filtered == 'True':
+            measurements = self._apply_filter(measurements)
+
+        limits = self._get_limits(measurements)
+
+        minutely_measurements = {
+            'transductor': transductor,
+            "min": limits['min'],
+            "max": limits['max'],
+            'measurements': self._format_date_from_measurements(measurements)
+        }
 
         return [minutely_measurements]
 
-    def apply_filter(self, value):
-        filtered_values = self.queryset.values(
-            value, 'collection_date'
-        )
+    def _apply_filter(self, measurements) -> list:
+        filtered_values = copy(measurements)
         indexes = range(len(filtered_values))
         filtered_values = (
             [
                 [
                     counter,
-                    item[value],
-                    timezone.datetime.timestamp(item['collection_date'])
+                    item[1],
+                    timezone.datetime.timestamp(item[0])
                 ]
                 for counter, item in zip(indexes, filtered_values)
             ]
@@ -186,8 +215,7 @@ class MinutelyMeasurementViewSet(MeasurementViewSet):
             [
                 [
                     timezone.datetime
-                    .utcfromtimestamp(item[2])
-                    .strftime('%m/%d/%Y %H:%M:%S'),
+                    .fromtimestamp(item[2]),
                     item[1]
                 ]
                 for item in filtered_values
@@ -196,108 +224,267 @@ class MinutelyMeasurementViewSet(MeasurementViewSet):
 
         return filtered_values
 
+    def _get_limits(self, measurements: list) -> dict:
+        limits = {
+            "min": 0,
+            "max": 0,
+        }
 
-class QuarterlyMeasurementViewSet(MeasurementViewSet):
+        if measurements and len(measurements):
+            limits['min'] = 1e9
+            for measurement in measurements:
+                measurement_value = measurement[1]
+                if measurement_value < limits['min'] and measurement_value > 0:
+                    limits['min'] = measurement_value
+                elif measurement_value > limits['max']:
+                    limits['max'] = measurement_value
+
+        return limits
+
+    def _format_date_from_measurements(self, measurements):
+        return [
+            [
+                measurement[0].strftime('%m/%d/%Y %H:%M:%S'),
+                measurement[1]
+            ] for measurement in measurements
+        ]
+        
+
+class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
+                                  mixins.DestroyModelMixin,
+                                  mixins.ListModelMixin,
+                                  viewsets.GenericViewSet):
     model = QuarterlyMeasurement
-    queryset = QuarterlyMeasurement.objects.none()
+    queryset = QuarterlyMeasurement.objects.all()
     serializer_class = QuarterlyMeasurementSerializer
+    fields = ['generated_energy_peak_time', 'generated_energy_off_peak_time']
+    information = 'generation'
 
-    # def get_queryset(self):
-    #     start_date = self.request.query_params.get('start_date')
-    #     end_date = self.request.query_params.get('end_date')
+    def list(self, request):
+        self.filter_queryset_by_date()
+        self.filter_queryset_by_campus()
+        self.filter_queryset_by_group()
+        self.filter_queryset_by_transductor()
 
-    #     params = [
-    #         {'name': 'start_date', 'value': start_date},
-    #         {'name': 'end_date', 'value': end_date}
-    #     ]
+        return Response(
+            self.mount_data_list(), 
+            status=200
+        )
 
-    #     validations.validate_query_params(params)
+    def filter_queryset_by_date(self):
+        date_params = self.get_date_params()
+        self.validate_date_params(date_params)
 
-    #     try:
-    #         self.queryset = self.model.objects.filter(
-    #             collection_date__gte=start_date,
-    #             collection_date__lte=end_date
-    #         ).order_by(
-    #             'collection_date'
-    #         )
-    #     except EnergyTransductor.DoesNotExist:
-    #         raise APIException(
-    #             'Serial number field does not match '
-    #             'any existent EnergyTransductor.'
-    #         )
-
-    #     return self.mount_data_list()
-
-    def mount_data_list(self, transductor=[]):
-        total_consumption_per_hour = []
-
-        for field in self.fields:
-            measurements = self.queryset.values(
-                field, 'collection_date'
+        self.queryset = self.queryset.filter(
+            collection_date__range=(
+                date_params['start_date'], 
+                date_params['end_date']
             )
+        )
 
-            if measurements:
-                total_consumption_per_hour = self.apply_algorithm(
-                    measurements,
-                    field
+    def get_date_params(self):
+        date_params = {}
+
+        start_date = self.request.query_params.get('start_date')
+        if start_date:
+            date_params['start_date'] = start_date
+        
+        end_date = self.request.query_params.get('end_date')
+        if end_date:
+            date_params['end_date'] = end_date
+        else:
+            end_date = timezone.now()
+            end_date = end_date.strftime("%Y-%m-%d %H:%M:%S")
+            date_params['end_date'] = str(end_date)
+
+        return date_params
+
+    def validate_date_params(self, date_params):
+        try:
+            MeasurementParamsValidator.validate_query_params(
+                date_params, ignore=['id']
+            )
+        except APIException as exception:
+            fields = exception.get_full_details()
+            if 'start_date' not in fields or 'end_date' not in fields:
+                raise exception
+
+    def filter_queryset_by_campus(self):
+        campus = self.request.query_params.get('campus')
+
+        # Filter queryset by campus only if campus is in query_params
+        if campus:
+            try:
+                campus = Campus.objects.get(
+                    pk=int(campus)
+                )
+                self.queryset = self.queryset.filter(
+                    transductor__campus__in=[campus]
+                )
+            except Campus.DoesNotExist:
+                raise APIException(
+                    'Campus id does not match with '
+                    'any existent campus.'
                 )
 
-        return total_consumption_per_hour
+    def filter_queryset_by_group(self):
+        group = self.request.query_params.get('group')
 
-    def apply_algorithm(self, measurements, field, transductor=[]):
+        # Filter queryset by group only if group is in query_params
+        if group:
+            try:
+                group = Group.objects.get(
+                    pk=int(group)
+                )
+                self.queryset = self.queryset.filter(
+                    transductor__grouping__in=[group]
+                )
+            except Group.DoesNotExist:
+                raise APIException(
+                    'Group id does not match with '
+                    'any existent group.'
+                )
+
+    def filter_queryset_by_transductor(self):
+        transductor_id = self.request.query_params.get('id')
+        
+        # Filter queryset by transductor only if id is in query_params
+        if transductor_id:
+            try:
+                transductor = EnergyTransductor.objects.get(
+                    pk=int(transductor_id)
+                )
+                self.queryset = self.queryset.filter(
+                    transductor=transductor
+                )
+            except EnergyTransductor.DoesNotExist:
+                raise APIException(
+                    'Transductor id does not match with '
+                    'any existent energy transductor'
+                )
+
+    def mount_data_list(self, transductor=[]):
+        data = {}
+        data[self.information] = []
+        data['min'] = 0
+        data['max'] = 0
+
+        measurements = self.queryset.order_by('collection_date').values(
+            self.fields[0], self.fields[1], 'collection_date'
+        )
+
+        if measurements:
+            response = self.apply_algorithm(measurements)
+            for value in response:
+                total = (value[1] + value[2])
+
+                if total > data['max']:
+                    data['max'] = total
+
+                data[self.information].append([value[0], total])
+
+        return data
+
+    def apply_algorithm(self, measurements, transductor=[]):
+        periodicity = self.request.query_params.get('type')
+
         measurements_list = (
             [
                 [
                     measurements[0]['collection_date'],
-                    measurements[0][field],
+                    0,
+                    0
                 ]
             ]
         )
 
-        for i in range(1, len(measurements) - 1):
+        if periodicity == 'hourly':
+            self.get_hourly_measurements(measurements, measurements_list)
+        elif periodicity == 'daily':
+            self.get_daily_measurements(measurements, measurements_list)
+        else:
+            measurements_list = []
+
+        return measurements_list
+
+    def get_hourly_measurements(self, measurements, measurements_list):
+        for i in range(0, len(measurements)):
             actual = measurements[i]['collection_date']
-            last = measurements[i - 1]['collection_date']
+            last = measurements_list[len(measurements_list) - 1][0]
 
-            if actual.minute < 15:
-                answer_hour = actual.hour
-            else:
-                answer_hour = actual.hour + 1
+            last_hour = (last.hour)
 
-            last_hour = measurements_list[len(measurements_list) - 1][0].hour
-
-            if answer_hour == last_hour:
-                measurements_list[len(measurements_list) - 1][1] += (
-                    measurements[i][field]
+            if actual.hour == last_hour:
+                self.build_data(
+                    actual, measurements, measurements_list, i
                 )
             else:
-                answer_date = timezone.datetime(
-                    actual.year, actual.month,
-                    actual.day, answer_hour, 0, 0
+                self.finish_data(
+                    actual, last, measurements, measurements_list, i
                 )
 
-                measurements_list[len(measurements_list) - 1][0] = (
-                    measurements_list[len(measurements_list) - 1][0]
-                    .strftime('%m/%d/%Y %H:%M:%S')
+            last = measurements_list[len(measurements_list) - 1][0]
+            measurements_list[len(measurements_list) - 1][0] = (
+                timezone.datetime(
+                    last.year, last.month, last.day,
+                    last.hour, 0, 0
                 )
-                measurements_list.append(
-                    [
-                        answer_date,
-                        measurements[i][field],
-                    ]
-                )
+            )
 
+    def get_daily_measurements(self, measurements, measurements_list):
+        for i in range(0, len(measurements) - 1):
+            actual = measurements[i]['collection_date']
+            last = measurements_list[len(measurements_list) - 1][0]
+
+            last_day = (last.day)
+
+            if actual.day == last_day:
+                self.build_data(
+                    actual, measurements, measurements_list, i
+                )
+            else:
+                last = last.replace(hour=0)
+                self.finish_data(
+                    actual, last, measurements, measurements_list, i
+                )
+            
+            last = measurements_list[len(measurements_list) - 1][0]
+            measurements_list[len(measurements_list) - 1][0] = (
+                timezone.datetime(
+                    last.year, last.month, last.day,
+                    0, 0, 0
+                )
+            )
+
+    def build_data(
+        self, actual, measurements, measurements_list, index
+    ):
         measurements_list[len(measurements_list) - 1][0] = (
-            measurements_list[len(measurements_list) - 1][0]
-            .strftime('%m/%d/%Y %H:%M:%S')
+            measurements[index]['collection_date']
+        )
+        measurements_list[len(measurements_list) - 1][1] += \
+            measurements[index][self.fields[1]]
+
+    def finish_data(self, actual, last, measurements, measurements_list, index):
+        answer_date = timezone.datetime(
+            actual.year, actual.month,
+            actual.day, actual.hour, 0, 0
         )
 
-        quarterly_measurements = {}
-        quarterly_measurements['measurements'] = measurements_list
+        measurements_list[len(measurements_list) - 1][0] = (
+            timezone.datetime(
+                last.year, last.month, last.day,
+                last.hour, 0, 0
+            )
+        )
 
-        if transductor != []:
-            quarterly_measurements['transductor'] = transductor
-
-        return [quarterly_measurements]
+        measurements_list.append(
+            [
+                answer_date,
+                measurements[index][self.fields[1]],
+                0
+            ]
+        )
 
 
 class MonthlyMeasurementViewSet(MeasurementViewSet):
@@ -403,49 +590,467 @@ class FrequencyViewSet(MinutelyMeasurementViewSet):
     fields = ['frequency_a']
 
 
-class ConsumptionPeakViewSet(QuarterlyMeasurementViewSet):
-    serializer_class = QuarterlySerializer
-    fields = ['consumption_peak_time']
-
-
-class ConsumptionOffPeakViewSet(QuarterlyMeasurementViewSet):
-    serializer_class = QuarterlySerializer
-    fields = ['consumption_off_peak_time']
-
-
-class GenerationPeakViewSet(QuarterlyMeasurementViewSet):
-    serializer_class = QuarterlySerializer
-    fields = ['generated_energy_peak_time']
-
-
-class GenerationOffPeakViewSet(QuarterlyMeasurementViewSet):
-    serializer_class = QuarterlySerializer
-    fields = ['generated_energy_off_peak_time']
-
-
-class TotalConsumtionViewSet(QuarterlyMeasurementViewSet):
+class TotalConsumptionViewSet(QuarterlyMeasurementViewSet):
     serializer_class = QuarterlySerializer
     fields = ['consumption_peak_time', 'consumption_off_peak_time']
+    information = 'consumption'
+
+
+class TotalGenerationViewSet(QuarterlyMeasurementViewSet):
+    serializer_class = QuarterlySerializer
+    fields = ['generated_energy_peak_time', 'generated_energy_off_peak_time']
+    information = 'generation'
+
+
+class TotalInductivePowerViewSet(QuarterlyMeasurementViewSet):
+    serializer_class = QuarterlySerializer
+    fields = ['inductive_power_peak_time', 'inductive_power_off_peak_time']
+    information = 'inductive_power'
+
+
+class TotalCapacitivePowerViewSet(QuarterlyMeasurementViewSet):
+    serializer_class = QuarterlySerializer
+    fields = ['capacitive_power_peak_time', 'capacitive_power_off_peak_time']
+    information = 'capacitive_power'
+
+
+class DailyConsumptionViewSet(QuarterlyMeasurementViewSet):
+    serializer_class = QuarterlySerializer
+    fields = ['consumption_peak_time', 'consumption_off_peak_time']
+
+    def mount_data_list(self, transductor=[]):
+        total_consumption_per_hour = []
+        response = [0] * 24
+
+        for field in self.fields:
+            measurements = self.queryset.values(
+                field, 'collection_date'
+            )
+
+            if measurements:
+                total_consumption_per_hour = self.apply_algorithm(
+                    measurements,
+                    field
+                )
+                for measurement in total_consumption_per_hour:
+                    position = int(
+                        re.search('([ ][0-9]+)', measurement[0]).group(0)
+                    )
+                    response[position] = measurement[1]
+
+        return response
+
+
+class ConsumptionCurveViewSet(QuarterlyMeasurementViewSet):
+    serializer_class = QuarterlySerializer
+    fields = ['consumption_peak_time', 'consumption_off_peak_time']
+
+    def mount_data_list(self, transductor=[]):
+        consumption = []
+
+        start_date = self.request.query_params.get('start_date')
+        end_date = self.request.query_params.get('end_date')
+        campus = self.request.query_params.get('campus')
+        group = self.request.query_params.get('group')
+        period = self.request.query_params.get('period')
+
+        if end_date is None:
+            end_date = timezone.now()
+            end_date = end_date.strftime("%Y-%m-%d %H:%M:%S")
+
+        start_date_compare = datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S")
+        end_date_compare = datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")
+        delta = relativedelta.relativedelta(
+            end_date_compare,
+            start_date_compare
+        )
+
+        # The start_date and end_date in request.
+        # query_params have to be the same day
+        if(self.request.query_params.get('period') == 'hourly'):
+            consumption = self.hourly_consumption_format()
+        elif(self.request.query_params.get('period') == 'daily'):
+            consumption = self.daily_consumption_format(
+                delta,
+                start_date_compare
+            )
+        elif(self.request.query_params.get('period') == 'monthly'):
+            consumption = self.monthly_consumption_format(
+                delta,
+                start_date_compare
+            )
+
+        return consumption
+
+    def hourly_consumption_format(self):
+        hourly_consumption = {}
+
+        for i in range(24):
+            hourly_consumption[str(i) + 'h'] = 0
+
+        for field in self.fields:
+            measurements = self.queryset.values(
+                field, 'collection_date'
+            )
+            for measurement in measurements:
+                hour = measurement['collection_date'].hour
+                hourly_consumption[str(hour) + 'h'] += measurement[field]
+
+        return hourly_consumption
+
+    def daily_consumption_format(self, delta, start_date):
+        daily_consumption = {}
+        current_date = start_date
+
+        for i in range(abs(int(delta.days)) + 1):
+            daily_consumption[str(current_date.strftime('%d/%m/%y'))] = 0
+            current_date = current_date + timedelta(days=1)
+
+        for field in self.fields:
+            measurement = measurements = self.queryset.values(
+                field, 'collection_date'
+            )
+            for measurement in measurements:
+                day = str(measurement['collection_date'].strftime('%d/%m/%y'))
+                daily_consumption[day] += measurement[field]
+
+        return daily_consumption
+
+    def monthly_consumption_format(self, delta, start_date):
+        monthly_consumption = {}
+        current_date = start_date
+
+        for i in range(abs(int(delta.months)) + 1):
+            monthly_consumption[str(current_date.strftime('%m/%y'))] = 0
+            current_date = current_date + relativedelta.relativedelta(months=1)
+
+        for field in self.fields:
+            measurement = measurements = self.queryset.values(
+                field, 'collection_date'
+            )
+            for measurement in measurements:
+                month = str(measurement['collection_date'].strftime('%m/%y'))
+                monthly_consumption[month] += measurement[field]
+
+        return monthly_consumption
+
+
+class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
+    serializer_class = QuarterlySerializer
+    fields = ['consumption_peak_time', 'consumption_off_peak_time']
+
+    def mount_data_list(self, transductor=[]):
+        data = {}
+        data['cost'] = []
+        data['min'] = 0
+        data['max'] = 0
+
+        measurements = self.queryset.order_by('collection_date').values(
+            self.fields[0], self.fields[1], 'collection_date',
+            'tax__value_peak', 'tax__value_off_peak'
+        )
+
+        if measurements:
+            response = self.apply_algorithm(
+                measurements
+            )
+
+            for value in response:
+                total_cost = (value[1] + value[2]) / 1000
+
+                if total_cost > data['max']:
+                    data['max'] = total_cost
+
+                data['cost'].append([value[0], total_cost])
+
+        return data
+
+    def apply_algorithm(self, measurements, transductor=[]):
+        type = self.request.query_params.get('type')
+
+        measurements_list = (
+            [
+                [
+                    measurements[0]['collection_date'],
+                    0,
+                    0
+                ]
+            ]
+        )
+
+        if type == 'daily':
+            for i in range(0, len(measurements)):
+                actual = measurements[i]['collection_date']
+
+                last_day = (
+                    measurements_list[len(measurements_list) - 1][0].day
+                )
+
+                if actual.day == last_day:
+                    self.build_data(
+                        actual, measurements, measurements_list, i
+                    )
+                else:
+                    self.finish_data(
+                        actual, measurements, measurements_list, i, type
+                    )
+
+            last = measurements_list[len(measurements_list) - 1][0]
+            measurements_list[len(measurements_list) - 1][0] = (
+                timezone.datetime(
+                    last.year, last.month, last.day,
+                    0, 0, 0
+                ).strftime('%m/%d/%Y %H:%M:%S')
+            )
+        elif type == 'monthly':
+            for i in range(0, len(measurements) - 1):
+                actual = measurements[i]['collection_date']
+
+                last_month = (
+                    measurements_list[len(measurements_list) - 1][0].month
+                )
+
+                if actual.month == last_month:
+                    self.build_data(
+                        actual, measurements, measurements_list, i
+                    )
+                else:
+                    self.finish_data(
+                        actual, measurements, measurements_list, i, type
+                    )
+
+            last = measurements_list[-1][0]
+            measurements_list[-1][0] = (
+                timezone.datetime(
+                    last.year, last.month, 1,
+                    0, 0, 0
+                ).strftime('%m/%d/%Y %H:%M:%S')
+            )
+        elif type == 'yearly':
+            for i in range(0, len(measurements)):
+                actual = measurements[i]['collection_date']
+
+                last_year = (
+                    measurements_list[-1][0].year
+                )
+
+                if actual.year == last_year:
+                    self.build_data(
+                        actual, measurements, measurements_list, i
+                    )
+                else:
+                    self.finish_data(
+                        actual, measurements, measurements_list, i, type
+                    )
+
+            last = measurements_list[-1][0]
+            measurements_list[-1][0] = (
+                timezone.datetime(
+                    last.year, 1, 1,
+                    0, 0, 0
+                ).strftime('%m/%d/%Y %H:%M:%S')
+            )
+        else:
+            measurements_list = []
+
+        return measurements_list
+
+    def build_data(
+            self, actual, measurements, measurements_list, index
+    ):
+        measurements_list[-1][0] = (
+            measurements[index]['collection_date']
+        )
+        if actual.hour in range(0, 17) \
+           or actual.hour in range(21, 23):
+            value_off_peak = measurements[index]['tax__value_off_peak']
+            measurements_list[-1][1] += \
+                measurements[index][self.fields[1]] \
+                * value_off_peak if value_off_peak else 1
+        else:
+            value_peak = measurements[index]['tax__value_peak']
+            measurements_list[-1][2] += \
+                measurements[index][self.fields[0]] \
+                * value_peak if value_peak else 1
+
+    def finish_data(
+            self, actual, measurements, measurements_list, index, type
+    ):
+        answer_date = timezone.datetime(
+            actual.year, actual.month,
+            actual.day, actual.hour, 0, 0
+        )
+
+        last = measurements_list[len(measurements_list) - 1][0]
+
+        if type == 'daily':
+            measurements_list[-1][0] = (
+                timezone.datetime(
+                    last.year, last.month, last.day,
+                    0, 0, 0
+                ).strftime('%m/%d/%Y %H:%M:%S')
+            )
+        elif type == 'monthly':
+            measurements_list[-1][0] = (
+                timezone.datetime(
+                    last.year, last.month, 1,
+                    0, 0, 0
+                ).strftime('%m/%d/%Y %H:%M:%S')
+            )
+        elif type == 'yearly':
+            measurements_list[-1][0] = (
+                timezone.datetime(
+                    last.year, 1, 1,
+                    0, 0, 0
+                ).strftime('%m/%d/%Y %H:%M:%S')
+            )
+
+        if actual.hour in range(0, 17) \
+           or actual.hour in range(21, 23):
+            value_off_peak = measurements[index]['tax__value_off_peak']
+            measurements_list.append(
+                [
+                    answer_date,
+                    measurements[index][self.fields[1]] * (
+                        value_off_peak if value_off_peak else 1
+                    ),
+                    0
+                ]
+            )
+        else:
+            value_peak = measurements[index]['tax__value_peak']
+            measurements_list.append(
+                [
+                    answer_date,
+                    0,
+                    measurements[index][self.fields[0]] * (
+                        value_peak if value_peak else 1
+                    )
+                ]
+            )
 
 
 class RealTimeMeasurementViewSet(MeasurementViewSet):
     serializer_class = RealTimeMeasurementSerializer
 
     def get_queryset(self):
-        serial_number = self.request.query_params.get('serial_number')
-        if serial_number:
+        transductor_id = self.request.query_params.get('id')
+        if transductor_id:
             try:
                 transductor = EnergyTransductor.objects.get(
-                    serial_number=serial_number)
+                    id=transductor_id)
                 queryset = RealTimeMeasurement.objects.filter(
                     transductor=transductor)
             except Exception:
                 exception = APIException(
-                    serial_number,
-                    _('This serial_number does not match with any Transductor'),
+                    transductor_id,
+                    _('This id does not match with any Transductor'),
                 )
                 exception.status_code = 400
                 raise exception
         else:
-            queryset = RealTimeMeasurement.objects.all()
+            queryset = RealTimeMeasurement.objects.select_related(
+                'transductor'
+            ).all()
+
         return queryset
+
+
+class Echo:
+    def write(self, value):
+        return value
+
+
+class MeasurementResults(mixins.RetrieveModelMixin,
+                         mixins.ListModelMixin,
+                         viewsets.GenericViewSet):
+    @api_view(['GET'])
+    def mount_csv_measurement(request):
+        class_name = request.query_params.get('class_name')
+        fields = request.query_params.get('fields')
+        start_date = request.query_params.get('start_date')
+
+        queryset = None
+
+        if class_name == 'minutely':
+            queryset = MeasurementResults.build_csv(
+                request, MinutelyMeasurement, fields, start_date
+            )
+        elif class_name == 'quarterly':
+            queryset = MeasurementResults.build_csv(
+                request, QuarterlyMeasurement, fields, start_date
+            )
+        elif class_name == 'monthly':
+            queryset = MeasurementResults.build_csv(
+                request, MonthlyMeasurement, fields, start_date
+            )
+
+        if queryset:
+            pseudo_buffer = Echo()
+            pseudo_buffer.write(codecs.BOM_UTF8)
+
+            writer = csv.writer(pseudo_buffer)
+            response = StreamingHttpResponse(
+                (writer.writerow(measurement) for measurement in queryset),
+                content_type='text/csv'
+            )
+            response['Content-Disposition'] = (
+                'attachment; filename="measurement_dataset.csv"'
+            )
+            response['Content-Transfer-Encoding'] = 'binary'
+
+            return response
+        else:
+            exception = APIException(
+                'Class name was not specified in request params.'
+            )
+            exception.status_code = 400
+            raise exception
+
+    @staticmethod
+    def build_csv(request, class_name, fields, start_date):
+        all_fields = {
+            measurement.name: measurement.verbose_name
+            for measurement in class_name._meta.get_fields()
+        }
+
+        if start_date is None:
+            raise NotAcceptable(
+                'Start date param is needed to create the csv file.'
+            )
+
+        if fields is not None:
+            columns = fields.split(',')
+        else:
+            columns = []
+
+        queryset = list(
+            class_name.objects.filter(
+                collection_date__gte=start_date
+            ).values_list(*columns)
+        )
+
+        if columns:
+            queryset.insert(
+                0,
+                [
+                    all_fields[column] for column in columns
+                    if column in all_fields
+                ]
+            )
+        else:
+            queryset.insert(
+                0,
+                [
+                    measurement.verbose_name
+                    for measurement in class_name._meta.get_fields()
+                ]
+            )
+
+        return queryset
+
+
+class TaxViewSet(viewsets.ModelViewSet):
+    queryset = Tax.objects.all()
+    serializer_class = TaxSerializer
+    permission_classes = (permissions.AllowAny,)

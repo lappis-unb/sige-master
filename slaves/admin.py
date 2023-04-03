@@ -15,7 +15,7 @@ class SlaveAdmin(admin.ModelAdmin):
         'broken',
         'ip_address',
         'port',
-        'location',
+        'name',
     )
 
     list_filter = (
