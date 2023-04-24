@@ -83,9 +83,9 @@ sudo docker inspect slave-api
 
 ### Creating a transductor
 
-You may create a transductor by sending a POST to '/energy_transductors/' ([shortcut](http://localhost:8001/energy_transductors/)).
+You may create a transductor by sending a POST to '/energy-transductors/' ([shortcut](http://localhost:8001/energy-transductors/)).
 
-A created transductor is only registred locally on master server, for registering it to a slave server, POST to '/energy_transductors/(transductor's serial number)/add_to_server/' and the post's body must contain { "slave_id" : (target slave id) }.
+A created transductor is only registred locally on master server, for registering it to a slave server, POST to '/energy-transductors/(transductor's serial number)/add_to_server/' and the post's body must contain { "slave_id" : (target slave id) }.
 
 ### Send push notifications 
 
