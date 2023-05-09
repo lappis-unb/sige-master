@@ -27,7 +27,8 @@ from django.db.models import Q
 class EnergyTransductorViewSet(viewsets.ModelViewSet):
     queryset = EnergyTransductor.objects
     serializer_class = EnergyTransductorSerializer
-    permission_classes = (permissions.AllowAny | CurrentADMINUserOnly,) # Para testes de Admin, retirar os permissions.AllowAny
+    # Para testes de Admin, retirar os permissions.AllowAny
+    permission_classes = (permissions.AllowAny | CurrentADMINUserOnly,) 
 
     def get_queryset(self): 
         campus_id = self.request.query_params.get('campus_id')
@@ -82,7 +83,8 @@ class EnergyTransductorListViewSet(viewsets.GenericViewSet,
                                    mixins.RetrieveModelMixin, 
                                    mixins.ListModelMixin):
     serializer_class = EnergyTransductorListSerializer
-    permission_classes = (permissions.AllowAny | CurrentADMINUserOnly,) # Para testes de Admin, retirar os permissions.AllowAny
+    # Para testes de Admin, retirar os permissions.AllowAny
+    permission_classes = (permissions.AllowAny | CurrentADMINUserOnly,) 
     
     def get_queryset(self):
         transductors = EnergyTransductor.objects.all()

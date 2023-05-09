@@ -11,10 +11,12 @@ from users.permissions import CurrentADMINUserOnly
 class GroupViewSet(viewsets.ModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
-    permission_classes = (permissions.AllowAny | CurrentADMINUserOnly,) # Para testes de Admin, retirar os permissions.AllowAny
+    # Para testes de Admin, retirar os permissions.AllowAny
+    permission_classes = (permissions.AllowAny | CurrentADMINUserOnly,)
 
 
 class GroupTypeViewSet(viewsets.ModelViewSet):
     queryset = GroupType.objects.all()
     serializer_class = GroupTypeSerializer
-    permission_classes = (permissions.AllowAny | CurrentADMINUserOnly,) # Para testes de Admin, retirar os permissions.AllowAny
+    # Para testes de Admin, retirar os permissions.AllowAny
+    permission_classes = (permissions.AllowAny | CurrentADMINUserOnly,)
