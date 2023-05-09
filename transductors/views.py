@@ -69,7 +69,7 @@ class EnergyTransductorViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def status_code_is_not_204(self, instance):
-        return self.delete(instance).status_code is not 204
+        return self.delete(instance).status_code != 204
 
     def delete(self, instance):
         return delete_transductor(
