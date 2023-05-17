@@ -1,12 +1,34 @@
+# config and logs
 venv/*
-
-# Any pycache related
-__pycache__
-*/__pycache__/*
-*/migrations/__pycache__/*
-*/tests/__pycache__/*
-*.pyc
-node_modules/
+.env
+.env.*
 .vscode
 .pytest_cache
 *.log
+
+# Python files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Django files
+*.py~
+db.sqlite3
+*.sqlite3
+media
+static
+__pycache__
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Migrações do Django
+**/migrations/*.py
+**/migrations/*.pyc
+**/migrations/*/__pycache__
+
+# Any pycache related
+*/tests/__pycache__/*
+

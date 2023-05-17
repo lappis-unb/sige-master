@@ -1,4 +1,5 @@
 from rest_framework import permissions
+
 from .models import CustomUser
 
 
@@ -14,10 +15,9 @@ class UserTypePermission(permissions.BasePermission):
         #   return False
 
         try:
-            
             type_user = self.get_type_user()
 
-            userid = request.data['userid']
+            userid = request.data["userid"]
             user = CustomUser.objects.get(id=userid)
             # user = request.user
             return user.user_type == type_user
@@ -32,14 +32,14 @@ class UserTypePermission(permissions.BasePermission):
 
 class CurrentADMINUserOnly(UserTypePermission):
     def get_type_user(self):
-        return 'admin'
+        return "admin"
 
 
 class CurrentRESEARCHNUserOnly(UserTypePermission):
     def get_type_user(self):
-        return 'researcher'
+        return "researcher"
 
 
 class CurrentGENERALUserOnly(UserTypePermission):
     def get_type_user(self):
-        return 'general'
+        return "general"

@@ -1,28 +1,23 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets
-from rest_framework import permissions
+from rest_framework import permissions, viewsets
+
+from users.permissions import CurrentADMINUserOnly
 
 from .models import Campus, Tariff
 from .serializers import CampusSerializer, TariffSerializer
-from users.permissions import CurrentADMINUserOnly
 
 
 class CampusViewSet(viewsets.ModelViewSet):
     queryset = Campus.objects.all()
     serializer_class = CampusSerializer
-    # Para testes de Admin, retirar os permissions.AllowAny
     permission_classes = (permissions.AllowAny | CurrentADMINUserOnly,)
 
 
 class TariffViewSet(viewsets.ModelViewSet):
     queryset = Tariff.objects.all()
     serializer_class = TariffSerializer
-    # Para testes de Admin, retirar os permissions.AllowAny
     permission_classes = (permissions.AllowAny | CurrentADMINUserOnly,)
 
     def get_queryset(self):
-        campus = get_object_or_404(
-            Campus,
-            pk=self.kwargs['campi_pk']
-        )
+        campus = get_object_or_404(Campus, pk=self.kwargs["campi_pk"])
         return Tariff.objects.filter(campus=campus)

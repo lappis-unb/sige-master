@@ -1,45 +1,37 @@
 from django.db import models
+
 # from django.conf import settings
 from django.utils import timezone
-from django.core.validators import RegexValidator
-from django.contrib.postgres.fields import JSONField
 from django.utils.translation import gettext_lazy as _
-
 from polymorphic.models import PolymorphicModel
 
 from slaves.models import Slave
 from transductors.models import EnergyTransductor
 
-from fcm_django.fcm import fcm_send_topic_message
+# from fcm_django.fcm import fcm_send_topic_message
 
-TOPIC_NAME = 'ALL'
+TOPIC_NAME = "ALL"
 
 
 class Event(PolymorphicModel):
     """
     Defines a new event object
     """
+
     # settings.USE_TZ = False
-    ended_at = models.DateTimeField(
-        null=True,
-        blank=True,
-        verbose_name=_('ended at')
-    )
+    ended_at = models.DateTimeField(null=True, blank=True, verbose_name=_("ended at"))
     created_at = models.DateTimeField(
         default=timezone.now,
-        verbose_name=_('created at'),
+        verbose_name=_("created at"),
     )
-    data = JSONField(
-        default=dict,
-        verbose_name=_('details'),
-        help_text=_('This field is required')
-    )
+    data = models.JSONField(default=dict, verbose_name=_("details"), help_text=_("This field is required"))
 
     class Meta:
-        verbose_name = _('event')
+        verbose_name = _("event")
+        verbose_name = _("event")
 
     def __str__(self):
-        return '%s@%s' % (self.__class__.__name__, self.created_at)
+        return "%s@%s" % (self.__class__.__name__, self.created_at)
 
     def save_event(self):
         """
@@ -59,105 +51,99 @@ class VoltageRelatedEvent(Event):
         on_delete=models.CASCADE,
         blank=False,
         null=False,
-        verbose_name=_('meter'),
-        help_text=_('This field is required')
+        verbose_name=_("meter"),
+        help_text=_("This field is required"),
     )
 
     class Meta:
-        verbose_name = _('voltage related')
+        verbose_name = _("voltage related")
 
     def save_event(self, transductor, event_dict):
         """
         Saves a failed connection event related to a transductor
         """
         self.transductor = transductor
-        self.data = event_dict['data']
-        self.created_at = event_dict['created_at']
-        self.ended_at = event_dict['ended_at']
+        self.data = event_dict["data"]
+        self.created_at = event_dict["created_at"]
+        self.ended_at = event_dict["ended_at"]
         self.save()
 
-        body = self.transductor.name + '\n'
+        body = self.transductor.name + "\n"
         counter = 0
 
-        if self.__class__.__name__ == 'PhaseDropEvent':
+        if self.__class__.__name__ == "PhaseDropEvent":
             for key, value in self.data.items():
-                body += 'Fase ' + key[-1].upper()
+                body += "Fase " + key[-1].upper()
                 counter += 1
                 if counter < len(self.data):
-                    body += ', '
+                    body += ", "
         else:
             for key, value in self.data.items():
-                body += key[-1].upper() + ' - ' + str(value) + 'V'
+                body += key[-1].upper() + " - " + str(value) + "V"
                 counter += 1
                 if counter < len(self.data):
-                    body += ', '
+                    body += ", "
 
-        fcm_send_topic_message(
-            topic_name=TOPIC_NAME,
-            data_message={
-                'title': str(self._meta.verbose_name).capitalize(),
-                'body': body,
-                'transducer': self.pk
-            }
-        )
-        return self
+        # fcm_send_topic_message(
+        #     topic_name=TOPIC_NAME,
+        #     data_message={"title": str(self._meta.verbose_name).capitalize(), "body": body, "transducer": self.pk},
+        # )
+        # return self
 
 
 class FailedConnectionTransductorEvent(Event):
     """
     Defines a new event related to a failed connection with a transductor
     """
+
     transductor = models.ForeignKey(
         EnergyTransductor,
         related_name="%(app_label)s_%(class)s",
         on_delete=models.CASCADE,
         blank=False,
         null=False,
-        verbose_name=_('meter'),
-        help_text=_('This field is required')
+        verbose_name=_("meter"),
+        help_text=_("This field is required"),
     )
 
     class Meta:
-        verbose_name = _('failed connection with meter')
+        verbose_name = _("failed connection with meter")
 
     def save_event(self, transductor, event_dict):
         """
         Saves a failed connection event related to a transductor
         """
         self.transductor = transductor
-        self.data = event_dict['data']
-        self.created_at = event_dict['created_at']
-        self.ended_at = event_dict['ended_at']
+        self.data = event_dict["data"]
+        self.created_at = event_dict["created_at"]
+        self.ended_at = event_dict["ended_at"]
         self.save()
         body = self.transductor.name
 
-        fcm_send_topic_message(
-            topic_name=TOPIC_NAME,
-            data_message={
-                'title': str(self._meta.verbose_name).capitalize(),
-                'body': body,
-                'transducer': self.pk
-            }
-        )
-        return self
+        # fcm_send_topic_message(
+        #     topic_name=TOPIC_NAME,
+        #     data_message={"title": str(self._meta.verbose_name).capitalize(), "body": body, "transducer": self.pk},
+        # )
+        # return self
 
 
 class FailedConnectionSlaveEvent(Event):
     """
     Defines a new event related to a failed connection with a slave
     """
+
     slave = models.ForeignKey(
         Slave,
         related_name="%(app_label)s_%(class)s",
         on_delete=models.CASCADE,
         blank=False,
         null=False,
-        verbose_name=_('slave'),
-        help_text=_('This field is required')
+        verbose_name=_("slave"),
+        help_text=_("This field is required"),
     )
 
     class Meta:
-        verbose_name = _('failed connection with slave server')
+        verbose_name = _("failed connection with slave server")
 
     def save_event(self, slave):
         """
@@ -177,7 +163,7 @@ class CriticalVoltageEvent(VoltageRelatedEvent):
     """
 
     class Meta:
-        verbose_name = _('critical voltage')
+        verbose_name = _("critical voltage")
 
 
 class PrecariousVoltageEvent(VoltageRelatedEvent):
@@ -186,7 +172,7 @@ class PrecariousVoltageEvent(VoltageRelatedEvent):
     """
 
     class Meta:
-        verbose_name = _('precarious voltage')
+        verbose_name = _("precarious voltage")
 
 
 class PhaseDropEvent(VoltageRelatedEvent):
@@ -195,17 +181,15 @@ class PhaseDropEvent(VoltageRelatedEvent):
     """
 
     class Meta:
-        verbose_name = _('phase drop')
+        verbose_name = _("phase drop")
 
 
 class ConsumptionRelatedEvent(Event):
     """
     Defines a generic event related to consumption event types
     """
-    consumption = models.FloatField(
-        default=0.0,
-        verbose_name=_('consumption related')
-    )
+
+    consumption = models.FloatField(default=0.0, verbose_name=_("consumption related"))
 
 
 class ConsumptionPeakEvent(ConsumptionRelatedEvent):
@@ -214,7 +198,7 @@ class ConsumptionPeakEvent(ConsumptionRelatedEvent):
     """
 
     class Meta:
-        verbose_name = _('consumption peak')
+        verbose_name = _("consumption peak")
 
 
 class ConsumptionAboveContract(ConsumptionRelatedEvent):
@@ -224,4 +208,4 @@ class ConsumptionAboveContract(ConsumptionRelatedEvent):
     """
 
     class Meta:
-        verbose_name = _('consumption above contracted threshold')
+        verbose_name = _("consumption above contracted threshold")
