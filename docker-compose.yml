@@ -1,37 +1,46 @@
-version: '3.5'
+version: '3.9'
 services:
     master-db:
-        container_name: master-db
-        restart: always
-        image: postgres:9.6
-        ports:
-            - 5431:5432
+        restart: unless-stopped
+        image: postgres:15.2-bullseye
         env_file: dev-env
-        networks:
-            - smi-network
         volumes:
             - master-pg-data:/var/lib/postgresql/data
+        healthcheck:
+            test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+            interval: 30s
+            timeout: 5s
+            retries: 5
+        networks:
+            - master-network
 
     master-api:
+        restart: unless-stopped
         container_name: master-api
-        restart: always
-        build: .
+        image: registry.gitlab.com/lappis-unb/projects/smi/smi-master
+        build:
+            context: .
+            dockerfile: Dockerfile
         env_file: dev-env
-        command: ["sh", "scripts/start.sh"]
+        command: [ "sh", "scripts/start.sh" ]
         ports:
             - 8001:8001
         networks:
-          - smi-network
+            - smi-network
+            - master-network
         volumes:
             - .:/smi-master
-            - pip_cache:/usr/local/lib/python3.6/site-packages
+            - pip_cache:/usr/local/lib/python3.11/site-packages
         depends_on:
-            - master-db
+            master-db:
+                condition: service_healthy
 
 volumes:
-    master-pg-data: {}
+    master-pg-data:
     pip_cache:
 
+
 networks:
-  smi-network:
-    external: true
+    master-network:
+    smi-network:
+        driver: bridge

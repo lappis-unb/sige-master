@@ -1,12 +1,10 @@
-from rest_framework import viewsets
-from rest_framework import serializers
-from rest_framework import permissions
+from rest_framework import permissions, serializers, viewsets
 from rest_framework.response import Response
+
+from users.permissions import CurrentADMINUserOnly
 
 from .models import Slave
 from .serializers import SlaveSerializer
-
-from users.permissions import CurrentADMINUserOnly
 
 
 class SlaveViewSet(viewsets.ModelViewSet):

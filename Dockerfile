@@ -1,12 +1,21 @@
-FROM python:3.9.16
+FROM python:3.11.2-slim-bullseye
 
-RUN apt-get update && \
-    apt-get install -y --force-yes --no-install-recommends \
-                        libpq-dev \
-                        cron \
-                        locales \
-                        tzdata \
-                        gettext
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    cron \
+    locales \
+    tzdata \
+    gettext &&\
+    rm -rf /var/lib/apt/lists/*
+
+
+WORKDIR /smi-master
+COPY requirements.txt .
+RUN pip install --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt \
+    && pip install wheel
+
+COPY . /smi-master
+
 
 RUN sed -i 's/# pt_BR.UTF-8 UTF-8/pt_BR.UTF-8 UTF-8/' /etc/locale.gen && \
     locale-gen pt_BR.UTF-8
@@ -22,18 +31,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     echo $TZ > /etc/timezone && \
     dpkg-reconfigure -f noninteractive tzdata
 
-WORKDIR /smi-master
-
-COPY . /smi-master
-
 # Setting cron
 COPY crons/crontab /etc/cron.d/smi-cron
-
-RUN chmod 0644 /etc/cron.d/smi-cron
-
-RUN /usr/bin/crontab /etc/cron.d/smi-cron
-
-RUN pip install --upgrade pip
-RUN pip install wheel
-RUN pip install --no-cache-dir -r requirements.txt
-
+RUN chmod 0644 /etc/cron.d/smi-cron \
+    /usr/bin/crontab /etc/cron.d/smi-cron
