@@ -1,0 +1,24 @@
+version: "3.9"
+services:
+    master-db:
+        volumes:
+            - ./.docker/pgdata:/var/lib/postgresql/data
+
+    master-api:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        volumes:
+            - .:/smi-master
+            - ./.docker/zsh/powerlevel10k/.p10k.zsh:/home/python/.p10k.zsh:delegated
+            - ./.docker/zsh/history:/home/python/zsh:delegated
+
+    extends:
+        files: docker-compose.dev.yml
+
+networks:
+    master-network:
+        name: master-network
+    smi-network:
+        driver: bridge
+        name: smi-network

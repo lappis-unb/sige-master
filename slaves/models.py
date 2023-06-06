@@ -1,48 +1,20 @@
 from django.db import models
-from django.core.validators import RegexValidator
-from django.core.exceptions import ValidationError
-from django.contrib.postgres.fields import ArrayField
-from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
-from django.core.exceptions import ObjectDoesNotExist
-
-"""
-    TODO Make get all measurements and list
-    transductor models methods
-"""
+from django.utils.translation import gettext_lazy as _
 
 
 class Slave(models.Model):
-
-    ip_address = models.CharField(
-        max_length=50,
-        verbose_name=_('IP address'),
-        help_text=_('This field is required')
-    )
-
-    port = models.CharField(
-        max_length=5,
-        default="80",
-        verbose_name=_('IP access port')
-    )
-
-    name = models.CharField(
-        max_length=50,
-        verbose_name=_('Location'),
-        help_text=_('This field is required'),
-        unique=True
-    )
-
-    broken = models.BooleanField(
-        default=False,
-        verbose_name=_('Broken')
-    )
+    server_address = models.CharField(max_length=50, verbose_name=_("server address"))
+    port = models.CharField(max_length=5, default="80", verbose_name=_("port"))
+    name = models.CharField(max_length=50, verbose_name=_("location"), unique=True)
+    active = models.BooleanField(default=True, verbose_name=_("active"))
+    broken = models.BooleanField(default=False, verbose_name=_("broken"))
 
     class Meta:
-        verbose_name = _('Slave server')
+        verbose_name = _("Slave server")
 
     def __str__(self):
-        return self.name
+        return f"{self.name}"
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -70,10 +42,7 @@ class Slave(models.Model):
         old_status = self.broken
         if old_status is True and new_status is False:
             try:
-                related_event = FailedConnectionSlaveEvent.objects.filter(
-                    slave=self,
-                    ended_at__isnull=True
-                ).last()
+                related_event = FailedConnectionSlaveEvent.objects.filter(slave=self, ended_at__isnull=True).last()
                 related_event.ended_at = timezone.now()
                 related_event.save()
             except FailedConnectionSlaveEvent.DoesNotExist as e:
@@ -84,7 +53,7 @@ class Slave(models.Model):
             event.save_event(self)
 
         self.broken = new_status
-        self.save(update_fields=['broken'])
+        self.save(update_fields=["broken"])
 
     def __is_success_status(self, status):
         if (status is not None) and (200 <= status < 300):

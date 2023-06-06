@@ -1,361 +1,138 @@
 from django.db import models
 from django.utils import timezone
-from transductors.models import EnergyTransductor
-from polymorphic.models import PolymorphicModel
-from django.contrib.postgres.fields import ArrayField, HStoreField
 from django.utils.translation import gettext_lazy as _
+
+from transductors.models import EnergyTransductor
 
 
 class Tax(models.Model):
-    value_peak = models.FloatField(
-        default=0,
-        verbose_name=_('Tax value to periods in peak time')
-    )
-
-    value_off_peak = models.FloatField(
-        default=0,
-        verbose_name=_('Tax value to periods in off peak time')
-    )
-
-    registration_date = models.DateTimeField(
-        default=timezone.now,
-        verbose_name=_('registration date')
-    )
+    value_peak = models.FloatField(default=None, null=True)
+    value_off_peak = models.FloatField(default=None, null=True)
+    registration_date = models.DateTimeField(default=timezone.now)
 
     class Meta:
-        verbose_name = _('Tax')
+        verbose_name = _("Tax")
 
 
-class Measurement(PolymorphicModel):
-    collection_date = models.DateTimeField(
-        blank=False,
-        null=False,
-        verbose_name=_('Collection time'),
-        help_text=_('This field is required')
-    )
+class Measurement(models.Model):
+    collection_date = models.DateTimeField(default=timezone.now)
     transductor = models.ForeignKey(
         EnergyTransductor,
         related_name="%(app_label)s_%(class)s",
         on_delete=models.CASCADE,
-        blank=False,
-        null=False,
-        verbose_name=_('Energy meter'),
-        help_text=_('This field is required')
+        verbose_name=_("Energy meter"),
     )
 
     def __str__(self):
-        return '%s' % self.collection_date
+        return f"{self.collection_date} - {self.transductor}"
 
     class Meta:
         abstract = True
-        verbose_name = _('Measurement')
+        verbose_name = _("Measurement")
 
 
 class MinutelyMeasurement(Measurement):
+    frequency_a = models.FloatField(default=None, null=True, blank=True)
+    voltage_a = models.FloatField(default=None, null=True)
+    voltage_b = models.FloatField(default=None, null=True)
+    voltage_c = models.FloatField(default=None, null=True)
+    current_a = models.FloatField(default=None, null=True)
+    current_b = models.FloatField(default=None, null=True)
+    current_c = models.FloatField(default=None, null=True)
+    active_power_a = models.FloatField(default=None, null=True)
+    active_power_b = models.FloatField(default=None, null=True)
+    active_power_c = models.FloatField(default=None, null=True)
+    total_active_power = models.FloatField(default=None, null=True)
+    reactive_power_a = models.FloatField(default=None, null=True)
+    reactive_power_b = models.FloatField(default=None, null=True)
+    reactive_power_c = models.FloatField(default=None, null=True)
+    total_reactive_power = models.FloatField(default=None, null=True)
+    apparent_power_a = models.FloatField(default=None, null=True)
+    apparent_power_b = models.FloatField(default=None, null=True)
+    apparent_power_c = models.FloatField(default=None, null=True)
+    total_apparent_power = models.FloatField(default=None, null=True)
+    power_factor_a = models.FloatField(default=None, null=True)
+    power_factor_b = models.FloatField(default=None, null=True)
+    power_factor_c = models.FloatField(default=None, null=True)
+    total_power_factor = models.FloatField(default=None, null=True)
+    dht_voltage_a = models.FloatField(default=None, null=True)
+    dht_voltage_b = models.FloatField(default=None, null=True)
+    dht_voltage_c = models.FloatField(default=None, null=True)
+    dht_current_a = models.FloatField(default=None, null=True)
+    dht_current_b = models.FloatField(default=None, null=True)
+    dht_current_c = models.FloatField(default=None, null=True)
+
     class Meta:
-        verbose_name = _('Minutely measurement')
-
-    frequency_a = models.FloatField(
-        default=0,
-        verbose_name=_('Frequency')
-    )
-
-    voltage_a = models.FloatField(
-        default=0,
-        verbose_name=_('Voltage at phase A')
-    )
-
-    voltage_b = models.FloatField(
-        default=0,
-        verbose_name=_('Voltage at phase B')
-    )
-
-    voltage_c = models.FloatField(
-        default=0,
-        verbose_name=_('Voltage at phase C')
-    )
-
-    current_a = models.FloatField(
-        default=0,
-        verbose_name=_('Current at phase A')
-    )
-
-    current_b = models.FloatField(
-        default=0,
-        verbose_name=_('Current at phase B')
-    )
-
-    current_c = models.FloatField(
-        default=0,
-        verbose_name=_('Current at phase C')
-    )
-
-    active_power_a = models.FloatField(
-        default=0,
-        verbose_name=_('Active power at phase A')
-    )
-
-    active_power_b = models.FloatField(
-        default=0,
-        verbose_name=_('Active power at phase B')
-    )
-
-    active_power_c = models.FloatField(
-        default=0,
-        verbose_name=_('Active power at phase C')
-    )
-
-    total_active_power = models.FloatField(
-        default=0,
-        verbose_name=_('Total active power')
-    )
-
-    reactive_power_a = models.FloatField(
-        default=0,
-        verbose_name=_('Reactive power phase A')
-    )
-
-    reactive_power_b = models.FloatField(
-        default=0,
-        verbose_name=_('Reactive power phase B')
-    )
-
-    reactive_power_c = models.FloatField(
-        default=0,
-        verbose_name=_('Reactive power phase C')
-    )
-
-    total_reactive_power = models.FloatField(
-        default=0,
-        verbose_name=_('Total reactive power')
-    )
-
-    apparent_power_a = models.FloatField(
-        default=0,
-        verbose_name=_('Apparent power on phase A')
-    )
-
-    apparent_power_b = models.FloatField(
-        default=0,
-        verbose_name=_('Apparent power on phase B')
-    )
-
-    apparent_power_c = models.FloatField(
-        default=0,
-        verbose_name=_('Apparent power on phase C')
-    )
-
-    total_apparent_power = models.FloatField(
-        default=0,
-        verbose_name=_('Total apparent power')
-    )
-
-    power_factor_a = models.FloatField(
-        default=0,
-        verbose_name=_('Power factor on phase A')
-    )
-
-    power_factor_b = models.FloatField(
-        default=0,
-        verbose_name=_('Power factor on phase B')
-    )
-
-    power_factor_c = models.FloatField(
-        default=0,
-        verbose_name=_('Power factor on phase C')
-    )
-
-    total_power_factor = models.FloatField(
-        default=0,
-        verbose_name=_('Total power factor')
-    )
-
-    dht_voltage_a = models.FloatField(
-        default=0,
-        verbose_name=_('DHT voltage on phase A')
-    )
-
-    dht_voltage_b = models.FloatField(
-        default=0,
-        verbose_name=_('DHT voltage on phase B')
-    )
-
-    dht_voltage_c = models.FloatField(
-        default=0,
-        verbose_name=_('DHT voltage on phase C')
-    )
-
-    dht_current_a = models.FloatField(
-        default=0,
-        verbose_name=_('DHT current on phase A')
-    )
-
-    dht_current_b = models.FloatField(
-        default=0,
-        verbose_name=_('DHT current on phase B')
-    )
-
-    dht_current_c = models.FloatField(
-        default=0,
-        verbose_name=_('DHT current on phase C')
-    )
+        verbose_name = _("Minutely measurement")
+        verbose_name_plural = _("Minutely Measurements")
 
 
 class QuarterlyMeasurement(Measurement):
+    generated_energy_peak_time = models.FloatField(default=None, null=True)
+    generated_energy_off_peak_time = models.FloatField(default=None, null=True)
+    consumption_peak_time = models.FloatField(default=None, null=True)
+    consumption_off_peak_time = models.FloatField(default=None, null=True)
+    inductive_power_peak_time = models.FloatField(default=None, null=True)
+    inductive_power_off_peak_time = models.FloatField(default=None, null=True)
+    capacitive_power_peak_time = models.FloatField(default=None, null=True)
+    capacitive_power_off_peak_time = models.FloatField(default=None, null=True)
+    is_calculated = models.BooleanField(default=False)
+    tax = models.ForeignKey(Tax, null=True, on_delete=models.SET_NULL)  # TODO: Verificar se é necessário
+
     class Meta:
-        verbose_name = _('Quartely measurement')
+        verbose_name = _("Quartely measurement")
+        verbose_name_plural = _("Quarterly Measurements")
 
-    generated_energy_peak_time = models.FloatField(
-        default=0,
-        verbose_name=_('Generated energy on peak hours')
-    )
-
-    generated_energy_off_peak_time = models.FloatField(
-        default=0,
-        verbose_name=_('Generated energy not on peak hours')
-    )
-
-    consumption_peak_time = models.FloatField(
-        default=0,
-        verbose_name=_('Consumption on peak hours')
-    )
-
-    consumption_off_peak_time = models.FloatField(
-        default=0,
-        verbose_name=_('Consumption not on peak hours')
-    )
-
-    inductive_power_peak_time = models.FloatField(
-        default=0,
-        verbose_name=_('Inductive power on peak hours')
-    )
-
-    inductive_power_off_peak_time = models.FloatField(
-        default=0,
-        verbose_name=_('Inductive power not on peak hours')
-    )
-
-    capacitive_power_peak_time = models.FloatField(
-        default=0,
-        verbose_name=_('Capacitive power on peak hours')
-    )
-
-    capacitive_power_off_peak_time = models.FloatField(
-        default=0,
-        verbose_name=_('Capacitive power not on peak hours')
-    )
-
-    tax = models.ForeignKey(
-        Tax,
-        null=True,
-        on_delete=models.SET_NULL,
-        verbose_name=_('Tax for peak time collection')
-    )
+    def __str__(self):
+        return f"{self.collection_date} - {self.transductor}"
 
 
 class MonthlyMeasurement(Measurement):
+    generated_energy_peak_time = models.FloatField(default=None, null=True)
+    generated_energy_off_peak_time = models.FloatField(default=None, null=True)
+    consumption_peak_time = models.FloatField(default=None, null=True)
+    consumption_off_peak_time = models.FloatField(default=None, null=True)
+    inductive_power_peak_time = models.FloatField(default=None, null=True)
+    inductive_power_off_peak_time = models.FloatField(default=None, null=True)
+    capacitive_power_peak_time = models.FloatField(default=None, null=True)
+    capacitive_power_off_peak_time = models.FloatField(default=None, null=True)
+    active_max_power_peak_time = models.FloatField(default=None, null=True)
+    active_max_power_off_peak_time = models.FloatField(default=None, null=True)
+    reactive_max_power_peak_time = models.FloatField(default=None, null=True)
+    reactive_max_power_off_peak_time = models.FloatField(default=None, null=True)
+
+    # TODO O slave não está mais fornecendo esses atributos (validar e deletar)
+    # active_max_power_list_peak = ArrayField(models.FloatField(), default=None)
+    # active_max_power_list_peak_time = ArrayField(models.DateTimeField(), default=None)
+    # active_max_power_list_off_peak = ArrayField(models.FloatField(), default=None)
+    # active_max_power_list_off_peak_time = ArrayField(models.DateTimeField(), default=None)
+    # reactive_max_power_list_peak = ArrayField(models.FloatField(), default=None)
+    # reactive_max_power_list_peak_time = ArrayField(models.DateTimeField(), default=None)
+    # reactive_max_power_list_off_peak = ArrayField(models.FloatField(), default=None)
+    # reactive_max_power_list_off_peak_time = ArrayField(models.DateTimeField(), default=None)
+
     class Meta:
-        verbose_name = _('Monthly measurement')
+        verbose_name = _("Monthly measurement")
+        verbose_name_plural = _("Minutely Measurements")
 
     def __str__(self):
-        return '%s' % self.collection_date
-
-    generated_energy_peak_time = models.FloatField(default=0)
-    generated_energy_off_peak_time = models.FloatField(default=0)
-
-    consumption_peak_time = models.FloatField(default=0)
-    consumption_off_peak_time = models.FloatField(default=0)
-
-    inductive_power_peak_time = models.FloatField(default=0)
-    inductive_power_off_peak_time = models.FloatField(default=0)
-
-    capacitive_power_peak_time = models.FloatField(default=0)
-    capacitive_power_off_peak_time = models.FloatField(default=0)
-
-    active_max_power_peak_time = models.FloatField(default=0)
-    active_max_power_off_peak_time = models.FloatField(default=0)
-
-    reactive_max_power_peak_time = models.FloatField(default=0)
-    reactive_max_power_off_peak_time = models.FloatField(
-        default=0
-    )
-
-    active_max_power_list_peak = ArrayField(
-        models.FloatField(), default=None
-    )
-    active_max_power_list_peak_time = ArrayField(
-        models.DateTimeField(), default=None
-    )
-
-    active_max_power_list_off_peak = ArrayField(
-        models.FloatField(), default=None
-    )
-
-    active_max_power_list_off_peak_time = ArrayField(
-        models.DateTimeField(), default=None
-    )
-
-    reactive_max_power_list_peak = ArrayField(
-        models.FloatField(), default=None
-    )
-
-    reactive_max_power_list_peak_time = ArrayField(
-        models.DateTimeField(), default=None
-    )
-
-    reactive_max_power_list_off_peak = ArrayField(
-        models.FloatField(), default=None
-    )
-    reactive_max_power_list_off_peak_time = ArrayField(
-        models.DateTimeField(), default=None
-    )
+        return f"{self.collection_date} - {self.transductor}"
 
 
+# TODO: Verificar se é necessário duplicar dados da model MinutelyMeasurement
 class RealTimeMeasurement(Measurement):
+    voltage_a = models.FloatField(default=None, null=True, verbose_name=_("Voltage on phase A"))
+    voltage_b = models.FloatField(default=None, null=True, verbose_name=_("Voltage on phase B"))
+    voltage_c = models.FloatField(default=None, null=True, verbose_name=_("Voltage on phase C"))
+    current_a = models.FloatField(default=None, null=True, verbose_name=_("Current on phase A"))
+    current_b = models.FloatField(default=None, null=True, verbose_name=_("Current on phase B"))
+    current_c = models.FloatField(default=None, null=True, verbose_name=_("Current on phase C"))
+    total_active_power = models.FloatField(default=None, null=True, verbose_name=_("Total active power"))
+    total_reactive_power = models.FloatField(default=None, null=True, verbose_name=_("Total reactive power"))
+    total_power_factor = models.FloatField(default=None, null=True, verbose_name=_("Total power factor"))
+
     class Meta:
-        verbose_name = _('Real time measurement')
+        verbose_name = _("Real time measurement")
 
-    voltage_a = models.FloatField(
-        default=0,
-        verbose_name=_('Voltage on phase A')
-    )
-
-    voltage_b = models.FloatField(
-        default=0,
-        verbose_name=_('Voltage on phase B')
-    )
-
-    voltage_c = models.FloatField(
-        default=0,
-        verbose_name=_('Voltage on phase C')
-    )
-
-    current_a = models.FloatField(
-        default=0,
-        verbose_name=_('Current on phase A')
-    )
-
-    current_b = models.FloatField(
-        default=0,
-        verbose_name=_('Current on phase B')
-    )
-
-    current_c = models.FloatField(
-        default=0,
-        verbose_name=_('Current on phase C')
-    )
-
-    total_active_power = models.FloatField(
-        default=0,
-        verbose_name=_('Total active power')
-    )
-
-    total_reactive_power = models.FloatField(
-        default=0,
-        verbose_name=_('Total reactive power')
-    )
-
-    total_power_factor = models.FloatField(
-        default=0,
-        verbose_name=_('Total power factor')
-    )
+    def __str__(self):
+        return f"{self.collection_date} - {self.transductor}"

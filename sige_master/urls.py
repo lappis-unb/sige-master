@@ -1,8 +1,10 @@
+from debug_toolbar import urls as debug_toolbar_urls
+from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.urls import include, path
 from django.utils.translation import gettext_lazy as _
-from rest_framework.documentation import include_docs_urls
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.routers import DefaultRouter
 
 from campi import urls as campi_routes
@@ -29,20 +31,24 @@ router.registry.extend(unifilar_diagram_routes.router.registry)
 
 router.registry.extend(campi_routes.router.registry)
 
-admin.site.site_header = _("SMI Site Administration")
+admin.site.site_header = _("SIGE Site Administration")
 admin.site.site_title = _("Energy monitoring system")
 
 urlpatterns = [
-    path("docs/", include_docs_urls(title="My API title")),
     path("admin/", admin.site.urls),
     path("login/", login),
     path("password_reset/validate_token/", users_views.PasswordTokenVerificationView.as_view()),
     path("password_reset/", include("django_rest_passwordreset.urls", namespace="password_reset")),
     path("csv-export/", MeasurementResults.mount_csv_measurement),
     path("graph/", include(measurements_routes.graph_router.urls)),
+    path("schema/", SpectacularAPIView.as_view(), name="api-schema"),
+    path("docs/", SpectacularSwaggerView.as_view(url_name="api-schema"), name="api-docs"),
     path("", include(router.urls)),
     path("", include("campi.urls")),
 ]
+
+if settings.DEBUG:
+    urlpatterns += [path("__debug__/", include(debug_toolbar_urls))]
 
 """
     The password_reset/ actually adds two routes: 

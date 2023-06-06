@@ -1,29 +1,29 @@
 import sys
-import pytz
-
-from django.test import Client, TestCase
-from django.conf import settings
-from django.db import IntegrityError
-from django.utils import timezone
-
 from datetime import datetime
 
+import pytz
+from django.conf import settings
+from django.db import IntegrityError
+from django.test import Client, TestCase
+from django.utils import timezone
 from rest_framework.request import Request
 from rest_framework.test import APIRequestFactory
 
 from campi.models import Campus
-from transductors.models import EnergyTransductor
-from measurements.models import MonthlyMeasurement
-from measurements.models import MinutelyMeasurement
-from measurements.models import QuarterlyMeasurement
+from measurements.models import (
+    MinutelyMeasurement,
+    MonthlyMeasurement,
+    QuarterlyMeasurement,
+)
 from measurements.serializers import ThreePhaseSerializer
+from transductors.models import EnergyTransductor
 
 
 class MeasurementsTestCase(TestCase):
     def setUp(self):
         self.campus = Campus.objects.create(
-            name='UnB - Faculdade Gama',
-            acronym='FGA',
+            name="UnB - Faculdade Gama",
+            acronym="FGA",
         )
 
         self.transductor = EnergyTransductor.objects.create(
@@ -31,7 +31,7 @@ class MeasurementsTestCase(TestCase):
             ip_address="1.1.1.1",
             model="MD30",
             firmware_version="0.1",
-            campus=self.campus
+            campus=self.campus,
         )
 
         self.time = datetime(2000, 1, 1, 1, 0, 0, 0)
@@ -67,7 +67,7 @@ class MeasurementsTestCase(TestCase):
             dht_current_b=8,
             dht_current_c=8,
             transductor=self.transductor,
-            collection_date=self.time
+            collection_date=self.time,
         )
 
         self.factory = APIRequestFactory()
@@ -77,49 +77,22 @@ class MeasurementsTestCase(TestCase):
         self.serializer_context = {"request": Request(self.request)}
 
     def test_should_get_active_power(self):
-        url = '/graph/minutely-active-power/?id='
+        url = "/graph/minutely-active-power/?id="
         url += str(self.transductor.id)
-        url += '&start_date=2000-01-01 00:00:00'
-        url += '&end_date=2000-01-01 23:59:00'
-        self.assertEqual(
-            self.client.get(
-                url
-            ).status_code,
-            200)
+        url += "&start_date=2000-01-01 00:00:00"
+        url += "&end_date=2000-01-01 23:59:00"
+        self.assertEqual(self.client.get(url).status_code, 200)
 
     def test_should_three_phase_serializer(self):
-        atp_serializer = ThreePhaseSerializer(
-            instance=self.minutely_measurement, context=self.serializer_context
-        ).data
+        atp_serializer = ThreePhaseSerializer(instance=self.minutely_measurement, context=self.serializer_context).data
         self.assertEqual(
             set(atp_serializer.keys()),
-            set(
-                [
-                    "id",
-                    "transductor",
-                    "min",
-                    "max",
-                    "phase_a",
-                    "phase_b",
-                    "phase_c"
-                ]
-            ),
+            set(["id", "transductor", "min", "max", "phase_a", "phase_b", "phase_c"]),
         )
 
     def test_should_not_three_phase_serializer(self):
-        atp_serializer = ThreePhaseSerializer(
-            instance=self.minutely_measurement, context=self.serializer_context
-        ).data
+        atp_serializer = ThreePhaseSerializer(instance=self.minutely_measurement, context=self.serializer_context).data
         self.assertNotEqual(
             set(atp_serializer.keys()),
-            set(
-                [
-                    "id",
-                    "transductor",
-                    "phase_a",
-                    "phase_b",
-                    "phase_c",
-                    "current_a"
-                ]
-            ),
+            set(["id", "transductor", "phase_a", "phase_b", "phase_c", "current_a"]),
         )

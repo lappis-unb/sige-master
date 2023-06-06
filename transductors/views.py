@@ -1,78 +1,102 @@
-import json
-
 from django.db.models import Q
-from django.http import Http404
-from django.shortcuts import render
 from django.utils import timezone
-from rest_framework import mixins, permissions, serializers, status, viewsets
-from rest_framework.decorators import action
+from rest_framework import mixins, permissions, status, viewsets
 from rest_framework.response import Response
 
 from campi.models import Campus
 from slaves.models import Slave
+from transductors.api import *
+from transductors.models import EnergyTransductor
+from transductors.serializers import (
+    EnergyTransductorListSerializer,
+    EnergyTransductorSerializer,
+)
 from users.permissions import CurrentADMINUserOnly
-
-from .api import *
-from .models import EnergyTransductor
-from .serializers import AddToServerSerializer, EnergyTransductorListSerializer, EnergyTransductorSerializer
 
 
 class EnergyTransductorViewSet(viewsets.ModelViewSet):
-    queryset = EnergyTransductor.objects
+    queryset = EnergyTransductor.objects.all().order_by("-id")
     serializer_class = EnergyTransductorSerializer
-    permission_classes = (
-        permissions.AllowAny | CurrentADMINUserOnly,
-    )  # Para testes de Admin, retirar os permissions.AllowAny
+    permission_classes = [permissions.AllowAny | CurrentADMINUserOnly]
 
     def get_queryset(self):
         campus_id = self.request.query_params.get("campus_id")
 
-        transductors = []
-        try:
-            transductors = self.get_transductors_by_campus_id(campus_id)
-        except EnergyTransductor.DoesNotExist:
-            raise APIException("Campus Id does not match with any campus")
-
-        # return sorted(
-        #     transductors,
-        #     key=lambda item: (item.campus.name, item.name)
-        # )
-        return transductors
-
-    def get_transductors_by_campus_id(self, campus_id):
         if campus_id:
-            return self.filter_transductors_by_campus_id(campus_id)
-        return EnergyTransductor.objects.all()
+            try:
+                campus = Campus.objects.get(id=campus_id)
+                return EnergyTransductor.objects.filter(campus=campus).order_by("campus__name", "name")
 
-    def filter_transductors_by_campus_id(self, campus_id):
-        return self.queryset.filter(campus=self.get_campus_id(campus_id))
+            except Campus.DoesNotExist:
+                raise APIException("Campus Id does not match with any campus")
 
-    def get_campus_id(campus_id):
-        return Campus.objects.get(id=campus_id)
+        return self.queryset.order_by("campus__name", "-id")
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-        try:
-            if instance.slave_server is not None:
-                if self.status_code_is_not_204(instance):
-                    return Response(status=status.HTTP_400_BAD_REQUEST)
-            instance.delete()
-        except Http404:
-            pass
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        serializer = self.get_serializer(instance)
 
-    def status_code_is_not_204(self, instance):
-        return self.delete(instance).status_code != 204
+        serializer.delete(instance)
+        return Response({"message": "Object deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
 
-    def delete(self, instance):
-        return delete_transductor(instance.id_in_slave, instance, instance.slave_server)
+    # TODO Terminar os testes e trocar de chamadas sicnronas para assincronas
+    # def destroy(self):
+    #     instance = self.get_object()
+
+    #     if instance.slave_server is None:
+    #         self.perform_destroy(instance)
+    #         return Response(status=status.HTTP_204_NO_CONTENT)
+    #     try:
+    #         async_to_sync(delete_from_slave)(instance)
+
+    #     except Exception as e:
+    #         instance.pending_deletion = True
+    #         instance.active = False
+    #         instance.save()
+    #         return Response(status=status.HTTP_202_ACCEPTED, data={"detail": "Object marked for deletion."})
+
+    # def create(self, request):
+    #     serializer = self.get_serializer(data=request.data)
+    #     serializer.is_valid(raise_exception=True)
+    #     instance = serializer.save()
+
+    #     if instance.slave_server is not None:
+    #         response = async_to_sync(create_on_slave)(instance)
+    #         if response != 201:
+    #             instance.pending_sync = True
+    #             instance.active = False
+    #             instance.save()
+
+    #     headers = self.get_success_headers(serializer.data)
+    #     print("._." * 80, flush=True)
+    #     return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    # def update(self, request):
+    #     instance = self.get_object()
+    #     serializer = self.get_serializer(instance, data=request.data, partial=True)
+    #     serializer.is_valid(raise_exception=True)
+    #     instance = serializer.save()
+
+    #     if instance.slave_server is not None:
+    #         response = async_to_sync(update_on_slave)(instance)
+    #         if response != 200:
+    #             instance.pending_sync = True
+    #             instance.active = False
+    #             instance.save()
+    #             return Response(status=status.HTTP_202_ACCEPTED, data={"detail": "Object marked for update."})
+
+    # return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class EnergyTransductorListViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin, mixins.ListModelMixin):
+class EnergyTransductorListViewSet(
+    viewsets.GenericViewSet,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+):
     serializer_class = EnergyTransductorListSerializer
     # Para testes de Admin, retirar os permissions.AllowAny
-    permission_classes = (permissions.AllowAny | CurrentADMINUserOnly,) 
-    
+    permission_classes = (permissions.AllowAny | CurrentADMINUserOnly,)
+
     def get_queryset(self):
         transductors = EnergyTransductor.objects.all()
         slaves = Slave.objects.all()

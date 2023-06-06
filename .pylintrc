@@ -1,0 +1,11 @@
+[BASIC]
+max-line-length=119
+
+[TYPECHECK]
+ignored-modules=django  # Ignorar erros E1101 (no-member) do Pylint
+
+[MESSAGES CONTROL]
+disable=
+    missing-module-docstring,
+    missing-class-docstring,
+    missing-function-docstring

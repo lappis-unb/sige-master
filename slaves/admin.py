@@ -6,10 +6,12 @@ from . import models
 @admin.register(models.Slave)
 class SlaveAdmin(admin.ModelAdmin):
     list_display = (
-        "broken",
-        "ip_address",
-        "port",
+        "id",
         "name",
+        "server_address",
+        "port",
+        "broken",
+        "active",
     )
 
-    list_filter = ("broken",)
+    list_filter = ("broken", "active")
