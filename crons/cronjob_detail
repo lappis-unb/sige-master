@@ -1,0 +1,41 @@
+HOME=/sige-master/
+ENV_COMMAND="export \$(cat /root/env | xargs)"
+LOG_FILE="/sige-master/logs/cronlog.log"
+
+#-------------------------------------------------------------------------------------------------------------------
+# Get All Events: At every minute 
+# Command: "sige-master/events/management/commands/get_events.py"
+
+* * * * * sleep 15 && eval $($ENV_COMMAND) && python /sige-master/manage.py get_events >> $LOG_FILE 2>&1
+
+#-------------------------------------------------------------------------------------------------------------------
+# Chek transductors broken: At every minute 
+# Command: "sige-master/slaves/management/commands/check_trans.py"
+
+* * * * * sleep 30 && eval $($ENV_COMMAND) && python /sige-master/manage.py check_trans >> $LOG_FILE 2>&1
+
+#-------------------------------------------------------------------------------------------------------------------
+# collect realtime: At every minute 
+# Command: "sige-master/slaves/management/commands/get_data.py"
+
+* * * * * sleep 45 && eval $($ENV_COMMAND) && python /sige-master/manage.py get_data realtime >> $LOG_FILE 2>&1
+
+#-------------------------------------------------------------------------------------------------------------------
+# collect minutely: At minutely 0 every hour
+# Command: "sige-master/slaves/management/commands/get_data.py"
+
+0 * * * * eval $($ENV_COMMAND) && python /sige-master/manage.py get_data minutely >> $LOG_FILE 2>&1
+
+#-------------------------------------------------------------------------------------------------------------------
+# collect quarterly: At minute 5 every hour
+# Command: "sige-master/slaves/management/commands/get_data.py"
+
+5 * * * * eval $($ENV_COMMAND) && python /sige-master/manage.py get_data quarterly >> $LOG_FILE 2>&1
+
+#-------------------------------------------------------------------------------------------------------------------
+# collect monthly: At minute 10 every hour
+# Command: "sige-master/slaves/management/commands/get_data.py"
+
+10 * * * * eval $($ENV_COMMAND) && python /sige-master/manage.py get_data monthly >> $LOG_FILE 2>&1
+
+#-------------------------------------------------------------------------------------------------------------------

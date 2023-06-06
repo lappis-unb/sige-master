@@ -1,65 +1,74 @@
-import requests
-from datetime import datetime, timedelta
+import logging
+
+import httpx
+
+logger = logging.getLogger("tasks")
 
 
-def request_measurements(measurement_type, slave, transductor=None, 
-                         start_date=None, end_date=None):
-    protocol = "http://"
-    endpoint = "/" + measurement_type + "/"
-    address = protocol\
-        + slave.ip_address\
-        + ":"\
-        + slave.port\
-        + endpoint
+def request_measurements(path, slave, pk=None, start_date=None, end_date=None):
+    url = f"http://{slave.server_address}:{slave.port}{path}"
+    params = {
+        "transductor": pk,
+        "start_date": start_date,
+        "end_date": end_date,
+    }
 
-    if transductor is not None and start_date is not None:
-        params = {
-            "id": transductor.id,
-            "start_date": start_date.strftime("%Y-%m-%d %H:%M:%S"),
-            "end_date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        }
-    else:
-        params = {}
+    logger.info(f"Starting data collection from: {url}")
+    logger.debug(
+        f"params: {{'transductor': {params['transductor']},"
+        f"'start_date': {params['start_date'].strftime('%d-%m-%Y %H:%M:%S')}}}"
+        if start_date
+        else params
+    )
 
-    return requests.get(address, params=params)
+    data, url = send_request(url, params)
+    while url:
+        page_data, url = send_request(url)
+        data.extend(page_data)
+
+    logger.info(f"Finished data collection from Endpoint: {path}.")
+    logger.debug(f"Total results received: {len(data)}")
+    return data
 
 
-def request_events(slave, event_type):
-    """
-    Makes the http request to get events from a slave server
-    """
-    protocol = "http://"
-    endpoint = "/" + event_type + "/"
+def request_events(slave, event_type, transductor=None, start_date=None, end_date=None):
+    url = f"http://{slave.server_address}:{slave.port}/{event_type}/"
 
-    params = {}
-    if transductor is not None:
-        params["id"] = transductor.id
+    params = {
+        "id": transductor.id,
+        "start_date": start_date,
+        "end_date": end_date,
+    }
 
-    if start_date is not None:
-        start_date = start_date.strftime("%Y-%m-%d %H:%M:%S")
-        params["start_date"] = start_date        
-
-    if end_date is not None:
-        end_date = end_date.strftime("%Y-%m-%d %H:%M:%S")
-        params["end_date"] = end_date        
-
-    return requests.get(address, params=params)
+    data = []
+    while url:
+        page_data, url = send_request(url, params)
+        data.extend(page_data)
+    return data
 
 
 def request_all_events(slave):
-    """
-    Gets all slave related events.
-    Returns an array of tuples containing tuple(Classname, response) pairs
-    """
+    """Gets all slave related events."""
     responses = [
-        (
-            "FailedConnectionTransductorEvent",
-            request_measurements('failed-connection-events', slave)
-        ),
-        (
-            "VoltageRelatedEvent",
-            request_measurements('voltage-events', slave)
-        )
+        ("FailedConnectionTransductorEvent", request_measurements("failed-connection-events", slave)),
+        ("VoltageRelatedEvent", request_measurements("voltage-events", slave)),
     ]
-
     return responses
+
+
+def build_url(slave, endpoint):
+    return f"http://{slave.server_address}:{slave.port}/{endpoint}/"
+
+
+def send_request(url, params=None):
+    logger.debug(f"Sending HTTP request to: {url}")
+    try:
+        response = httpx.get(url, params=params)
+        response.raise_for_status()
+        results = response.json()["results"]
+        next_url = response.json()["next"]
+        logger.debug(f"Successful HTTP request: status_code={response.status_code}, received {len(results)} results")
+        return results, next_url
+    except httpx.HTTPError as exc:
+        logger.exception(f"HTTP Exception for {exc.request.url} - {exc}")
+        raise

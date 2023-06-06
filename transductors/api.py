@@ -1,72 +1,116 @@
-import requests
+import asyncio
+import json
+import logging
+
+import httpx
+from rest_framework.status import is_server_error, is_success
+
+logger = logging.getLogger(__name__)
 
 
-def check_connection(slave):
-    if slave is None:
-        return True
-
-    protocol = "http://"
-    endpoint = "/energy-transductors/"
-    address = protocol + slave.ip_address + ":" + slave.port + endpoint
+def send_request(method, url, data=None):
     try:
-        response = requests.get(address, timeout=1)
-    except Exception:
-        return False
+        if method.upper() not in ["GET", "POST", "PUT", "DELETE"]:
+            raise ValueError(f"Unsupported HTTP method: {method}")
 
-    if response.status_code == 200:
-        return True
+        response = httpx.request(method, url, json=data)
+        response.raise_for_status()
+        return response
+    except httpx.HTTPError as exc:
+        logger.exception(f"HTTP Exception for {exc.request.url} - {exc}")
+        raise
 
-    else:
-        return False
 
-
-def create_transductor(transductor_data, slave_server):
-    protocol = "http://"
+def create_transductor(transductor):
     endpoint = "/energy-transductors/"
-    address = protocol + slave_server.ip_address + ":" + slave_server.port + endpoint
+    slave_server = transductor.slave_server
+    url = f"http://{slave_server.server_address}:{slave_server.port}{endpoint}"
+    data = _get_transductor_data(transductor)
 
-    print("================================================")
-    print("create_transductor")
-    print("address: ", address)
-    return requests.post(address, json=__get_transductor_data(transductor_data, slave_server), timeout=1)
+    return send_request("POST", url, data)
 
 
-def update_transductor(transductor_id, transductor_data, slave_server):
-    protocol = "http://"
+def update_transductor(transductor):
     endpoint = "/energy-transductors/"
+    slave_server = transductor.slave_server
+    data = _get_transductor_data(transductor)
+    url = f"http://{slave_server.server_address}:{slave_server.port}{endpoint}{transductor.id}/"
 
-    address = protocol + slave_server.ip_address + ":" + slave_server.port + endpoint + str(transductor_id) + "/"
-
-    return requests.put(address, json=__get_transductor_data(transductor_data, slave_server), timeout=1)
+    return send_request("PUT", url, data)
 
 
-def delete_transductor(transductor_id, transductor, slave_server):
-    protocol = "http://"
+def delete_transductor(transductor):
     endpoint = "/energy-transductors/"
-    address = protocol + slave_server.ip_address + ":" + slave_server.port + endpoint + str(transductor_id) + "/"
+    slave_server = transductor.slave_server
+    url = f"http://{slave_server.server_address}:{slave_server.port}{endpoint}{transductor.id}/"
 
-    return requests.delete(address, timeout=1)
+    return send_request("DELETE", url)
 
 
-def __get_transductor_data(transductor, slave_server):
-    latitude = transductor.get("geolocation_latitude")
-    if latitude is None:
-        latitude = 0.0
-
-    longitude = transductor.get("geolocation_longitude")
-
-    if longitude is None:
-        longitude = 0.0
+def _get_transductor_data(transductor):
+    physical_location = f"{transductor.campus}"
 
     return {
-        "model": transductor.get("model"),
-        "serial_number": transductor.get("serial_number"),
-        "ip_address": transductor.get("ip_address"),
-        "geolocation_latitude": latitude,
-        "geolocation_longitude": longitude,
-        "measurement_minutelymeasurement": [],
-        "measurement_quarterlymeasurement": [],
-        "measurement_monthlymeasurement": [],
-        "firmware_version": transductor.get("firmware_version"),
-        "port": transductor.get("port"),
+        "id": transductor.id,
+        "model": transductor.model,
+        "serial_number": transductor.serial_number,
+        "ip_address": transductor.ip_address,
+        "firmware_version": transductor.firmware_version,
+        "port": transductor.port,
+        "geolocation_latitude": transductor.geolocation_latitude,
+        "geolocation_longitude": transductor.geolocation_longitude,
+        "physical_location": physical_location,
+        "installation_date": transductor.creation_date.strftime("%Y-%m-%d %H:%M:%S"),
     }
+
+
+# ---------------------------------------------------------------------------------------------
+# TODO: Subistituir funcoes sync por async
+# ---------------------------------------------------------------------------------------------
+
+
+async def delete_from_slave(instance):
+    return await request_slave_transductor(instance, "DELETE")
+
+
+async def create_on_slave(instance):
+    return await request_slave_transductor(instance, "POST")
+
+
+async def update_on_slave(instance):
+    return await request_slave_transductor(instance, "PUT")
+
+
+async def request_slave_transductor(instance, method, max_retries=3, wait_time=5):
+    endpoint = "/energy-transductors/"
+    slave_server = instance.slave_server
+    data = _get_transductor_data(instance)
+
+    base_url = f"http://{slave_server.server_address}:{slave_server.port}{endpoint}"
+    if method in ["update", "delete"]:
+        base_url = f"{base_url}/{instance.id}"
+
+    if method == "delete":
+        data = None
+
+    for attempt in range(1, max_retries + 1):
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.request(method, base_url, json=data)
+
+                if is_server_error(response.status_code):
+                    raise Exception(f"{response.text} - {response.status_code}")
+
+                if is_success(response.status_code):
+                    serialized_data = json.loads(response.text)
+                    return serialized_data, response.status_code
+
+                return response.text, response.status_code
+
+        except Exception as e:
+            logger.warning(f"Attempt {attempt}: {e} - retrying in {wait_time} seconds")
+            if attempt == max_retries:
+                logger.error(f"Failed: {method} transductor Slave API after {attempt} attempts: {e}")
+                return str(e), response.status_code if response else None
+            else:
+                await asyncio.sleep(wait_time)

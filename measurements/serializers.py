@@ -1,92 +1,97 @@
+# from django.db.models import Sum
 from rest_framework import serializers
 
-from .models import MinutelyMeasurement
-from .models import QuarterlyMeasurement
-from .models import MonthlyMeasurement
-from .models import EnergyTransductor
-from .models import Tax
+from measurements.models import (
+    EnergyTransductor,
+    MinutelyMeasurement,
+    MonthlyMeasurement,
+    QuarterlyMeasurement,
+    Tax,
+)
 
-from django.db.models import Sum
 
-
-class MinutelyMeasurementSerializer(serializers.HyperlinkedModelSerializer):
-
+class MinutelyMeasurementSerializer(serializers.ModelSerializer):
     class Meta:
         model = MinutelyMeasurement
-        fields = ('id',
-                  'transductor',
-                  'collection_date',
-                  'frequency_a',
-                  'voltage_a',
-                  'voltage_b',
-                  'voltage_c',
-                  'current_a',
-                  'current_b',
-                  'current_c',
-                  'active_power_a',
-                  'active_power_b',
-                  'active_power_c',
-                  'total_active_power',
-                  'reactive_power_a',
-                  'reactive_power_b',
-                  'reactive_power_c',
-                  'total_reactive_power',
-                  'apparent_power_a',
-                  'apparent_power_b',
-                  'apparent_power_c',
-                  'total_apparent_power',
-                  'power_factor_a',
-                  'power_factor_b',
-                  'power_factor_c',
-                  'total_power_factor',
-                  'dht_voltage_a',
-                  'dht_voltage_b',
-                  'dht_voltage_c',
-                  'dht_current_a',
-                  'dht_current_b',
-                  'dht_current_c',
-                  'transductor',
-                  'url')
+        fields = (
+            "id",
+            "transductor",
+            "frequency_a",
+            "voltage_a",
+            "voltage_b",
+            "voltage_c",
+            "current_a",
+            "current_b",
+            "current_c",
+            "active_power_a",
+            "active_power_b",
+            "active_power_c",
+            "total_active_power",
+            "reactive_power_a",
+            "reactive_power_b",
+            "reactive_power_c",
+            "total_reactive_power",
+            "apparent_power_a",
+            "apparent_power_b",
+            "apparent_power_c",
+            "total_apparent_power",
+            "power_factor_a",
+            "power_factor_b",
+            "power_factor_c",
+            "total_power_factor",
+            "dht_voltage_a",
+            "dht_voltage_b",
+            "dht_voltage_c",
+            "dht_current_a",
+            "dht_current_b",
+            "dht_current_c",
+            "collection_date",
+        )
 
 
-class QuarterlyMeasurementSerializer(serializers.HyperlinkedModelSerializer):
+class QuarterlyMeasurementSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuarterlyMeasurement
-        fields = ('id',
-                  'collection_date',
-                  'generated_energy_peak_time',
-                  'generated_energy_off_peak_time',
-                  'consumption_peak_time',
-                  'consumption_off_peak_time',
-                  'inductive_power_peak_time',
-                  'inductive_power_off_peak_time',
-                  'capacitive_power_peak_time',
-                  'capacitive_power_off_peak_time',
-                  'transductor',
-                  'url')
+        fields = (
+            "id",
+            "transductor",
+            "is_calculated",
+            "generated_energy_peak_time",
+            "generated_energy_off_peak_time",
+            "consumption_peak_time",
+            "consumption_off_peak_time",
+            "inductive_power_peak_time",
+            "inductive_power_off_peak_time",
+            "capacitive_power_peak_time",
+            "capacitive_power_off_peak_time",
+            "collection_date",
+        )
 
 
-class MonthlyMeasurementSerializer(serializers.HyperlinkedModelSerializer):
+class MonthlyMeasurementSerializer(serializers.ModelSerializer):
     class Meta:
         model = MonthlyMeasurement
-        fields = ('id',
-                  'generated_energy_peak_time',
-                  'generated_energy_off_peak_time',
-                  'consumption_peak_time',
-                  'consumption_off_peak_time',
-                  'inductive_power_peak_time',
-                  'inductive_power_off_peak_time',
-                  'capacitive_power_peak_time',
-                  'capacitive_power_off_peak_time',
-                  'active_max_power_peak_time',
-                  'active_max_power_off_peak_time',
-                  'reactive_max_power_peak_time',
-                  'reactive_max_power_off_peak_time',
-                  'active_max_power_list_peak_time',
-                  'active_max_power_list_off_peak_time',
-                  'reactive_max_power_list_peak_time',
-                  'reactive_max_power_list_off_peak_time',
-                  'url')
+        fields = (
+            "id",
+            "transductor",
+            "generated_energy_peak_time",
+            "generated_energy_off_peak_time",
+            "consumption_peak_time",
+            "consumption_off_peak_time",
+            "inductive_power_peak_time",
+            "inductive_power_off_peak_time",
+            "capacitive_power_peak_time",
+            "capacitive_power_off_peak_time",
+            "active_max_power_peak_time",
+            "active_max_power_off_peak_time",
+            "reactive_max_power_peak_time",
+            "reactive_max_power_off_peak_time",
+            "collection_date",
+            # "active_max_power_list_peak_time",
+            # "active_max_power_list_off_peak_time",
+            # "reactive_max_power_list_peak_time",
+            # "reactive_max_power_list_off_peak_time",
+        )
 
 
 class ThreePhaseSerializer(MinutelyMeasurementSerializer):
@@ -107,6 +112,7 @@ class ThreePhaseSerializer(MinutelyMeasurementSerializer):
     >>> queryset = MinutelyMeasurement.objects.all()
         serializer_class = MinutelyApparentPowerThreePhase
     """
+
     max = serializers.FloatField(default=0)
     min = serializers.FloatField(default=0)
     phase_a = serializers.ListField(default=[])
@@ -116,13 +122,13 @@ class ThreePhaseSerializer(MinutelyMeasurementSerializer):
     class Meta:
         model = MinutelyMeasurement
         fields = (
-            'id',
-            'transductor',
-            'max',
-            'min',
-            'phase_a',
-            'phase_b',
-            'phase_c'
+            "id",
+            "transductor",
+            "max",
+            "min",
+            "phase_a",
+            "phase_b",
+            "phase_c",
         )
 
 
@@ -134,11 +140,11 @@ class MeasurementSerializer(MinutelyMeasurementSerializer):
     class Meta:
         model = MinutelyMeasurement
         fields = (
-            'id',
-            'transductor',
-            'max',
-            'min',
-            'measurements'
+            "id",
+            "transductor",
+            "max",
+            "min",
+            "measurements",
         )
 
 
@@ -147,51 +153,51 @@ class QuarterlySerializer(QuarterlyMeasurementSerializer):
 
     class Meta:
         model = QuarterlyMeasurement
-        fields = (
-            'id',
-            'measurements'
-        )
+        fields = ("id", "measurements")
 
 
-class RealTimeMeasurementSerializer(serializers.HyperlinkedModelSerializer):
+class RealTimeMeasurementSerializer(serializers.ModelSerializer):
     consumption = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = MinutelyMeasurement
-        fields = ('id',
-                  'transductor_id',
-                  'collection_date',
-                  'voltage_a',
-                  'voltage_b',
-                  'voltage_c',
-                  'current_a',
-                  'current_b',
-                  'current_c',
-                  'total_active_power',
-                  'total_reactive_power',
-                  'total_power_factor',
-                  'consumption',
-                  'url')
-
-    def get_consumption(self, obj):
-        consumptions = ['consumption_peak_time', 'consumption_off_peak_time']
-        info = QuarterlyMeasurement.objects.filter(
-            transductor=EnergyTransductor.objects.get(
-                pk=self.__dict__['_args'][0].last().transductor_id
-            )
-        ).aggregate(
-            total_consumption=(Sum(consumptions[0]) + Sum(consumptions[1]))
+        fields = (
+            "id",
+            "transductor_id",
+            "collection_date",
+            "voltage_a",
+            "voltage_b",
+            "voltage_c",
+            "current_a",
+            "current_b",
+            "current_c",
+            "total_active_power",
+            "total_reactive_power",
+            "total_power_factor",
+            "consumption",
         )
 
-        return info['total_consumption']
+    def get_consumption(self, obj):
+        transductor_id = obj.transductor_id
+        transductor = EnergyTransductor.objects.get(id=transductor_id)
+
+        last_measurement = transductor.measurements_quarterlymeasurement.order_by("-collection_date").last()
+
+        if last_measurement is not None:
+            return (
+                last_measurement.consumption_peak_time
+                if last_measurement.consumption_peak_time is not None
+                else last_measurement.consumption_off_peak_time
+            )
+
+        return None
 
 
-class TaxSerializer(serializers.HyperlinkedModelSerializer):
+class TaxSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tax
         fields = (
-            'id',
-            'value_peak',
-            'value_off_peak',
-            'url'
+            "id",
+            "value_peak",
+            "value_off_peak",
         )

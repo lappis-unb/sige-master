@@ -26,7 +26,7 @@ def get_event_response(event_type: str, created_at: str, ended_at: str = None):
     [
         {{
             "type": "{event_type}",
-            "ip_address": "192.168.1.1",
+            "server_address": "192.168.1.1",
             "created_at": "{created_at}",
             "ended_at": {'null' if ended_at is None else f'"{ended_at}"'},
             "data": {{
@@ -49,7 +49,7 @@ def get_several_events_in_different_states_response():
         [
             {
                 "type": "FailedConnectionTransductorEvent",
-                "ip_address": "192.168.1.1",
+                "server_address": "192.168.1.1",
                 "created_at": "2021-03-08T16:04:03",
                 "ended_at": "2021-03-08T16:05:04",
                 "data": {
@@ -62,7 +62,7 @@ def get_several_events_in_different_states_response():
     [
         {
             "type": "CriticalVoltageEvent",
-            "ip_address": "192.168.1.1",
+            "server_address": "192.168.1.1",
             "created_at": "2021-03-08T16:04:03",
             "ended_at": null,
             "data": {
@@ -70,7 +70,7 @@ def get_several_events_in_different_states_response():
         },
         {
             "type": "PrecariousVoltageEvent",
-            "ip_address": "192.168.1.1",
+            "server_address": "192.168.1.1",
             "created_at": "2021-03-08T18:04:03",
             "ended_at": null,
             "data": {
@@ -78,7 +78,7 @@ def get_several_events_in_different_states_response():
         },
         {
             "type": "PhaseDropEvent",
-            "ip_address": "192.168.1.1",
+            "server_address": "192.168.1.1",
             "created_at": "2021-03-08T16:04:03",
             "ended_at": null,
             "data": {
@@ -100,11 +100,11 @@ class GetEventsFromTransductorsTestCase(TestCase):
             acronym="FGA",
         )
 
-        self.slave = Slave.objects.create(ip_address="1.1.1.1", name="UED FGA", broken=False)
+        self.slave = Slave.objects.create(server_address="1.1.1.1", name="UED FGA", broken=False)
 
         self.energy_transductor = EnergyTransductor.objects.create(
             serial_number="87654321",
-            ip_address="192.168.1.1",
+            server_address="192.168.1.1",
             geolocation_latitude=20.1,
             geolocation_longitude=37.9,
             name="MESP 1",

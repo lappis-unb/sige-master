@@ -32,11 +32,7 @@ class UserManager(BaseUserManager):
         return self._create_user(email, password, **extra_fields)
 
 
-USER_TYPES = [
-    ('admin', 'Admin'),
-    ('researcher', 'Researcher'),
-    ('general', 'General User')
-]
+USER_TYPES = [("admin", "Admin"), ("researcher", "Researcher"), ("general", "General User")]
 
 
 class CustomUser(AbstractUser):
@@ -47,4 +43,5 @@ class CustomUser(AbstractUser):
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["name"]
+
     objects = UserManager()  # This is the new line in the User model. ##

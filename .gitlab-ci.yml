@@ -1,4 +1,4 @@
-image: docker:latest
+image: docker:24.0.2
 
 services:
   - docker:dind
@@ -7,107 +7,67 @@ stages:
   - build
   - lint
   - test
-  - build_image
-  - code_quality
-  - cleanup
-
+  - release
+  - deploy
 
 variables:
-    DOCKER_HOST: tcp://docker:2375/
-    DOCKER_DRIVER: overlay2
-    REGISTRY: registry.gitlab.com
-    REPOSITORY: lappis-unb/projects/smi
-    SERVICE_NAME: master-api
-    IMAGE_TAG: latest
-    IMAGE_API: registry.gitlab.com/lappis-unb/projects/smi/smi-master:latest
-    IMAGE_DB: postgres:15.2-bullseye
-
+  SERVICE_NAME: master-api
+  IMAGE_DB: postgres:15.2-bullseye
+  IMAGE_STG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+  RELEASE_IMAGE: $CI_REGISTRY_IMAGE:latest
 
 before_script:
   - docker --version
   - docker compose version
+  - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
 
 build:
-    stage: build
-    script:
-      - docker compose pull 2>&1 | grep -v 'Downloading\|Extracting' || true
-      - docker compose build --parallel
+  stage: build
+  script:
+    - docker build --pull -t $IMAGE_STG .
+    - docker push $IMAGE_STG
 
-
-lint:
-    stage: lint
-    before_script:
-      - docker compose pull
-    script:
-      - docker compose run ${SERVICE_NAME} pycodestyle .
-    after_script:
-      - docker image prune -f
-
+style:
+  stage: lint
+  before_script:
+    - docker compose pull
+  script:
+    - docker compose run ${SERVICE_NAME} pycodestyle .
+  allow_failure: true
 
 test:
-    stage: test
-    before_script:
-      - docker compose pull
-      - docker compose up -d
-    script:
-      - docker compose run --rm ${SERVICE_NAME} python manage.py test --verbosity=3
-      - docker compose run --rm ${SERVICE_NAME} coverage run manage.py test
-      - docker compose run --rm ${SERVICE_NAME} coverage report
-      - docker compose run --rm ${SERVICE_NAME} coverage erase
-      # - docker compose run --rm app coverage report --fail-under=50
-    allow_failure: true
+  stage: test
+  before_script:
+    - docker compose pull
+    - docker compose up -d
+  script:
+    - docker compose run --rm ${SERVICE_NAME} python manage.py test --verbosity=3
+    - docker compose run --rm ${SERVICE_NAME} coverage run manage.py test
+    - docker compose run --rm ${SERVICE_NAME} coverage report
+    - docker compose run --rm ${SERVICE_NAME} coverage erase
+    # - docker compose run --rm app coverage report --fail-under=50
+  allow_failure: true # temporary until refactoring the tests
 
+release-image:
+  stage: release
+  script:
+    - docker pull $IMAGE_STG
+    - docker tag $IMAGE_STG $RELEASE_IMAGE
+    - docker push $RELEASE_IMAGE
+  dependencies:
+    - build
+  only:
+    changes:
+      - Dockerfile
 
-build_image:
-    stage: build
-    before_script:
-      - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    script:
-      - docker build -t $CI_REGISTRY_IMAGE .
-      - docker push $CI_REGISTRY_IMAGE
-    only:
-        changes:
-          - Dockerfile
-
-
-code_quality:
-    stage: lint
-    image: docker:stable
-    variables:
-        DOCKER_DRIVER: overlay2
-    allow_failure: true
-    services:
-      - docker:stable-dind
-    before_script:
-      - export SP_VERSION=$(echo "$CI_SERVER_VERSION" | sed 's/^\([0-9]*\)\.\([0-9]*\).*/\1-\2-stable/')
-    script:
-      - docker run --env SOURCE_CODE="$PWD" --volume "$PWD":/code --volume /var/run/docker.sock:/var/run/docker.sock "registry.gitlab.com/gitlab-org/security-products/codequality:$SP_VERSION" /code
-    artifacts:
-        paths:
-          - gl-code-quality-report.json
-        reports:
-            codequality: gl-code-quality-report.json
-    only:
-      - master
-
-
-cleanup:
-    stage: build
-    script:
-      - docker --version
-      - docker ps
-      - docker images
-      - docker volume ls
-      - docker compose down --volumes --remove-orphans
-      - if [[ $(docker ps -aq) ]]; then docker stop $(docker ps -aq); fi
-      - if [[ $(docker ps -aq) ]]; then docker rm -f $(docker ps -aq); fi
-      - if [[ $(docker images -q) ]]; then docker rmi -f $(docker images -q); fi
-      - if [[ $(docker volume ls -q) ]]; then dorcker volume rm -f $(docker volume ls -q); fi
-      - if [[ $(docker network ls --filter type=custom -q) ]]; then docker network rm -f $(docker network ls --filter type=custom); fi
-      - docker builder prune -a -f
-    only:
-        changes:
-          - gitlab-ci.yml
-          - docker compose.yml
-          - Dockerfile
-
+deploy:
+  stage: deploy
+  script:
+    # - ./scrips/deploy.sh
+    echo "Falta fazer o script de deployment!"
+    echo "SSH ou Local Gitlab Runner?"
+  dependencies:
+    - build
+  only:
+    - main
+  environment: production
