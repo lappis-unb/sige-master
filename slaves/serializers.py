@@ -3,15 +3,15 @@ from rest_framework import serializers
 from .models import Slave
 
 
-class SlaveSerializer(serializers.HyperlinkedModelSerializer):
+class SlaveSerializer(serializers.ModelSerializer):
     class Meta:
         model = Slave
         fields = (
-            'id',
-            'ip_address',
-            'port',
-            'name',
-            'broken',
-            'url'
+            "id",
+            "name",
+            "server_address",
+            "port",
+            "broken",
+            "active",
         )
-        read_only_fields = (['broken'])
+        read_only_fields = ["broken"]

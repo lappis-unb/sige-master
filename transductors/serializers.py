@@ -1,226 +1,164 @@
+import logging
+
+from django.core.validators import MaxValueValidator
+from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
-from slaves.models import Slave
-from rest_framework.exceptions import NotAcceptable
-from rest_framework.exceptions import APIException
-from campi.models import Campus
-from rest_framework import status, viewsets
-from rest_framework.response import Response
+from rest_framework.status import is_client_error, is_server_error, is_success
 
-from .models import EnergyTransductor
-from .api import check_connection
-from .api import create_transductor
-from .api import update_transductor
-from .api import delete_transductor
+from transductors.api import create_transductor, delete_transductor, update_transductor
+from transductors.models import EnergyTransductor
+from transductors.validators import latitude_validator, longitude_validator
 
-import time
-import requests
+logger = logging.getLogger(__name__)
 
 
-class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
+class EnergyTransductorSerializer(serializers.ModelSerializer):
+    geolocation_latitude = serializers.FloatField(validators=[latitude_validator])
+    geolocation_longitude = serializers.FloatField(validators=[longitude_validator])
+    port = serializers.IntegerField(validators=[MaxValueValidator(65535)])
+
     class Meta:
         model = EnergyTransductor
         fields = (
-            'id',
-            'serial_number',
-            'ip_address',
-            'port',
-            'slave_server',
-            'geolocation_latitude',
-            'geolocation_longitude',
-            'campus',
-            'firmware_version',
-            'name',
-            'broken',
-            'active',
-            'model',
-            'grouping',
-            'firmware_version',
-            'url',
-            'history'
+            "id",
+            "model",
+            "serial_number",
+            "ip_address",
+            "port",
+            "firmware_version",
+            "campus",
+            "geolocation_latitude",
+            "geolocation_longitude",
+            "broken",
+            "active",
+            "name",
+            "slave_server",
+            "grouping",
+            "history",
         )
 
-        read_only_fields = (
-            'active',
-            'broken'
-        )
+        read_only_fields = ("active", "broken")
+
+    def validate_grouping_data(self, grouping_data):
+        existent_group_type = [group.type.name for group in grouping_data]
+        valid_groups_type = set(existent_group_type)
+
+        if len(existent_group_type) != len(valid_groups_type):
+            error_message = _("You could not link the same transductor for " "two or more groups of the same type.")
+            raise serializers.ValidationError(error_message)
 
     def create(self, validated_data):
-        existent_group_type = (
-            [group.type.name for group in validated_data.get('grouping')]
-        )
-        valid_groups_type = set(existent_group_type)
+        grouping_data = validated_data.pop("grouping", [])
+        self.validate_grouping_data(grouping_data)
 
-        if len(existent_group_type) is not len(valid_groups_type):
-            raise NotAcceptable(
-                _('You could not link the same transductor for '
-                  'two or more groups of the same type.')
-            )
-        else:
-            id_in_slave = 0
-            if(validated_data.get('slave_server') is not None):
-                try:
-                    slave_server = validated_data.get('slave_server')
-                    response = create_transductor(validated_data, slave_server)
-                    print(response.status_code)
-                    if response.status_code != 201:
-                        error_message = _(
-                            'The collection server %s is unavailable' 
-                            % slave_server.name)
-                        exception = APIException(
-                            error_message
-                        )
-                        exception.status_code = 400
-                        raise exception
-                    r = response.json()
-                    print(r)
-                    id_in_slave = r['id']
-                except Exception:
-                    error_message = _(
-                        'Could not connect with server %s. Try it again later'
-                        % slave_server.name)
-                    exception = APIException(
-                        error_message
-                    )
-                    exception.status_code = 400
-                    raise exception
+        transductor = EnergyTransductor.objects.create(**validated_data)
+        if transductor.slave_server:
+            sync_slave, response = self.handle_slave_transductor(transductor, create_transductor)
+
+            if not sync_slave:
+                transductor.delete()
+                raise serializers.ValidationError(detail=response.text, code=response.status_code)
+
+        transductor.grouping.set(grouping_data)
+        return transductor
+
+    def delete(self, instance):
+        if instance.slave_server is None:
+            return instance.delete()
+
+        sync_slave, response = self.handle_slave_transductor(instance, delete_transductor)
+
+        if not sync_slave:
+            raise serializers.ValidationError(f"Failed to delete in slave API. Status code: {response.status_code}")
+        return instance.delete()
+
+    def handle_slave_transductor(self, instance, action_func):
+        try:
+            response = action_func(instance)
+            if is_success(response.status_code):
+                return (True, response.json)
+
+            elif is_client_error(response.status_code):
+                if isinstance(response, dict):
+                    response = format_serializer_errors(response)
+                return (False, response)
+
+            elif is_server_error(response.status_code):
+                instance.pending_sync = True
+                return (True, response)
 
             else:
-                id_in_slave = None
-            transductor = EnergyTransductor.objects.create(
-                serial_number=validated_data.get('serial_number'),
-                ip_address=validated_data.get('ip_address'),
-                firmware_version=validated_data.get('firmware_version'),
-                campus=validated_data.get('campus'),
-                name=validated_data.get('name'),
-                model=validated_data.get('model'),
-                geolocation_latitude=validated_data.get('geolocation_latitude'),
-                geolocation_longitude=validated_data.get(
-                    'geolocation_longitude'
-                ),
-                slave_server=validated_data.get('slave_server'),
-                id_in_slave=id_in_slave,
-                history=validated_data.get('history')
-            )
+                raise serializers.ValidationError(detail="Unknown error occurred")
 
-            for group in validated_data.get('grouping'):
-                transductor.grouping.add(group)
-
-            return transductor
+        except Exception as e:
+            logger.exception(f"Exception when updating slave transductor: {e}")
+            raise serializers.ValidationError(e)
 
     def update(self, instance, validated_data):
+        if instance.campus != validated_data["campus"]:
+            error_message = _("Cannot update campus field.")
+            raise serializers.ValidationError(error_message)
 
-        existent_group_type = (
-            [
-                group.type.name for group in set(validated_data.get('grouping'))
-            ]
-        )
-        valid_groups_type = set(existent_group_type)
+        grouping_data = validated_data.pop("grouping", [])
+        self.validate_grouping_data(grouping_data)
 
-        if len(existent_group_type) is not len(valid_groups_type):
-            raise NotAcceptable(
-                _('You could not link the same transductor for '
-                  'two or more groups of the same type.')
-            )
-        old_slave_server = instance.slave_server
-        new_slave_server = validated_data.get('slave_server')
+        new_slave = validated_data.pop("slave_server", None)
+        old_slave = instance.slave_server
 
-        errors = []
-        if new_slave_server != old_slave_server:
-            if not check_connection(old_slave_server):
-                error_message = _(
-                    'Could not disconnect from server %s. Try it again later'
-                    % old_slave_server.name)
-                errors.append(error_message)
+        for key, value in validated_data.items():
+            setattr(instance, key, value)
 
-            if not check_connection(new_slave_server):
-                error_message = _(
-                    'Could not connect with server %s. Try it again later' 
-                    % new_slave_server.name)
-
-                errors.append(error_message)
-
-            if errors.__len__() > 0:
-                exception = APIException(
-                    errors
-                )
-                exception.status_code = 400
-                raise exception
-
-            else:
-                try:
-                    if old_slave_server is not None:
-                        delete_transductor(
-                            instance.id_in_slave, instance, old_slave_server)
-
-                except Exception:
-                    error_message = _(
-                        'Could not disconnect from server %s.' 
-                        ' Try it again later'
-                        % old_slave_server.name)
-
-                    errors.append(error_message)
-                try:
-                    if new_slave_server is not None:
-                        response = create_transductor(
-                            validated_data, new_slave_server)
-                        r = response.json()
-                        instance.id_in_slave = r['id']
-
-                except Exception:
-                    error_message = _(
-                        'Could not connect with server %s. Try it again later'
-                        % new_slave_server.name)
-
-                    errors.append(error_message)
-
-        else:
-            try:
-                if old_slave_server is not None:
-                    update_transductor(
-                        instance.id_in_slave, validated_data, old_slave_server)
-
-            except Exception:
-                error_message = _(
-                    'Could not connect with server %s. Try it again later'
-                    % new_slave_server.name)
-
-                errors.append(error_message)
-
-        if errors.__len__() > 0:
-            exception = APIException(
-                errors
-            )
-            exception.status_code = 400
-            raise exception
-
-        instance.serial_number = validated_data.get('serial_number')
-        instance.ip_address = validated_data.get('ip_address')
-        instance.port = validated_data.get('port')
-        instance.history = validated_data.get('history')
-        instance.firmware_version = validated_data.get('firmware_version')
-        instance.campus = validated_data.get('campus')
-        instance.name = validated_data.get('name')
-        instance.model = validated_data.get('model')
-        instance.geolocation_latitude = validated_data.get(
-            'geolocation_latitude')
-        instance.geolocation_longitude = validated_data.get(
-            'geolocation_longitude'
-        )
-
-        instance.grouping.set(validated_data.get('grouping'))
-
-        instance.slave_server = new_slave_server
+        response = self.handle_atomic_change_slave(instance, old_slave, new_slave)
+        logger.info("response: %s", response)
 
         instance.save()
+        instance.grouping.set(grouping_data)
         return instance
+
+    @transaction.atomic
+    def handle_atomic_change_slave(self, instance, old_slave, new_slave):
+        if old_slave != new_slave:
+            if new_slave:
+                instance.slave_server = new_slave
+                sync_slave, response = self.handle_slave_transductor(instance, create_transductor)
+                if not sync_slave:
+                    logger.error(
+                        "Failed to delete in old slave API. Status code: %s",
+                        response.status_code,
+                    )
+                    raise serializers.ValidationError(
+                        f"Failed to create in new slave API. Status code: {response.status_code}"
+                    )
+            if old_slave:
+                sync_slave, response = self.handle_slave_transductor(instance, delete_transductor)
+                if not sync_slave:
+                    logger.error(
+                        "Failed to delete in old slave API. Status code: %s",
+                        response.status_code,
+                    )
+                    raise serializers.ValidationError(
+                        f"Failed to delete in old slave API. Status code: {response.status_code}"
+                    )
+        else:
+            instance.slave_server = new_slave
+            sync_slave, response = self.handle_slave_transductor(instance, update_transductor)
+            if not sync_slave:
+                logger.error(
+                    "Failed to delete in old slave API. Status code: %s",
+                    response.status_code,
+                )
+                raise serializers.ValidationError(
+                    f"Failed to update in new slave API. Status code: {response.status_code}"
+                )
+        return response
 
 
 class AddToServerSerializer(serializers.Serializer):
     slave_id = serializers.IntegerField()
 
 
-class EnergyTransductorListSerializer(serializers.HyperlinkedModelSerializer):
+class EnergyTransductorListSerializer(serializers.ModelSerializer):
     current_precarious_events_count = serializers.IntegerField()
     current_critical_events_count = serializers.IntegerField()
     events_last72h = serializers.IntegerField()
@@ -230,14 +168,25 @@ class EnergyTransductorListSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = EnergyTransductor
         fields = (
-            'id',
-            'serial_number',
-            'campus',
-            'name',
-            'active',
-            'model',
-            'grouping',
-            'current_precarious_events_count',
-            'current_critical_events_count',
-            'events_last72h'
+            "id",
+            "serial_number",
+            "campus",
+            "name",
+            "active",
+            "model",
+            "grouping",
+            "current_precarious_events_count",
+            "current_critical_events_count",
+            "events_last72h",
         )
+
+
+def format_serializer_errors(serializer):
+    errors = serializer.errors
+    formatted_errors = {}
+
+    for field, error_messages in errors.items():
+        formatted_error_messages = [str(error_message) for error_message in error_messages]
+        formatted_errors[field] = formatted_error_messages
+
+    return formatted_errors

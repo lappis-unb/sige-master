@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-03-04 16:07-0300\n"
+"POT-Creation-Date: 2023-05-29 12:06-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,108 +17,110 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-
-#: campi/apps.py:6
-msgid "campi"
-msgstr ""
-
-#: campi/apps.py:7
-msgid "Campi module"
-msgstr ""
-
-#: campi/models.py:13
+#: campi/models.py:15
 msgid "Campus"
 msgstr ""
 
-#: campi/models.py:14
+#: campi/models.py:16
 msgid "Campi"
 msgstr ""
 
-#: campi/models.py:19 groups/models.py:10 groups/models.py:39
+#: campi/models.py:21 groups/models.py:10 groups/models.py:39
 msgid "Name"
 msgstr ""
 
-#: campi/models.py:20 campi/models.py:26 events/models.py:31
-#: events/models.py:59 events/models.py:77 events/models.py:105
+#: campi/models.py:22 campi/models.py:28 events/models.py:27
+#: events/models.py:55 events/models.py:106 events/models.py:142
 #: groups/models.py:11 groups/models.py:40 groups/models.py:46
-#: measurements/models.py:14 measurements/models.py:23 slaves/models.py:19
-#: slaves/models.py:31 transductors/models.py:32 transductors/models.py:68
-#: transductors/models.py:73 transductors/models.py:95
-#: transductors/models.py:101 transductors/models.py:113
-#: transductors/models.py:121 transductors/models.py:127
 msgid "This field is required"
 msgstr ""
 
-#: campi/models.py:25
+#: campi/models.py:27
 msgid "Acronym"
 msgstr ""
 
-#: events/apps.py:6
-msgid "events"
+#: campi/models.py:33 transductors/models.py:19
+msgid "latitude"
+msgstr ""
+
+#: campi/models.py:38 transductors/models.py:20
+msgid "longitude"
+msgstr ""
+
+#: campi/models.py:44
+msgid "map zoom"
+msgstr ""
+
+#: campi/models.py:52
+msgid "contract type"
+msgstr ""
+
+#: campi/models.py:59
+msgid "off peak demand"
+msgstr ""
+
+#: campi/models.py:66
+msgid "peak demand"
 msgstr ""
 
 #: events/models.py:22
 msgid "ended at"
 msgstr ""
 
-#: events/models.py:26 transductors/models.py:106
+#: events/models.py:25 transductors/models.py:30
 msgid "created at"
 msgstr ""
 
-#: events/models.py:30
+#: events/models.py:27
 msgid "details"
 msgstr ""
 
-#: events/models.py:35
+#: events/models.py:30 events/models.py:31
 msgid "event"
 msgstr ""
 
-#: events/models.py:58 events/models.py:76
+#: events/models.py:54 events/models.py:105
 msgid "meter"
 msgstr ""
 
-#: events/models.py:63
+#: events/models.py:59
 msgid "voltage related"
 msgstr ""
 
-#: events/models.py:81
+#: events/models.py:110
 msgid "failed connection with meter"
 msgstr ""
 
-#: events/models.py:104
+#: events/models.py:141
 msgid "slave"
 msgstr ""
 
-#: events/models.py:109
+#: events/models.py:146
 msgid "failed connection with slave server"
 msgstr ""
 
-#: events/models.py:128
+#: events/models.py:166
 msgid "critical voltage"
 msgstr ""
 
-#: events/models.py:137
+#: events/models.py:175
 msgid "precarious voltage"
 msgstr ""
 
-#: events/models.py:146
+#: events/models.py:184
 msgid "phase drop"
 msgstr ""
 
-#: events/models.py:155
+#: events/models.py:192
 msgid "consumption related"
 msgstr ""
 
-#: events/models.py:165
+#: events/models.py:201
 msgid "consumption peak"
 msgstr ""
 
-#: events/models.py:175
+#: events/models.py:211
 msgid "consumption above contracted threshold"
-msgstr ""
-
-#: groups/apps.py:7
-msgid "Meter group module"
 msgstr ""
 
 #: groups/models.py:15
@@ -129,23 +131,15 @@ msgstr ""
 msgid "Type"
 msgstr ""
 
-#: groups/models.py:50 transductors/models.py:126
+#: groups/models.py:50 transductors/models.py:22
 msgid "Grouping"
 msgstr ""
 
-#: measurements/apps.py:6
-msgid "measurements"
+#: measurements/models.py:14
+msgid "Tax"
 msgstr ""
 
-#: measurements/apps.py:7
-msgid "Measurements module"
-msgstr ""
-
-#: measurements/models.py:13
-msgid "Collection time"
-msgstr ""
-
-#: measurements/models.py:22 transductors/models.py:200
+#: measurements/models.py:23 transductors/models.py:99
 msgid "Energy meter"
 msgstr ""
 
@@ -153,327 +147,222 @@ msgstr ""
 msgid "Measurement"
 msgstr ""
 
-#: measurements/models.py:36
+#: measurements/models.py:66
 msgid "Minutely measurement"
 msgstr ""
 
-#: measurements/models.py:40
-msgid "Frequency"
+#: measurements/models.py:67 measurements/models.py:116
+msgid "Minutely Measurements"
 msgstr ""
 
-#: measurements/models.py:45
-msgid "Voltage at phase A"
-msgstr ""
-
-#: measurements/models.py:50
-msgid "Voltage at phase B"
-msgstr ""
-
-#: measurements/models.py:55
-msgid "Voltage at phase C"
-msgstr ""
-
-#: measurements/models.py:60
-msgid "Current at phase A"
-msgstr ""
-
-#: measurements/models.py:65
-msgid "Current at phase B"
-msgstr ""
-
-#: measurements/models.py:70
-msgid "Current at phase C"
-msgstr ""
-
-#: measurements/models.py:75
-msgid "Active power at phase A"
-msgstr ""
-
-#: measurements/models.py:80
-msgid "Active power at phase B"
-msgstr ""
-
-#: measurements/models.py:85
-msgid "Active power at phase C"
-msgstr ""
-
-#: measurements/models.py:90 measurements/models.py:320
-msgid "Total active power"
-msgstr ""
-
-#: measurements/models.py:95
-msgid "Reactive power phase A"
-msgstr ""
-
-#: measurements/models.py:100
-msgid "Reactive power phase B"
-msgstr ""
-
-#: measurements/models.py:105
-msgid "Reactive power phase C"
-msgstr ""
-
-#: measurements/models.py:110 measurements/models.py:325
-msgid "Total reactive power"
-msgstr ""
-
-#: measurements/models.py:115
-msgid "Apparent power on phase A"
-msgstr ""
-
-#: measurements/models.py:120
-msgid "Apparent power on phase B"
-msgstr ""
-
-#: measurements/models.py:125
-msgid "Apparent power on phase C"
-msgstr ""
-
-#: measurements/models.py:130
-msgid "Total apparent power"
-msgstr ""
-
-#: measurements/models.py:135
-msgid "Power factor on phase A"
-msgstr ""
-
-#: measurements/models.py:140
-msgid "Power factor on phase B"
-msgstr ""
-
-#: measurements/models.py:145
-msgid "Power factor on phase C"
-msgstr ""
-
-#: measurements/models.py:150 measurements/models.py:330
-msgid "Total power factor"
-msgstr ""
-
-#: measurements/models.py:155
-msgid "DHT voltage on phase A"
-msgstr ""
-
-#: measurements/models.py:160
-msgid "DHT voltage on phase B"
-msgstr ""
-
-#: measurements/models.py:165
-msgid "DHT voltage on phase C"
-msgstr ""
-
-#: measurements/models.py:170
-msgid "DHT current on phase A"
-msgstr ""
-
-#: measurements/models.py:175
-msgid "DHT current on phase B"
-msgstr ""
-
-#: measurements/models.py:180
-msgid "DHT current on phase C"
-msgstr ""
-
-#: measurements/models.py:186
+#: measurements/models.py:83
 msgid "Quartely measurement"
 msgstr ""
 
-#: measurements/models.py:190
-msgid "Generated energy on peak hours"
+#: measurements/models.py:84
+msgid "Quarterly Measurements"
 msgstr ""
 
-#: measurements/models.py:195
-msgid "Generated energy not on peak hours"
+#: measurements/models.py:115
+msgid "Monthly measurement"
 msgstr ""
 
-#: measurements/models.py:200
-msgid "Consumption on peak hours"
-msgstr ""
-
-#: measurements/models.py:205
-msgid "Consumption not on peak hours"
-msgstr ""
-
-#: measurements/models.py:210
-msgid "Inductive power on peak hours"
-msgstr ""
-
-#: measurements/models.py:215
-msgid "Inductive power not on peak hours"
-msgstr ""
-
-#: measurements/models.py:220
-msgid "Capacitive power on peak hours"
-msgstr ""
-
-#: measurements/models.py:225
-msgid "Capacitive power not on peak hours"
-msgstr ""
-
-#: measurements/models.py:286
-msgid "Real time measurement"
-msgstr ""
-
-#: measurements/models.py:290
+#: measurements/models.py:124
 msgid "Voltage on phase A"
 msgstr ""
 
-#: measurements/models.py:295
+#: measurements/models.py:125
 msgid "Voltage on phase B"
 msgstr ""
 
-#: measurements/models.py:300
+#: measurements/models.py:126
 msgid "Voltage on phase C"
 msgstr ""
 
-#: measurements/models.py:305
+#: measurements/models.py:127
 msgid "Current on phase A"
 msgstr ""
 
-#: measurements/models.py:310
+#: measurements/models.py:128
 msgid "Current on phase B"
 msgstr ""
 
-#: measurements/models.py:315
+#: measurements/models.py:129
 msgid "Current on phase C"
 msgstr ""
 
-#: measurements/utils.py:29
+#: measurements/models.py:130
+msgid "Total active power"
+msgstr ""
+
+#: measurements/models.py:131
+msgid "Total reactive power"
+msgstr ""
+
+#: measurements/models.py:132
+msgid "Total power factor"
+msgstr ""
+
+#: measurements/models.py:135
+msgid "Real time measurement"
+msgstr ""
+
+#: measurements/utils.py:30
 #, python-format
 msgid "It must have an %s argument"
 msgstr ""
 
-#: measurements/utils.py:35 measurements/utils.py:47 measurements/views.py:445
-msgid "This serial_number does not match with any Transductor"
+#: measurements/utils.py:36 measurements/utils.py:48 measurements/views.py:718
+msgid "This id does not match with any Transductor"
 msgstr ""
 
-#: slaves/apps.py:6
-msgid "asodfjsdiofjao"
+#: sige_master/urls.py:34
+msgid "SIGE Site Administration"
 msgstr ""
 
-#: slaves/apps.py:7 slaves/apps.py:8
-msgid "Slave server module"
+#: sige_master/urls.py:35
+msgid "Energy monitoring system"
 msgstr ""
 
-#: slaves/cronjob.py:14
-msgid "Check meters cronjob"
+#: slaves/models.py:7
+msgid "server address"
 msgstr ""
 
-#: slaves/cronjob.py:29
-msgid "Get all measurements cronjob"
-msgstr ""
-
-#: slaves/cronjob.py:56
-msgid "Get real time measurements cronjob"
-msgstr ""
-
-#: slaves/models.py:18 transductors/models.py:67
-msgid "IP address"
-msgstr ""
-
-#: slaves/models.py:25
-msgid "IP access port"
-msgstr ""
-
-#: slaves/models.py:30
-msgid "Location"
-msgstr ""
-
-#: slaves/models.py:37
-msgid "Broken"
-msgstr ""
-
-#: slaves/models.py:41
-msgid "Slave server"
-msgstr ""
-
-#: transductors/apps.py:6
-msgid "transductors"
-msgstr ""
-
-#: transductors/apps.py:7
-msgid "Meters module"
-msgstr ""
-
-#: transductors/models.py:22
-msgid "active"
-msgstr ""
-
-#: transductors/models.py:26
-msgid "unreachable"
-msgstr ""
-
-#: transductors/models.py:31
-msgid "name"
-msgstr ""
-
-#: transductors/models.py:39
-msgid "last minutely collection"
-msgstr ""
-
-#: transductors/models.py:46
-msgid "last quarterly collection"
-msgstr ""
-
-#: transductors/models.py:53
-msgid "last monthly collection"
-msgstr ""
-
-#: transductors/models.py:74
+#: slaves/models.py:8 transductors/models.py:18
 msgid "port"
 msgstr ""
 
-#: transductors/models.py:80
-msgid "latitude"
+#: slaves/models.py:9
+msgid "location"
 msgstr ""
 
-#: transductors/models.py:86
-msgid "longitude"
+#: slaves/models.py:10 transductors/models.py:26
+msgid "active"
 msgstr ""
 
-#: transductors/models.py:94
-msgid "serial number"
+#: slaves/models.py:11 transductors/models.py:27
+msgid "broken"
 msgstr ""
 
-#: transductors/models.py:100
-msgid "firmware version"
+#: slaves/models.py:14
+msgid "Slave server"
 msgstr ""
 
-#: transductors/models.py:112
-msgid "campus"
+#: templates/email/user_reset_password.html:2
+#: templates/email/user_reset_password.txt:2
+#, python-format
+msgid ""
+"You're receiving this email because you requested a password reset \n"
+"for your user account at %(site_name)s."
 msgstr ""
 
-#: transductors/models.py:120
+#: templates/email/user_reset_password.html:5
+#: templates/email/user_reset_password.txt:5
+msgid "Please go to the following page and choose a new password:"
+msgstr ""
+
+#: templates/email/user_reset_password.html:12
+#: templates/email/user_reset_password.txt:12
+msgid "Thanks for using our site!"
+msgstr ""
+
+#: templates/email/user_reset_password.html:14
+#: templates/email/user_reset_password.txt:14
+#, python-format
+msgid "The %(site_name)s team"
+msgstr ""
+
+#: templates/material/admin/login.html:31
+msgid "Please correct the error below."
+msgstr ""
+
+#: templates/material/admin/login.html:33
+msgid "Please correct the errors below."
+msgstr ""
+
+#: templates/material/admin/login.html:47
+#, python-format
+msgid ""
+"You are authenticated as %(username)s, but are not authorized to access this "
+"page. Would you like to login to a different account?"
+msgstr ""
+
+#: templates/material/admin/login.html:90
+msgid "Forgotten your password or username?"
+msgstr ""
+
+#: templates/material/admin/login.html:94
+msgid "Log in"
+msgstr ""
+
+#: templates/material/admin/login.html:102
+msgid "Forgot your password?"
+msgstr ""
+
+#: transductors/models.py:14 users/models.py:45
+msgid "name"
+msgstr ""
+
+#: transductors/models.py:15
 msgid "model"
 msgstr ""
 
-#: transductors/models.py:132
+#: transductors/models.py:16
+msgid "firmware version"
+msgstr ""
+
+#: transductors/models.py:21
+msgid "campus"
+msgstr ""
+
+#: transductors/models.py:31
+msgid "history"
+msgstr ""
+
+#: transductors/models.py:34
 msgid "Collection Server"
 msgstr ""
 
-#: transductors/models.py:140
+#: transductors/models.py:45
+msgid "serial number"
+msgstr ""
+
+#: transductors/models.py:51
 msgid "Meter"
 msgstr ""
 
-#: transductors/serializers.py:58
-msgid "Could not add transductor to server "
+#: transductors/serializers.py:48
+msgid ""
+"You could not link the same transductor for two or more groups of the same "
+"type."
 msgstr ""
 
-#: transductors/serializers.py:117
-msgid "Could not add transductor to server at ip:"
+#: transductors/serializers.py:100
+msgid "Cannot update campus field."
 msgstr ""
 
-#: transductors/serializers.py:119
-msgid "Could not connect with connect with"
+#: transductors/validators.py:7
+#, python-brace-format
+msgid "{value} is not a valid latitude"
 msgstr ""
 
-#: transductors/serializers.py:120
-msgid "collection server at ip: "
+#: transductors/validators.py:13
+#, python-brace-format
+msgid "{value} is not a valid longitude"
 msgstr ""
 
-#: users/apps.py:6
-msgid "users"
+#: users/admin.py:14
+msgid "Personal info"
 msgstr ""
 
-#: users/apps.py:7
-msgid "Users module"
+#: users/admin.py:15
+msgid "Permissions"
+msgstr ""
+
+#: users/admin.py:17
+msgid "Important dates"
+msgstr ""
+
+#: users/models.py:44
+msgid "email address"
 msgstr ""

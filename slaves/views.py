@@ -1,11 +1,7 @@
-from rest_framework import viewsets
-from rest_framework import serializers
-from rest_framework import permissions
-from rest_framework.response import Response
+from rest_framework import permissions, viewsets
 
-from .models import Slave
-from .serializers import SlaveSerializer
-
+from slaves.models import Slave
+from slaves.serializers import SlaveSerializer
 from users.permissions import CurrentADMINUserOnly
 
 
@@ -13,4 +9,4 @@ class SlaveViewSet(viewsets.ModelViewSet):
     queryset = Slave.objects.all()
     serializer_class = SlaveSerializer
     # Para testes de Admin, retirar os permissions.AllowAny
-    permission_classes = (permissions.AllowAny | CurrentADMINUserOnly,) 
+    permission_classes = (permissions.AllowAny | CurrentADMINUserOnly,)

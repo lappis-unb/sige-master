@@ -1,159 +1,54 @@
-from .api import *
+from django.core.validators import MinLengthValidator
 from django.db import models
-from django.utils.timezone import datetime
-from polymorphic.models import PolymorphicModel
-from django.db import models
-from django.core.exceptions import ValidationError
-from django.core.validators import RegexValidator
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from polymorphic.models import PolymorphicModel
-
-from .api import *
 from campi.models import Campus
-from slaves.models import Slave
 from groups.models import Group
-from django.core.validators import MinLengthValidator
+from slaves.models import Slave
+
+from transductors.api import delete_transductor, update_transductor, create_transductor
 
 
-class Transductor(PolymorphicModel):
-    active = models.BooleanField(
-        default=True,
-        verbose_name=_('active')
-    )
-    broken = models.BooleanField(
-        default=False,
-        verbose_name=_('unreachable')
-    )
-    name = models.CharField(
-        max_length=256,
-        blank=True,
-        verbose_name=_('name'),
-        help_text=_('This field is required')
-    )
-
-    last_minutely_collection = models.DateTimeField(
-        blank=False,
-        null=False,
-        default=datetime.now,
-        verbose_name=_('last minutely collection')
-    )
-
-    last_quarterly_collection = models.DateTimeField(
-        blank=False,
-        null=False,
-        default=datetime.now,
-        verbose_name=_('last quarterly collection')
-    )
-
-    last_monthly_collection = models.DateTimeField(
-        blank=False,
-        null=False,
-        default=datetime.now,
-        verbose_name=_('last monthly collection')
-    )
-
-    ip_address = models.CharField(
-        max_length=15,
-        unique=True,
-        default='0.0.0.0',
-        validators=[
-            RegexValidator(
-                regex='^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$',
-                message='Incorrect IP address format',
-                code='invalid_ip_address'
-            ),
-        ],
-        verbose_name=_('IP address'),
-        help_text=_('This field is required')
-    )
-
-    port = models.IntegerField(
-        default=1001,
-        help_text=_('This field is required'),
-        verbose_name=_('port')
-    )
-
-    geolocation_latitude = models.FloatField(
+class Transductor(models.Model):
+    name = models.CharField(max_length=256, blank=True, verbose_name=_("name"))
+    model = models.CharField(max_length=256, verbose_name=_("model"))
+    firmware_version = models.CharField(max_length=20, verbose_name=_("firmware version"))
+    ip_address = models.GenericIPAddressField(unique=True, protocol="IPv4")
+    port = models.PositiveIntegerField(default=1001, verbose_name=_("port"))
+    geolocation_latitude = models.FloatField(default=0, blank=True, verbose_name=_("latitude"))
+    geolocation_longitude = models.FloatField(default=0, blank=True, verbose_name=_("longitude"))
+    campus = models.ForeignKey(Campus, on_delete=models.CASCADE, verbose_name=_("campus"))
+    grouping = models.ManyToManyField(Group, verbose_name=_("Grouping"), blank=True)
+    last_minutely_collection = models.DateTimeField(default=timezone.now)
+    last_quarterly_collection = models.DateTimeField(default=timezone.now)
+    last_monthly_collection = models.DateTimeField(default=timezone.now)
+    active = models.BooleanField(default=True, verbose_name=_("active"))
+    broken = models.BooleanField(default=False, verbose_name=_("broken"))
+    pending_sync = models.BooleanField(default=False)
+    pending_deletion = models.BooleanField(default=False)
+    creation_date = models.DateTimeField(default=timezone.now, verbose_name=_("created at"))
+    history = models.TextField(blank=True, verbose_name=_("history"))
+    slave_server = models.ForeignKey(
+        Slave,
+        verbose_name=_("Collection Server"),
+        default=None,
         null=True,
         blank=True,
-        verbose_name=_('latitude')
-    )
-
-    geolocation_longitude = models.FloatField(
-        null=True,
-        blank=True,
-        verbose_name=_('longitude')
+        on_delete=models.DO_NOTHING,
+        related_name="transductors",
     )
     serial_number = models.CharField(
         primary_key=False,
         unique=True,
         max_length=8,
-        blank=False,
-        null=False,
-        verbose_name=_('serial number'),
-        help_text=_('This field is required'),
-        validators=[MinLengthValidator(1)]
-    )
-
-    firmware_version = models.CharField(
-        max_length=20,
-        verbose_name=_('firmware version'),
-        help_text=_('This field is required')
-    )
-
-    creation_date = models.DateTimeField(
-        default=datetime.now,
-        verbose_name=_('created at')
-    )
-
-    campus = models.ForeignKey(
-        Campus,
-        on_delete=models.CASCADE,
-        verbose_name=_('campus'),
-        help_text=_('This field is required')
-    )
-
-    model = models.CharField(
-        max_length=256,
-        verbose_name=_('model'),
-        help_text=_('This field is required')
-    )
-
-    grouping = models.ManyToManyField(
-        Group,
-        verbose_name=_('Grouping'),
-        help_text=_('This field is required'),
-        blank=True
-    )
-
-    slave_server = models.ForeignKey(
-        Slave,
-        verbose_name=_('Collection Server'),
-        default=None,
-        null=True,
-        blank=True,
-        on_delete=models.DO_NOTHING,
-        related_name='transductors'
-    )
-
-    id_in_slave = models.IntegerField(
-        default=None,
-        null=True,
-        blank=True
-    )
-
-    history = models.TextField(
-        blank=True,
-        verbose_name=_('history')
+        verbose_name=_("serial number"),
+        validators=[MinLengthValidator(1)],
     )
 
     class Meta:
         abstract = True
-        verbose_name = _('Meter')
-
-    def __str__(self):
-        raise NotImplementedError
+        verbose_name = _("Meter")
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -163,7 +58,7 @@ class Transductor(PolymorphicModel):
         raise NotImplementedError
 
     def activate(self):
-        if(len(self.slave_servers.all()) > 0):
+        if len(self.slave_servers.all()) > 0:
             self.active = True
         else:
             self.active = False
@@ -198,11 +93,12 @@ class Transductor(PolymorphicModel):
 
 class EnergyTransductor(Transductor):
     class Meta:
-        verbose_name = _('Energy meter')
+        verbose_name = _("Energy meter")
 
     def __str__(self):
-        return 'Energy meter: %s Serial #%s' % (self.name, self.serial_number)
+        return f"{self.name} - {self.ip_address}"
 
     # There aren't measurements yet
     def get_measurements(self, datetime):
         pass
+    

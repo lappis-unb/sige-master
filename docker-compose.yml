@@ -1,37 +1,50 @@
-version: '3.5'
+version: "3.9"
 services:
     master-db:
         container_name: master-db
-        restart: always
-        image: postgres:9.6
-        ports:
-            - 5431:5432
+        restart: unless-stopped
+        image: postgres:15.2-bullseye
         env_file: dev-env
-        networks:
-            - smi-network
         volumes:
-            - master-pg-data:/var/lib/postgresql/data
+            - pg-data:/var/lib/postgresql/data
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres"]
+            interval: 5m
+            timeout: 30s
+            retries: 3
+            start_period: 1m
+        networks:
+            - master-network
 
     master-api:
         container_name: master-api
-        restart: always
-        build: .
+        restart: unless-stopped
+        image: ${RELEASE_IMAGE:-master-api}
+        build:
+            context: .
+            dockerfile: Dockerfile
         env_file: dev-env
-        command: ["sh", "scripts/start.sh"]
+        command: ["sh", "scripts/start-dev.sh"]
         ports:
-            - 8001:8001
+            - 443:8001
         networks:
-          - smi-network
+            - sige-network
+            - master-network
         volumes:
-            - .:/smi-master
-            - pip_cache:/usr/local/lib/python3.6/site-packages
+            - .:/sige-master
+            - pip_cache:/usr/local/lib/python3.11/site-packages
         depends_on:
             - master-db
 
 volumes:
-    master-pg-data: {}
+    pg-data:
+        name: master-pgdata
     pip_cache:
+        name: master-pip-cache
 
 networks:
-  smi-network:
-    external: true
+    master-network:
+        name: master-network
+    sige-network:
+        driver: bridge
+        name: sige-network
