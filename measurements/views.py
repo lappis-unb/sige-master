@@ -4,26 +4,37 @@ import os
 import re
 from copy import copy
 from datetime import datetime, timedelta
+from django.db.models import QuerySet
 
 import numpy as np
 from dateutil import relativedelta
 from django.http import StreamingHttpResponse
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import mixins, permissions, viewsets
+from rest_framework import mixins, permissions, viewsets, status
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import APIException, NotAcceptable
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
+
+from transductors.models import EnergyTransductor
+from campi.models import Tariff
+
 
 from measurements.filters import (
     MinutelyMeasurementFilter,
     MonthlyMeasurementFilter,
     QuarterlyMeasurementFilter,
     RealTimeMeasurementFilter,
+    UferMeasurementFilter,
 )
 from measurements.lttb import downsample
-from measurements.missing_values import get_measurements_with_missing_values
+from measurements.missing_values import (
+    get_measurements_with_missing_values,
+    get_ufer_measurements_with_missing_values,
+)
+from measurements.utils import MeasurementParamsValidator
+
 from measurements.models import (
     MinutelyMeasurement,
     MonthlyMeasurement,
@@ -179,9 +190,7 @@ class QuarterlyMeasurementViewSet(viewsets.ReadOnlyModelViewSet):
             return super().list(request, *args, **kwargs)
 
         data = {self.information: [], "min": 0, "max": 0}
-        measurements = self.queryset.order_by("collection_date").values(
-            self.fields[0], self.fields[1], "collection_date"
-        )
+        measurements = self.queryset.order_by("collection_date").values(*self.fields, "collection_date")
 
         if measurements:
             response = self.apply_algorithm(measurements)
@@ -207,6 +216,7 @@ class QuarterlyMeasurementViewSet(viewsets.ReadOnlyModelViewSet):
             self.get_hourly_measurements(measurements, measurements_list)
         elif periodicity == "daily":
             self.get_daily_measurements(measurements, measurements_list)
+
         else:
             measurements_list = []
 
@@ -491,7 +501,6 @@ class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
 
     def apply_algorithm(self, measurements, transductor=[]):
         type = self.request.query_params.get("type")
-
         measurements_list = [[measurements[0]["collection_date"], 0, 0]]
 
         if type == "daily":
@@ -509,10 +518,10 @@ class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
             measurements_list[len(measurements_list) - 1][0] = timezone.datetime(
                 last.year, last.month, last.day, 0, 0, 0
             ).strftime("%m/%d/%Y %H:%M:%S")
+
         elif type == "monthly":
             for i in range(0, len(measurements) - 1):
                 actual = measurements[i]["collection_date"]
-
                 last_month = measurements_list[len(measurements_list) - 1][0].month
 
                 if actual.month == last_month:
@@ -643,3 +652,104 @@ class TaxViewSet(viewsets.ModelViewSet):
     queryset = Tax.objects.all()
     serializer_class = TaxSerializer
     permission_classes = (permissions.AllowAny,)
+
+
+class ReportViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = QuarterlyMeasurement.objects.all()
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = QuarterlyMeasurementFilter
+    fields = [
+        "consumption_peak_time",
+        "consumption_off_peak_time",
+        "generated_energy_peak_time",
+        "generated_energy_off_peak_time",
+    ]
+
+    def list(self, request, *args, **kwargs):
+        campus = request.query_params.get("campus")
+        if not campus:
+            return Response({"detail": "Campus parameter is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        measurements = self.get_filtered_measurements()
+        if not measurements:
+            return Response({}, status=status.HTTP_204_NO_CONTENT)
+
+        processed_data = self.process_measurements(measurements)
+
+        tariffs = self.get_tariffs(campus)
+        if tariffs:
+            processed_data["tariff_peak"] = tariffs["high_tariff"]
+            processed_data["tariff_off_peak"] = tariffs["regular_tariff"]
+
+        return Response(processed_data, status=status.HTTP_200_OK)
+
+    def get_filtered_measurements(self) -> QuerySet:
+        filtered_queryset = self.filter_queryset(self.get_queryset())
+
+        return filtered_queryset.values(*self.fields, "collection_date")
+
+    def get_tariffs(self, campus: str) -> dict:
+        return Tariff.objects.filter(campus=campus).values("regular_tariff", "high_tariff").last()
+
+    def process_measurements(self, measurements: QuerySet) -> dict:
+        monthly_summary = {field: 0 for field in self.fields}
+
+        for obj in measurements:
+            for field in self.fields:
+                monthly_summary[field] += obj[field] or 0
+        return monthly_summary
+
+
+class UferViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = MinutelyMeasurement.objects.all()
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = UferMeasurementFilter
+    fields = ["power_factor_a", "power_factor_b", "power_factor_c"]
+
+    def list(self, request, *args, **kwargs):
+        MeasurementParamsValidator.get_ufer_fields()
+        campus_id = self.request.query_params.get("campus")
+
+        if not campus_id:
+            return Response({"detail": "Campus parameter is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        transductors = EnergyTransductor.objects.filter(campus_id=campus_id).values_list("id", "name")
+        self.queryset = self.filter_queryset(self.get_queryset())
+
+        result = []
+        for transductor in transductors:
+            result.append(self.threephasic_measurement_collections(transductor))
+
+        return Response(result, status=status.HTTP_200_OK)
+
+    def threephasic_measurement_collections(self, transductor):
+        start_date = datetime.fromisoformat(self.request.query_params.get("start_date"))
+        end_date = datetime.fromisoformat(self.request.query_params.get("end_date"))
+
+        measurements_a = get_ufer_measurements_with_missing_values(
+            self.queryset.filter(transductor_id=transductor[0]).values(self.fields[0], "collection_date"),
+            self.fields[0],
+            start_date=start_date,
+            end_date=end_date,
+        )
+        measurements_b = get_ufer_measurements_with_missing_values(
+            self.queryset.filter(transductor_id=transductor[0]).values(self.fields[1], "collection_date"),
+            self.fields[1],
+            start_date=start_date,
+            end_date=end_date,
+        )
+        measurements_c = get_ufer_measurements_with_missing_values(
+            self.queryset.filter(transductor_id=transductor[0]).values(self.fields[2], "collection_date"),
+            self.fields[2],
+            start_date=start_date,
+            end_date=end_date,
+        )
+
+        minutely_measurements = {
+            "transductor_id": transductor[0],
+            "transductor_name": transductor[1],
+            "phase_a": measurements_a,
+            "phase_b": measurements_b,
+            "phase_c": measurements_c,
+        }
+        return minutely_measurements

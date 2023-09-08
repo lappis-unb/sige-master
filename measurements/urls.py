@@ -20,6 +20,8 @@ from measurements.views import (
     MonthlyMeasurementViewSet,
     QuarterlyMeasurementViewSet,
     RealTimeMeasurementViewSet,
+    UferViewSet,
+    ReportViewSet,
     TaxViewSet,
     TotalCapacitivePowerViewSet,
     TotalConsumptionViewSet,
@@ -37,7 +39,8 @@ router.register(r"quarterly-measurements", QuarterlyMeasurementViewSet)
 router.register(r"monthly-measurements", MonthlyMeasurementViewSet)
 router.register(r"realtime-measurements", RealTimeMeasurementViewSet, basename="realtime-measurements")
 router.register(r"tax", TaxViewSet, basename="tax")
-
+router.register(r"report", ReportViewSet, basename="report")
+router.register(r"ufer", UferViewSet, basename="ufer")
 
 graph_router = routers.DefaultRouter()
 graph_router.register(r"minutely-threephase-voltage", VoltageThreePhaseViewSet, basename="minutelyvoltage")
