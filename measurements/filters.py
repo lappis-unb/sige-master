@@ -14,6 +14,8 @@ from measurements.models import (
 
 class BaseMeasurementFilter(filters.FilterSet):
     id = filters.NumberFilter(field_name="transductor")
+    campus = filters.NumberFilter(method="filter_campus", field_name="campus")
+    group = filters.NumberFilter(method="filter_group", field_name="grouping")
     start_date = filters.DateTimeFilter(method="filter_start_date", field_name="collection_date", lookup_expr="gte")
     end_date = filters.DateTimeFilter(method="filter_end_date", field_name="collection_date", lookup_expr="lte")
 
@@ -24,21 +26,6 @@ class BaseMeasurementFilter(filters.FilterSet):
         if not value:
             value = timezone.now()
         return queryset.filter(collection_date__lte=value)
-
-
-class MinutelyMeasurementFilter(BaseMeasurementFilter):
-    class Meta:
-        fields = ["id", "start_date", "end_date"]
-        model = MinutelyMeasurement
-
-
-class QuarterlyMeasurementFilter(BaseMeasurementFilter):
-    campus = filters.NumberFilter(method="filter_campus")
-    group = filters.NumberFilter(method="filter_group")
-
-    class Meta:
-        model = QuarterlyMeasurement
-        fields = ["start_date", "end_date", "campus", "group", "id"]
 
     def filter_campus(self, queryset, name, value):
         try:
@@ -53,6 +40,24 @@ class QuarterlyMeasurementFilter(BaseMeasurementFilter):
             return queryset.filter(transductor__grouping=group)
         except Group.DoesNotExist:
             raise APIException("Group id does not match with any existent group.")
+
+
+class MinutelyMeasurementFilter(BaseMeasurementFilter):
+    class Meta:
+        fields = ["id", "start_date", "end_date"]
+        model = MinutelyMeasurement
+
+
+class UferMeasurementFilter(BaseMeasurementFilter):
+    class Meta:
+        fields = fields = ["start_date", "end_date", "campus", "group"]
+        model = MinutelyMeasurement
+
+
+class QuarterlyMeasurementFilter(BaseMeasurementFilter):
+    class Meta:
+        model = QuarterlyMeasurement
+        fields = ["id", "start_date", "end_date", "campus", "group"]
 
 
 class MonthlyMeasurementFilter(BaseMeasurementFilter):

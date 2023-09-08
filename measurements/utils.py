@@ -3,6 +3,7 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework.exceptions import APIException
 
 from transductors.models import EnergyTransductor
+from campi.models import Campus
 from utils.validator import ValidationException
 
 
@@ -16,6 +17,9 @@ class MeasurementParamsValidator:
         ]
 
     @staticmethod
+    def get_ufer_fields():
+        return [("date", MeasurementParamsValidator.validate_start_date), ("campus", MeasurementParamsValidator)]
+
     def validate_query_params(params, ignore=None):
         if ignore is None:
             ignore = []
@@ -40,6 +44,15 @@ class MeasurementParamsValidator:
         exception.status_code = 400
         if errors:
             raise exception
+
+    @staticmethod
+    def validate_campus_id(campus_id):
+        try:
+            Campus.objects.get(id=campus_id)
+        except Campus.DoesNotExist:
+            raise ValidationException(
+                _("This id does not match with any Campus"),
+            )
 
     @staticmethod
     def validate_id(transductor_id):
