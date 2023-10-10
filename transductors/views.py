@@ -121,6 +121,7 @@ class EnergyTransductorListViewSet(
                 "campus": transductor.campus.name,
                 "name": transductor.name,
                 "active": transductor.active,
+                "broken": transductor.broken,
                 "model": transductor.model,
                 "grouping": transductor.grouping.all(),
                 "current_precarious_events_count": prec,
