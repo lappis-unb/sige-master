@@ -260,8 +260,10 @@ class QuarterlyMeasurementViewSet(viewsets.ReadOnlyModelViewSet):
     def build_data(self, actual, measurements, measurements_list, index):
         measurements_list[len(measurements_list) - 1][0] = measurements[index]["collection_date"]
         value = measurements[index][self.fields[1]]
+
         if value is not None:
-            measurements_list[len(measurements_list) - 1][1] += value
+            if measurements_list[len(measurements_list) - 1][1] is not None:
+                measurements_list[len(measurements_list) - 1][1] += value
 
     def finish_data(self, actual, last, measurements, measurements_list, index):
         answer_date = timezone.datetime(actual.year, actual.month, actual.day, actual.hour, 0, 0)
