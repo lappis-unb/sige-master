@@ -28,6 +28,8 @@ class Transductor(models.Model):
     pending_sync = models.BooleanField(default=False)
     pending_deletion = models.BooleanField(default=False)
     creation_date = models.DateTimeField(default=timezone.now, verbose_name=_("created at"))
+    power = models.IntegerField(default=0)
+    is_generator = models.BooleanField(default=False)
     history = models.TextField(blank=True, verbose_name=_("history"))
     slave_server = models.ForeignKey(
         Slave,
