@@ -173,6 +173,7 @@ class EnergyTransductorListSerializer(serializers.ModelSerializer):
             "campus",
             "name",
             "active",
+            "broken",
             "model",
             "grouping",
             "current_precarious_events_count",
