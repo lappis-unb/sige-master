@@ -44,8 +44,9 @@ test:
     - docker compose run --rm ${SERVICE_NAME} python manage.py test --verbosity=3
     - docker compose run --rm ${SERVICE_NAME} coverage run manage.py test
     - docker compose run --rm ${SERVICE_NAME} coverage report
+    - docker compose run --rm ${SERVICE_NAME} coverage xml -o coverage.xml
+    - docker run -it --rm -v "$(pwd):/code" python:3.8-slim bash -c "pip install coverage-badge && coverage-badge -o coverage.svg -f"
     - docker compose run --rm ${SERVICE_NAME} coverage erase
-    # - docker compose run --rm app coverage report --fail-under=50
   allow_failure: true # temporary until refactoring the tests
 
 release-image:
