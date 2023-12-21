@@ -5,6 +5,8 @@ services:
         restart: unless-stopped
         image: postgres:15.2-bullseye
         env_file: dev-env
+        environment:        
+            - TZ=America/Sao_Paulo
         volumes:
             - pg-data:/var/lib/postgresql/data
         healthcheck:
