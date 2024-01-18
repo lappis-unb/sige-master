@@ -1,6 +1,5 @@
 from django.db import models
 
-# from django.conf import settings
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from polymorphic.models import PolymorphicModel
@@ -8,7 +7,6 @@ from polymorphic.models import PolymorphicModel
 from slaves.models import Slave
 from transductors.models import EnergyTransductor
 
-# from fcm_django.fcm import fcm_send_topic_message
 
 TOPIC_NAME = "ALL"
 
@@ -18,7 +16,6 @@ class Event(PolymorphicModel):
     Defines a new event object
     """
 
-    # settings.USE_TZ = False
     ended_at = models.DateTimeField(null=True, blank=True, verbose_name=_("ended at"))
     created_at = models.DateTimeField(
         default=timezone.now,
@@ -84,13 +81,6 @@ class VoltageRelatedEvent(Event):
                 if counter < len(self.data):
                     body += ", "
 
-        # fcm_send_topic_message(
-        #     topic_name=TOPIC_NAME,
-        #     data_message={"title": str(self._meta.verbose_name).capitalize(), "body": body, "transducer": self.pk},
-        # )
-        # return self
-
-
 class FailedConnectionTransductorEvent(Event):
     """
     Defines a new event related to a failed connection with a transductor
@@ -119,12 +109,6 @@ class FailedConnectionTransductorEvent(Event):
         self.ended_at = event_dict["ended_at"]
         self.save()
         body = self.transductor.name
-
-        # fcm_send_topic_message(
-        #     topic_name=TOPIC_NAME,
-        #     data_message={"title": str(self._meta.verbose_name).capitalize(), "body": body, "transducer": self.pk},
-        # )
-        # return self
 
 
 class FailedConnectionSlaveEvent(Event):

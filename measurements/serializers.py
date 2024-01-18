@@ -86,11 +86,7 @@ class MonthlyMeasurementSerializer(serializers.ModelSerializer):
             "active_max_power_off_peak_time",
             "reactive_max_power_peak_time",
             "reactive_max_power_off_peak_time",
-            "collection_date",
-            # "active_max_power_list_peak_time",
-            # "active_max_power_list_off_peak_time",
-            # "reactive_max_power_list_peak_time",
-            # "reactive_max_power_list_off_peak_time",
+            "collection_date"
         )
 
 
