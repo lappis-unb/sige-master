@@ -1,4 +1,3 @@
-# from django.db.models import Sum
 from rest_framework import serializers
 
 from measurements.models import (
@@ -86,11 +85,7 @@ class MonthlyMeasurementSerializer(serializers.ModelSerializer):
             "active_max_power_off_peak_time",
             "reactive_max_power_peak_time",
             "reactive_max_power_off_peak_time",
-            "collection_date",
-            # "active_max_power_list_peak_time",
-            # "active_max_power_list_off_peak_time",
-            # "reactive_max_power_list_peak_time",
-            # "reactive_max_power_list_off_peak_time",
+            "collection_date"
         )
 
 

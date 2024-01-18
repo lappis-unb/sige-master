@@ -11,15 +11,12 @@ class UserTypePermission(permissions.BasePermission):
             e realizar os testes com o Token.
 
         '''
-        # if not request.user.is_authenticated:
-        #   return False
 
         try:
             type_user = self.get_type_user()
 
             userid = request.data["userid"]
             user = CustomUser.objects.get(id=userid)
-            # user = request.user
             return user.user_type == type_user
         except KeyError:
             return False
