@@ -21,9 +21,11 @@ class Seeder:
         )
         self.slave = Slave.objects.bulk_create([
             Slave(
-                ip_address=slave_api,
+                server_address=slave_api,
                 port=8000,
-                name="Local slave"
+                name="Local slave",
+                active=True,
+                broken=False,
             )
         ])
         print('\t  Successfully created', len(self.slave), 'slaves', '\n')
@@ -36,13 +38,22 @@ class Seeder:
                 acronym='Darcy A',
                 geolocation_latitude=-15.7636,
                 geolocation_longitude=-47.8694,
+                zoom_ratio=16,
+                contract_type='Azul',
+                off_peak_demand=0.0,
+                peak_demand=0.0,
             ),
             Campus(
                 name='Faculdade do Gama',
                 acronym='FGA',
                 geolocation_latitude=-15.9894,
                 geolocation_longitude=-48.0443,
-            )])
+                zoom_ratio=16,
+                contract_type='Azul',
+                off_peak_demand=0.0,
+                peak_demand=0.0,
+            )
+        ])
         print('\t  Successfully created', len(self.campus), 'campus', '\n')
         
     def create_group_types(self):
@@ -91,6 +102,9 @@ class Seeder:
                 firmware_version="1.42",
                 name="UED1",
                 model="MD30",
+                grouping=[group],
+                active=True,
+                broken=False,
             ),
             EnergyTransductor(
                 serial_number="30000484",
@@ -102,6 +116,9 @@ class Seeder:
                 firmware_version="1.42",
                 name="CPD1",
                 model="MD30",
+                grouping=[group],
+                active=True,
+                broken=False,
             ),
             EnergyTransductor(
                 serial_number="30000486",
@@ -113,6 +130,9 @@ class Seeder:
                 firmware_version="1.42",
                 name="CPD2",
                 model="MD30",
+                grouping=[group],
+                active=True,
+                broken=False,
             ),
             EnergyTransductor(
                 serial_number="30000247",
@@ -124,6 +144,9 @@ class Seeder:
                 firmware_version="1.42",
                 name="FT I",
                 model="MD30",
+                grouping=[group],
+                active=True,
+                broken=False,
             )])
         print(
             '\t  Successfully created', 
@@ -135,6 +158,7 @@ class Seeder:
     def create_events(self):
         print('\t- Creating Events')
         t = EnergyTransductor.objects.all()
+        self.events = []
         self.events.append([
             CriticalVoltageEvent.objects.create(
                 transductor=t[0]
@@ -199,7 +223,7 @@ class Seeder:
         """ TODO Improve ranges """ 
         days = 1
         for i in range(days * 24 * 60):
-            MinutelyMeasurement.objects.create(
+            measurement = MinutelyMeasurement.objects.create(
                 transductor=t[i % len(self.energyTransductors)],
                 collection_date=now,
                 frequency_a=random.randrange(221),
@@ -232,6 +256,7 @@ class Seeder:
                 dht_current_b=random.randrange(5),
                 dht_current_c=random.randrange(4)
             )
+            self.minutelyMeasurements.append(measurement)
             now = now - timedelta(seconds=60)
         print(
             '\t  Successfully created', 
