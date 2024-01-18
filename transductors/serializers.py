@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 class EnergyTransductorSerializer(serializers.ModelSerializer):
     geolocation_latitude = serializers.FloatField(validators=[latitude_validator])
     geolocation_longitude = serializers.FloatField(validators=[longitude_validator])
+    power = serializers.IntegerField()
     port = serializers.IntegerField(validators=[MaxValueValidator(65535)])
 
     class Meta:
@@ -30,6 +31,8 @@ class EnergyTransductorSerializer(serializers.ModelSerializer):
             "campus",
             "geolocation_latitude",
             "geolocation_longitude",
+            "power",
+            "is_generator",
             "broken",
             "active",
             "name",
