@@ -575,8 +575,9 @@ class CostConsumptionViewSet(QuarterlyMeasurementViewSet):
         elif type == "yearly":
             measurements_list[-1][0] = timezone.datetime(last.year, 1, 1, 0, 0, 0).strftime("%m/%d/%Y %H:%M:%S")
 
-        if actual.hour in range(0, 17) or actual.hour in range(21, 23):
-            value_off_peak = measurements[index]["tax__value_off_peak"]
+        if actual.hour in range(0, 18) \
+           or actual.hour in range(21, 24):
+            value_off_peak = measurements[index]['tax__value_off_peak']
             measurements_list.append(
                 [answer_date, measurements[index][self.fields[1]] * (value_off_peak if value_off_peak else 1), 0]
             )
