@@ -47,40 +47,42 @@ class GroupTestCase(TestCase):
             {"post": "create", "get": "list", "put": "update", "patch": "partial_update", "delete": "destroy"}
         )
 
-    def test_not_create_transductor_with_same_group_type(self):
+    def test_not_create_transductor_wrong_compus_id(self):
         params = {
             "serial_number": "8293010",
-            "server_address": "172.24.0.3",
+            "ip_address": "172.24.0.3",
+            "port": 65535,
             "geolocation_latitude": -48.04542,
             "geolocation_longitude": -15.989753,
             "firmware_version": "0.3",
             "name": "ICC Sul",
             "broken": True,
             "active": False,
-            "campus": self.serializer_campus["url"],
+            "campus": 1,
             "model": "TR4020",
-            "grouping": [self.serializer_group["url"], self.serializer_another_group["url"]],
+            "grouping": [1],
             "history": "Transductor history",
         }
 
         request = self.factory.post("energy-transductors", params)
         response = self.view_list(request)
 
-        self.assertEqual(response.status_code, 406)
+        self.assertEqual(response.status_code, 400)
 
     def test_update_transductor_with_more_than_one_group(self):
         params = {
             "serial_number": "8293010",
-            "server_address": "172.24.0.3",
+            "ip_address": "172.24.0.3",
+            "port": 65535,
             "geolocation_latitude": -48.04542,
             "geolocation_longitude": -15.989753,
             "firmware_version": "0.3",
             "name": "ICC Sul",
             "broken": True,
             "active": False,
-            "campus": self.serializer_campus["url"],
+            "campus": self.serializer_campus["id"],
             "model": "TR4020",
-            "grouping": [self.serializer_group["url"], self.serializer_other_group["url"]],
+            "grouping": [self.serializer_group["id"], self.serializer_other_group["id"]],
             "history": "Transductor history",
         }
 

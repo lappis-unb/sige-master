@@ -91,39 +91,6 @@ class MeasurementsTestCase(TestCase):
             active_max_power_off_peak_time=8,
             reactive_max_power_peak_time=8,
             reactive_max_power_off_peak_time=8,
-            active_max_power_list_peak=[0.0, 0.0, 0.0, 0.0],
-            active_max_power_list_peak_time=[
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-            ],
-            active_max_power_list_off_peak=[0.0, 0.0, 0.0, 0.0],
-            active_max_power_list_off_peak_time=[
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-            ],
-            reactive_max_power_list_peak=[0.0, 0.0, 0.0, 0.0],
-            reactive_max_power_list_peak_time=[
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-            ],
-            reactive_max_power_list_off_peak=[
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-            ],
-            reactive_max_power_list_off_peak_time=[
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-            ],
             transductor=self.transductor,
             collection_date=self.time,
         )
@@ -172,6 +139,7 @@ class MeasurementsTestCase(TestCase):
     def test_should_not_create_minutely_measurement_without_collection_date(self):
         new_measurement = MinutelyMeasurement()
         new_measurement.transductor = self.transductor
+        new_measurement.collection_date = None
 
         with self.assertRaises(IntegrityError):
             new_measurement.save()
@@ -209,6 +177,7 @@ class MeasurementsTestCase(TestCase):
     def test_should_not_create_quarterly_measurement_without_collection_date(self):
         new_measurement = QuarterlyMeasurement()
         new_measurement.transductor = self.transductor
+        new_measurement.collection_date = None
 
         with self.assertRaises(IntegrityError):
             new_measurement.save()
@@ -227,6 +196,20 @@ class MeasurementsTestCase(TestCase):
     # Monthly measurements tests
     def test_create_new_monthly_measurement(self):
         before = len(MonthlyMeasurement.objects.all())
+
+    # generated_energy_peak_time = models.FloatField(default=None, null=True)
+    # generated_energy_off_peak_time = models.FloatField(default=None, null=True)
+    # consumption_peak_time = models.FloatField(default=None, null=True)
+    # consumption_off_peak_time = models.FloatField(default=None, null=True)
+    # inductive_power_peak_time = models.FloatField(default=None, null=True)
+    # inductive_power_off_peak_time = models.FloatField(default=None, null=True)
+    # capacitive_power_peak_time = models.FloatField(default=None, null=True)
+    # capacitive_power_off_peak_time = models.FloatField(default=None, null=True)
+    # active_max_power_peak_time = models.FloatField(default=None, null=True)
+    # active_max_power_off_peak_time = models.FloatField(default=None, null=True)
+    # reactive_max_power_peak_time = models.FloatField(default=None, null=True)
+    # reactive_max_power_off_peak_time = models.FloatField(default=None, null=True)
+
         MonthlyMeasurement.objects.create(
             generated_energy_peak_time=8,
             generated_energy_off_peak_time=8,
@@ -240,39 +223,6 @@ class MeasurementsTestCase(TestCase):
             active_max_power_off_peak_time=8,
             reactive_max_power_peak_time=8,
             reactive_max_power_off_peak_time=8,
-            active_max_power_list_peak=[0.0, 0.0, 0.0, 0.0],
-            active_max_power_list_peak_time=[
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-            ],
-            active_max_power_list_off_peak=[0.0, 0.0, 0.0, 0.0],
-            active_max_power_list_off_peak_time=[
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-            ],
-            reactive_max_power_list_peak=[0.0, 0.0, 0.0, 0.0],
-            reactive_max_power_list_peak_time=[
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-            ],
-            reactive_max_power_list_off_peak=[
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-            ],
-            reactive_max_power_list_off_peak_time=[
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-            ],
             transductor=self.transductor,
             collection_date=timezone.now(),
         )
@@ -283,6 +233,7 @@ class MeasurementsTestCase(TestCase):
     def test_should_not_create_monthly_measurement_without_collection_date(self):
         new_measurement = MonthlyMeasurement()
         new_measurement.transductor = self.transductor
+        new_measurement.collection_date = None
 
         with self.assertRaises(IntegrityError):
             new_measurement.save()

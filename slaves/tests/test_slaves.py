@@ -47,7 +47,7 @@ class TestSlavesModels(TestCase):
     def test_should_create_new_slave(self):
         slaves_before = len(Slave.objects.all())
         Slave.objects.create(
-            ip_address="1.1.1.3",
+            server_address="1.1.1.3",
             name="MESP FGA",
             broken=False,
         )

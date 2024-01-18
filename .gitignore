@@ -79,3 +79,6 @@ cover/
 # PyBuilder
 .pybuilder/
 target/
+
+# Database Dum
+*.json
