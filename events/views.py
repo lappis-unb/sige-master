@@ -135,173 +135,116 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
         'PhaseDropEvent': 'phase_drop'
     }
 
-    def list(self, request):
+    def list(self, requests):
         transductor_id = self.request.query_params.get('id')
-        type = self.request.query_params.get('type')
+        event_type = self.request.query_params.get('type')
         campus = self.request.query_params.get('campus')
 
-        if type == 'period':
-            # Initially defined to be filtered for 3 days
+        voltage_related_events, failed_connection_transductor_events, failed_connection_slave_events = self.get_filtered_events(event_type)
+
+        if transductor_id:
+            voltage_related_events, failed_connection_transductor_events, failed_connection_slave_events = self.filter_by_transductor(
+                voltage_related_events, failed_connection_transductor_events, failed_connection_slave_events, transductor_id)
+        elif campus:
+            voltage_related_events, failed_connection_transductor_events, failed_connection_slave_events = self.filter_by_campus(
+                voltage_related_events, failed_connection_transductor_events, failed_connection_slave_events, campus)
+
+        events = self.retrieve_events(voltage_related_events, failed_connection_transductor_events, failed_connection_slave_events, transductor_id)
+
+        return Response(events, status=200)
+
+    def get_filtered_events(self, event_type):
+        if event_type == 'period':
             now = timezone.now()
             initial = now - timezone.timedelta(days=3)
 
             voltage_related_events = self.generic_filter(
-                VoltageRelatedEvent,
-                (initial, now),
-                type
-            )
-
+                VoltageRelatedEvent, (initial, now), event_type)
             failed_connection_transductor_events = self.generic_filter(
-                FailedConnectionTransductorEvent,
-                (initial, now),
-                type
-            )
-
+                FailedConnectionTransductorEvent, (initial, now), event_type)
             failed_connection_slave_events = self.generic_filter(
-                FailedConnectionSlaveEvent,
-                (initial, now),
-                type
-            )
-
+                FailedConnectionSlaveEvent, (initial, now), event_type)
         else:
-            voltage_related_events = self.generic_filter(
-                VoltageRelatedEvent
-            )
+            voltage_related_events = self.generic_filter(VoltageRelatedEvent)
+            failed_connection_transductor_events = self.generic_filter(FailedConnectionTransductorEvent)
+            failed_connection_slave_events = self.generic_filter(FailedConnectionSlaveEvent)
 
-            failed_connection_transductor_events = self.generic_filter(
-                FailedConnectionTransductorEvent
-            )
+        return voltage_related_events, failed_connection_transductor_events, failed_connection_slave_events
 
-            failed_connection_slave_events = self.generic_filter(
-                FailedConnectionSlaveEvent
-            )
+    def filter_by_transductor(self, voltage_related_events, failed_connection_transductor_events, failed_connection_slave_events, transductor_id):
+        try:
+            transductor = EnergyTransductor.objects.get(id=transductor_id)
 
-        if transductor_id:
-            try:
-                transductor = EnergyTransductor.objects.get(
-                    id=transductor_id
-                )
+            voltage_related_events = voltage_related_events.filter(transductor=transductor)
+            failed_connection_transductor_events = failed_connection_transductor_events.filter(transductor=transductor)
+            failed_connection_slave_events = failed_connection_slave_events.filter(slave__transductors__in=[transductor])
+        except ObjectDoesNotExist:
+            self.raise_not_found_exception('Energy transductor id does not match with any EnergyTransductor', 404)
 
-                voltage_related_events = voltage_related_events.filter(
-                    transductor=transductor
-                )
+        return voltage_related_events, failed_connection_transductor_events, failed_connection_slave_events
 
-                failed_connection_transductor_events = (
-                    failed_connection_transductor_events.filter(
-                        transductor=transductor
-                    )
-                )
+    def filter_by_campus(self, voltage_related_events, failed_connection_transductor_events, failed_connection_slave_events, campus):
+        try:
+            transductors = EnergyTransductor.objects.filter(campus=Campus.objects.get(pk=int(campus)))
 
-                failed_connection_slave_events = (
-                    failed_connection_slave_events.filter(
-                        slave__transductors__in=[transductor]
-                    )
-                )
-            except EnergyTransductor.DoesNotExist:
-                exception = APIException(
-                    'Energy transductor id does not match '
-                    'with any EnergyTransductor'
-                )
-                exception.status_code = 404
-                raise exception
-        elif campus:
-            try:
-                transductors = EnergyTransductor.objects.filter(
-                    campus=Campus.objects.get(pk=int(campus))
-                )
+            voltage_related_events = voltage_related_events.filter(transductor__in=transductors)
+            failed_connection_transductor_events = failed_connection_transductor_events.filter(transductor__in=transductors)
+            failed_connection_slave_events = failed_connection_slave_events.filter(slave__transductors__in=transductors)
+        except ObjectDoesNotExist:
+            self.raise_not_found_exception('Campus id does not match with any Campus', 404)
 
-                voltage_related_events = voltage_related_events.filter(
-                    transductor__in=transductors
-                )
-                failed_connection_transductor_events = (
-                    failed_connection_transductor_events.filter(
-                        transductor__in=transductors
-                    )
-                )
-                failed_connection_slave_events = (
-                    failed_connection_slave_events.filter(
-                        slave__transductors__in=transductors
-                    )
-                )
-            except Campus.DoesNotExist:
-                exception = APIException(
-                    'Campus id does not match with any Campus'
-                )
-                exception.status_code = 404
-                raise exception
+        return voltage_related_events, failed_connection_transductor_events, failed_connection_slave_events
 
+    def raise_not_found_exception(self, message, status_code):
+        exception = APIException(message)
+        exception.status_code = status_code
+        raise exception
+
+    def generic_filter(self, class_instance, range=None, period=None):
+        if period is not None and range is not None:
+            return class_instance.objects.filter(Q(ended_at__isnull=True) | Q(ended_at__range=range))
+        else:
+            return class_instance.objects.filter(ended_at__isnull=True)
+
+    def retrieve_events(self, voltage_related_events, failed_connection_transductor_events, failed_connection_slave_events, transductor_id):
         events = {}
 
-        for type in self.types:
-            events[self.events[type]] = []
-            elements = voltage_related_events.instance_of(self.types[type])
-            self.build_transductor_related_event(
-                events, elements, self.events[type]
-            )
+        for event_type in self.types:
+            events[self.events[event_type]] = []
+            elements = voltage_related_events.instance_of(self.types[event_type])
+            self.build_transductor_related_event(events, elements, self.events[event_type])
 
         events['transductor_connection_fail'] = []
-        self.build_transductor_related_event(
-            events, failed_connection_transductor_events, 
-            'transductor_connection_fail'
-        )
+        self.build_transductor_related_event(events, failed_connection_transductor_events, 'transductor_connection_fail')
 
         slave_events = []
 
         for element in failed_connection_slave_events:
+            transductors = element.slave.transductors.select_related('campus')
             if transductor_id:
-                transductors = (
-                    element.slave.transductors.select_related('campus').filter(
-                        pk=transductor_id
-                    )
-                )
-            else:
-                transductors = (
-                    element.slave.transductors.select_related('campus').all()
-                )
+                transductors = transductors.filter(pk=transductor_id)
+            transductors = transductors.all()
+
             for transductor in transductors:
-                event = {}
-                event['id'] = element.pk
-                event['location'] = transductor.name
-                event['campus'] = transductor.campus.acronym
-                event['transductor'] = transductor.id
-                event['data'] = {'slave': element.slave.pk}
-                event['start_time'] = element.created_at
-                event['end_time'] = element.ended_at
+                event = {
+                    'id': element.pk,
+                    'location': transductor.name,
+                    'campus': transductor.campus.acronym,
+                    'transductor': transductor.id,
+                    'data': {'slave': element.slave.pk},
+                    'start_time': element.created_at,
+                    'end_time': element.ended_at
+                }
                 slave_events.append(event)
 
         events['slave_connection_fail'] = slave_events
 
-        events['count'] = \
-            len(events['slave_connection_fail']) \
-            + len(events['transductor_connection_fail']) \
-            + len(events['phase_drop']) \
-            + len(events['critical_tension'])
+        events['count'] = len(events['slave_connection_fail']) + len(events['transductor_connection_fail']) + len(events['phase_drop']) + len(events['critical_tension'])
+        events['critical_events_count'] = len(events['critical_tension']) + len(events['phase_drop'])
+        events['light_events_count'] = len(events['slave_connection_fail']) + len(events['transductor_connection_fail']) + len(events['precarious_tension'])
 
-        events['critical_events_count'] = \
-            len(events['critical_tension']) \
-            + len(events['phase_drop'])
-
-        events['light_events_count'] = \
-            len(events['slave_connection_fail']) \
-            + len(events['transductor_connection_fail']) \
-            + len(events['precarious_tension'])
-
-        return Response(events, status=200)
-
-    def generic_filter(self, class_instance, range=None, period=None):
-        queryset = None
-
-        if period is not None and range is not None:
-            queryset = class_instance.objects.filter(
-                Q(ended_at__isnull=True) | Q(ended_at__range=range)
-            )
-        else:
-            queryset = class_instance.objects.filter(
-                ended_at__isnull=True
-            )
-
-        return queryset
-
+        return events
+      
     def build_transductor_related_event(self, events, elements, type):
         for element in elements:
             event = {}
@@ -313,3 +256,4 @@ class AllEventsViewSet(viewsets.ReadOnlyModelViewSet):
             event['start_time'] = element.created_at
             event['end_time'] = element.ended_at
             events[type].append(event)
+            
