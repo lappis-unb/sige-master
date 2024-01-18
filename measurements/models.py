@@ -18,7 +18,7 @@ class Measurement(models.Model):
     collection_date = models.DateTimeField(default=timezone.now)
     transductor = models.ForeignKey(
         EnergyTransductor,
-        related_name="%(app_label)s_%(class)s",
+        related_name="%(class)s" + "s",
         on_delete=models.CASCADE,
         verbose_name=_("Energy meter"),
     )

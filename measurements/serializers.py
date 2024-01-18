@@ -1,4 +1,3 @@
-# from django.db.models import Sum
 from rest_framework import serializers
 
 from measurements.models import (
@@ -8,6 +7,7 @@ from measurements.models import (
     QuarterlyMeasurement,
     Tax,
 )
+from campi.models import Tariff
 
 
 class MinutelyMeasurementSerializer(serializers.ModelSerializer):
@@ -181,7 +181,7 @@ class RealTimeMeasurementSerializer(serializers.ModelSerializer):
         transductor_id = obj.transductor_id
         transductor = EnergyTransductor.objects.get(id=transductor_id)
 
-        last_measurement = transductor.measurements_quarterlymeasurement.order_by("-collection_date").last()
+        last_measurement = transductor.quarterlymeasurements.order_by("-collection_date").last()
 
         if last_measurement is not None:
             return (
@@ -201,3 +201,31 @@ class TaxSerializer(serializers.ModelSerializer):
             "value_peak",
             "value_off_peak",
         )
+
+
+class UferSerializer(serializers.Serializer):
+    transductor_id = serializers.IntegerField(min_value=1)
+    transductor_name = serializers.CharField(max_length=255)
+    phase_a = serializers.FloatField(min_value=0, max_value=100)
+    phase_b = serializers.FloatField(min_value=0, max_value=100)
+    phase_c = serializers.FloatField(min_value=0, max_value=100)
+
+
+class ReportSerializer(serializers.Serializer):
+    campus = serializers.CharField()
+    consumption_peak_time = serializers.FloatField()
+    consumption_off_peak_time = serializers.FloatField()
+    generated_energy_peak_time = serializers.FloatField()
+    generated_energy_off_peak_time = serializers.FloatField()
+    tariff_peak = serializers.FloatField(read_only=True)
+    tariff_off_peak = serializers.FloatField(read_only=True)
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+
+        tariffs = Tariff.objects.filter(campus=instance["campus"]).values("regular_tariff", "high_tariff").last()
+        if tariffs:
+            data["tariff_peak"] = tariffs["high_tariff"]
+            data["tariff_off_peak"] = tariffs["regular_tariff"]
+
+        return data
