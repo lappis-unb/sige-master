@@ -48,26 +48,3 @@ def get_minutes_from_date(date) -> int:
 
 def get_date_from_minutes(minutes):
     return timezone.datetime.fromtimestamp(minutes * 60)
-
-
-def get_ufer_measurements_with_missing_values(measurements, value_field: str, start_date, end_date):
-    new_measurements = []
-
-    if measurements and len(measurements):
-        start_date_in_minutes = get_minutes_from_date(start_date)
-        end_date_in_minutes = get_minutes_from_date(end_date)
-        index = 0
-
-        for minute in range(start_date_in_minutes, end_date_in_minutes + 1):
-            if index < len(measurements):
-                if get_minutes_from_date(measurements[index]["collection_date"]) == minute:
-                    new_measurements.append(measurements[index][value_field])
-                    index += 1
-
-    if len(new_measurements):
-        valid = len(list(filter(lambda x: x <= 0.92 and x >= -0.92, new_measurements)))
-        total = len(measurements)
-        result = valid / total
-        return result
-    else:
-        return 0

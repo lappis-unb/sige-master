@@ -4,13 +4,13 @@ import os
 import re
 from copy import copy
 from datetime import datetime, timedelta
-from django.db.models import QuerySet
 
 import numpy as np
 from dateutil import relativedelta
 from django.http import StreamingHttpResponse
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models import Sum, Case, When, Q, Count, QuerySet
 from rest_framework import mixins, permissions, viewsets, status
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import APIException, NotAcceptable
@@ -18,7 +18,6 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
 from transductors.models import EnergyTransductor
-from campi.models import Tariff
 
 
 from measurements.filters import (
@@ -29,11 +28,7 @@ from measurements.filters import (
     UferMeasurementFilter,
 )
 from measurements.lttb import downsample
-from measurements.missing_values import (
-    get_measurements_with_missing_values,
-    get_ufer_measurements_with_missing_values,
-)
-from measurements.utils import MeasurementParamsValidator
+from measurements.missing_values import get_measurements_with_missing_values
 
 from measurements.models import (
     MinutelyMeasurement,
@@ -51,6 +46,8 @@ from measurements.serializers import (
     RealTimeMeasurementSerializer,
     TaxSerializer,
     ThreePhaseSerializer,
+    UferSerializer,
+    ReportSerializer,
 )
 
 
@@ -657,7 +654,7 @@ class TaxViewSet(viewsets.ModelViewSet):
 
 
 class ReportViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = QuarterlyMeasurement.objects.all()
+    serializer_class = ReportSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = QuarterlyMeasurementFilter
     fields = [
@@ -667,91 +664,99 @@ class ReportViewSet(viewsets.ReadOnlyModelViewSet):
         "generated_energy_off_peak_time",
     ]
 
+    def get_queryset(self):
+        queryset = QuarterlyMeasurement.objects.all().only(*self.fields)
+
+        return self.filter_queryset(queryset)
+
     def list(self, request, *args, **kwargs):
+        group = request.query_params.get("group")
         campus = request.query_params.get("campus")
         if not campus:
             return Response({"detail": "Campus parameter is required."}, status=status.HTTP_400_BAD_REQUEST)
 
-        measurements = self.get_filtered_measurements()
-        if not measurements:
+        measurements = self.get_queryset()
+        if not measurements.exists():
             return Response({}, status=status.HTTP_204_NO_CONTENT)
 
-        processed_data = self.process_measurements(measurements)
+        aggregated_data = self.get_aggregated_monthy(measurements)
+        aggregated_data["campus"] = campus
 
-        tariffs = self.get_tariffs(campus)
-        if tariffs:
-            processed_data["tariff_peak"] = tariffs["high_tariff"]
-            processed_data["tariff_off_peak"] = tariffs["regular_tariff"]
+        serializer = self.get_serializer(data=aggregated_data)
+        serializer.is_valid(raise_exception=True)
 
-        return Response(processed_data, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def get_filtered_measurements(self) -> QuerySet:
-        filtered_queryset = self.filter_queryset(self.get_queryset())
-
-        return filtered_queryset.values(*self.fields, "collection_date")
-
-    def get_tariffs(self, campus: str) -> dict:
-        return Tariff.objects.filter(campus=campus).values("regular_tariff", "high_tariff").last()
-
-    def process_measurements(self, measurements: QuerySet) -> dict:
-        monthly_summary = {field: 0 for field in self.fields}
-
-        for obj in measurements:
-            for field in self.fields:
-                monthly_summary[field] += obj[field] or 0
-        return monthly_summary
+    def get_aggregated_monthy(self, measurements: QuerySet) -> dict:
+        aggregates = {field: Sum(field) for field in self.fields}
+        return measurements.aggregate(**aggregates)
 
 
 class UferViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = MinutelyMeasurement.objects.all()
+    serializer_class = UferSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = UferMeasurementFilter
     fields = ["power_factor_a", "power_factor_b", "power_factor_c"]
 
-    def list(self, request, *args, **kwargs):
-        MeasurementParamsValidator.get_ufer_fields()
-        campus_id = self.request.query_params.get("campus")
+    def get_queryset(self):
+        queryset = MinutelyMeasurement.objects.all().only(*self.fields, "collection_date")
+        non_zero_queryset = queryset.exclude(power_factor_a=0, power_factor_b=0, power_factor_c=0)
 
+        return self.filter_queryset(non_zero_queryset).select_related("transductor")
+
+    def list(self, request):
+        campus_id = request.query_params.get("campus")
         if not campus_id:
             return Response({"detail": "Campus parameter is required."}, status=status.HTTP_400_BAD_REQUEST)
 
-        transductors = EnergyTransductor.objects.filter(campus_id=campus_id).values_list("id", "name")
-        self.queryset = self.filter_queryset(self.get_queryset())
+        transductor_ids = EnergyTransductor.objects.values_list("id", flat=True)
+        filtered_measurements = self.get_queryset().filter(transductor__in=transductor_ids)
 
-        result = []
-        for transductor in transductors:
-            result.append(self.threephasic_measurement_collections(transductor))
+        filter_conditions = self._generate_filter_conditions()
+        annotations = self._generate_annotations(filter_conditions)
+        aggregated_data = filtered_measurements.values("transductor", "transductor__name").annotate(**annotations)
 
-        return Response(result, status=status.HTTP_200_OK)
+        results = []
+        for data in aggregated_data:
+            transductor_info = {"id": data["transductor"], "name": data["transductor__name"]}
+            percentage_data = self._calculate_percentage(data)
+            results.append(self._serialize_transductor_data(percentage_data, transductor_info))
 
-    def threephasic_measurement_collections(self, transductor):
-        start_date = datetime.fromisoformat(self.request.query_params.get("start_date"))
-        end_date = datetime.fromisoformat(self.request.query_params.get("end_date"))
+        return Response(results, status=status.HTTP_200_OK)
 
-        measurements_a = get_ufer_measurements_with_missing_values(
-            self.queryset.filter(transductor_id=transductor[0]).values(self.fields[0], "collection_date"),
-            self.fields[0],
-            start_date=start_date,
-            end_date=end_date,
+    def _generate_filter_conditions(self, threshold: float = 0.92) -> Q:
+        conditions = Q()
+        for field in self.fields:
+            conditions |= Q(**{f"{field}__gt": -0.92}) & Q(**{f"{field}__lt": 0.92})
+
+        return conditions
+
+    def _generate_annotations(self, filter_conditions: Q) -> dict:
+        annotations = {}
+        for field in self.fields:
+            annotations[f"{field}_total"] = Count(field)
+            annotations[f"{field}_interval"] = Count(Case(When(filter_conditions, then=1)))
+
+        return annotations
+
+    def _calculate_percentage(self, measurements: dict) -> dict:
+        data = {}
+
+        for field in self.fields:
+            total = measurements[f"{field}_total"]
+            interval_count = measurements[f"{field}_interval"]
+            data[field] = (interval_count / total) * 100 if total else 0
+        return data
+
+    def _serialize_transductor_data(self, percent_data: dict, transductor_info: dict) -> dict:
+        serializer = self.serializer_class(
+            data={
+                "transductor_id": transductor_info["id"],
+                "transductor_name": transductor_info["name"],
+                "phase_a": percent_data["power_factor_a"],
+                "phase_b": percent_data["power_factor_b"],
+                "phase_c": percent_data["power_factor_c"],
+            }
         )
-        measurements_b = get_ufer_measurements_with_missing_values(
-            self.queryset.filter(transductor_id=transductor[0]).values(self.fields[1], "collection_date"),
-            self.fields[1],
-            start_date=start_date,
-            end_date=end_date,
-        )
-        measurements_c = get_ufer_measurements_with_missing_values(
-            self.queryset.filter(transductor_id=transductor[0]).values(self.fields[2], "collection_date"),
-            self.fields[2],
-            start_date=start_date,
-            end_date=end_date,
-        )
-
-        minutely_measurements = {
-            "transductor_id": transductor[0],
-            "transductor_name": transductor[1],
-            "phase_a": measurements_a,
-            "phase_b": measurements_b,
-            "phase_c": measurements_c,
-        }
-        return minutely_measurements
+        serializer.is_valid(raise_exception=True)
+        return serializer.validated_data
