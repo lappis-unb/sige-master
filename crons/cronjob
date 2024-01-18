@@ -4,4 +4,3 @@
 0 * * * * export $(cat /root/env | xargs) && python /sige-master/manage.py collect_data minutely >> /sige-master/logs/cron_output.log 2>&1
 5 * * * * export $(cat /root/env | xargs) && python /sige-master/manage.py collect_data quarterly >> /sige-master/logs/cron_output.log 2>&1
 10 * * * * export $(cat /root/env | xargs) && python /sige-master/manage.py collect_data monthly >> /sige-master/logs/cron_output.log 2>&1
-

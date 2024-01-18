@@ -32,7 +32,7 @@ class TransductorTestCase(TestCase):
         )
 
         self.sample_slave_server = Slave.objects.create(
-            ip_address="10.0.0.1",
+            server_address="10.0.0.1",
             name="FGA",
             broken=False
         )

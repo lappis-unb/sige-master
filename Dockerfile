@@ -55,5 +55,5 @@ RUN wget https://cronitor.io/dl/linux_amd64.tar.gz \
 COPY crons/cronjob /etc/cron.d/sige-cron
 RUN chmod 0644 /etc/cron.d/sige-cron && \
     /usr/bin/crontab /etc/cron.d/sige-cron
-
+    
 CMD ["/sige-master/scripts/start.sh"]

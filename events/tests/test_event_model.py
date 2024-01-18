@@ -24,7 +24,7 @@ class EventTestCase(TestCase):
 
         self.transductor = EnergyTransductor.objects.create(
             serial_number="8764321",
-            server_address="111.101.111.11",
+            ip_address="111.101.111.11",
             broken=False,
             active=True,
             model="TR4020",
@@ -46,3 +46,4 @@ class EventTestCase(TestCase):
 
         self.assertEqual(before + 1, len(FailedConnectionSlaveEvent.objects.all()))
         self.assertEqual(self.slave.server_address, event.slave.server_address)
+    

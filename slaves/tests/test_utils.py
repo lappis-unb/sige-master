@@ -1,12 +1,6 @@
-from datetime import datetime
-from unittest import mock
-
-from django.http import JsonResponse
 from django.test import TestCase
 from django.utils import timezone
 from requests.models import Response
-from rest_framework import status
-
 from campi.models import Campus
 from events.models import (
     CriticalVoltageEvent,
