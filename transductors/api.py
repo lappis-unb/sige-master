@@ -95,22 +95,35 @@ async def request_slave_transductor(instance, method, max_retries=3, wait_time=5
 
     for attempt in range(1, max_retries + 1):
         try:
-            async with httpx.AsyncClient() as client:
-                response = await client.request(method, base_url, json=data)
-
-                if is_server_error(response.status_code):
-                    raise Exception(f"{response.text} - {response.status_code}")
-
-                if is_success(response.status_code):
-                    serialized_data = json.loads(response.text)
-                    return serialized_data, response.status_code
-
-                return response.text, response.status_code
+            result = await _make_request(method, base_url, data)
+            return result
 
         except Exception as e:
-            logger.warning(f"Attempt {attempt}: {e} - retrying in {wait_time} seconds")
-            if attempt == max_retries:
-                logger.error(f"Failed: {method} transductor Slave API after {attempt} attempts: {e}")
-                return str(e), response.status_code if response else None
-            else:
-                await asyncio.sleep(wait_time)
+            _handle_retry(attempt, max_retries, wait_time, method, e)
+
+    return str(e), None
+
+
+async def _make_request(method, base_url, data):
+    async with httpx.AsyncClient() as client:
+        response = await client.request(method, base_url, json=data)
+
+        if is_server_error(response.status_code):
+            raise Exception(f"{response.text} - {response.status_code}")
+
+        if is_success(response.status_code):
+            serialized_data = json.loads(response.text)
+            return serialized_data, response.status_code
+
+        return response.text, response.status_code
+
+
+async def _handle_retry(attempt, max_retries, wait_time, method, exception):
+    logger.warning(f"Attempt {attempt}: {exception} - retrying in {wait_time} seconds")
+    if attempt == max_retries:
+        logger.error(
+            f"Failed: {method} transductor Slave API after {attempt} attempts: {exception}"
+        )
+        raise exception  # ou return str(exception), None se preferir
+    else:
+        await asyncio.sleep(wait_time)
