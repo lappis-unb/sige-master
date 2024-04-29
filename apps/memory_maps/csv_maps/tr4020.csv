@@ -1,0 +1,63 @@
+register                      ,attribute                        ,address ,size ,Type    ,group    ,active ,byteorder    ,function              ,description
+RTC_Ano                       ,year                             ,     10 ,   1 ,short16 ,datetime ,true   ,MSB_LSB      ,Read_Holding_Registers ,Ano
+RTC_Mes                       ,month                            ,     11 ,   1 ,Short16 ,datetime ,true   ,MSB_LSB      ,Read_Holding_Registers ,Mês
+RTC_DiaDoAno                  ,day_of_the_year                  ,     12 ,   1 ,short16 ,datetime ,true   ,MSB_LSB      ,Read_Holding_Registers ,Dia do Ano
+RTC_DiaDaSemana               ,day_of_the_week                  ,     13 ,   1 ,short16 ,datetime ,true   ,MSB_LSB      ,Read_Holding_Registers ,Dia da Semana
+RTC_DiaDoMes                  ,day_of_the_month                 ,     14 ,   1 ,short16 ,datetime ,true   ,MSB_LSB      ,Read_Holding_Registers ,Dia do Mês
+RTC_Hora                      ,hour                             ,     15 ,   1 ,short16 ,datetime ,true   ,MSB_LSB      ,Read_Holding_Registers ,Hora
+RTC_Minuto                    ,minute                           ,     16 ,   1 ,short16 ,datetime ,true   ,MSB_LSB      ,Read_Holding_Registers ,Minuto
+RTC_Segundo                   ,second                           ,     17 ,   1 ,short16 ,datetime ,true   ,MSB_LSB      ,Read_Holding_Registers ,Segundo
+FreqA                         ,frequency_a                      ,     66 ,   2 ,float32 ,minutely ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Medição Frequência fase A
+UrmsA                         ,voltage_a                        ,     68 ,   2 ,float32 ,minutely ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Tensão na Fase A
+UrmsB                         ,voltage_b                        ,     70 ,   2 ,float32 ,minutely ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Tensão na Fase B
+UrmsC                         ,voltage_c                        ,     72 ,   2 ,float32 ,minutely ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Tensão na Fase C
+IrmsA                         ,current_a                        ,     74 ,   2 ,float32 ,minutely ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Corrente na Fase A
+IrmsB                         ,current_b                        ,     76 ,   2 ,float32 ,minutely ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Corrente na Fase B
+IrmsC                         ,current_c                        ,     78 ,   2 ,float32 ,minutely ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Corrente na Fase C
+PotAtivA                      ,active_power_a                   ,     80 ,   2 ,float32 ,minutely ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Potência Ativa na Fase A
+PotAtivB                      ,active_power_b                   ,     82 ,   2 ,float32 ,minutely ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Potência Ativa na Fase B
+PotAtivC                      ,active_power_c                   ,     84 ,   2 ,float32 ,minutely ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Potência Ativa na Fase C
+PotAtivT                      ,total_active_power               ,     86 ,   2 ,float32 ,minutely ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Potência Ativa Total
+PotReatA                      ,reactive_power_a                 ,     88 ,   2 ,float32 ,minutely ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Potência Reativa na Fase A
+PotReatB                      ,reactive_power_b                 ,     90 ,   2 ,float32 ,minutely ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Potência Reativa na Fase B
+PotReatC                      ,reactive_power_c                 ,     92 ,   2 ,float32 ,minutely ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Potência Reativa na Fase C
+PotReatT                      ,total_reactive_power             ,     94 ,   2 ,float32 ,minutely ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Potência Reativa Total
+PotAparA                      ,apparent_power_a                 ,     96 ,   2 ,float32 ,minutely ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Potência Aparente na Fase A
+PotAparB                      ,apparent_power_b                 ,     98 ,   2 ,float32 ,minutely ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Potência Aparente na Fase B
+PotAparC                      ,apparent_power_c                 ,    100 ,   2 ,float32 ,minutely ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Potência Aparente na Fase C
+PotAparT                      ,total_apparent_power             ,    102 ,   2 ,float32 ,minutely ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Potência Aparente Total
+FatPotA                       ,power_factor_a                   ,    104 ,   2 ,float32 ,minutely ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Fator de Potência Fase A
+FatPotB                       ,power_factor_b                   ,    106 ,   2 ,float32 ,minutely ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Fator de Potência Fase B
+FatPotC                       ,power_factor_c                   ,    108 ,   2 ,float32 ,minutely ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Fator de Potência Fase C
+FatPotT                       ,total_power_factor               ,    110 ,   2 ,float32 ,minutely ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Fator de Potência Total
+DhtUA                         ,dht_voltage_a                    ,    112 ,   2 ,float32 ,minutely ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,DHT Tesão Fase A
+DhtUB                         ,dht_voltage_b                    ,    114 ,   2 ,float32 ,minutely ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,DHT Tesão Fase B
+DhtUC                         ,dht_voltage_c                    ,    116 ,   2 ,float32 ,minutely ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,DHT Tesão Fase C
+DhtIA                         ,dht_current_a                    ,    118 ,   2 ,float32 ,minutely ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,DHT Corrente Fase A
+DhtIB                         ,dht_current_b                    ,    120 ,   2 ,float32 ,minutely ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,DHT Corrente Fase B
+DhtIC                         ,dht_current_c                    ,    122 ,   2 ,float32 ,minutely ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,DHT Corrente Fase C
+ConsumoA                      ,consumption_a                    ,    132 ,   2 ,float32 ,minutely ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Consumo fase A (desde o último reset)
+ConsumoB                      ,consumption_b                    ,    134 ,   2 ,float32 ,minutely ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Consumo fase B (desde o último reset)
+ConsumoC                      ,consumption_c                    ,    136 ,   2 ,float32 ,minutely ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Consumo fase C (desde o último reset)
+ConsumoT                      ,total_consumption                ,    138 ,   2 ,float32 ,minutely ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Consumo total (desde o último reset)
+EnergGerPontaMesPassado       ,generated_energy_peak_time       ,    156 ,   2 ,float32 ,monthly  ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Energia gerada no mês anterior no horário de ponta
+EnergGerForaPontaMesPassado   ,generated_energy_off_peak_time   ,    158 ,   2 ,float32 ,monthly  ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Energia gerada no mês anterior no horário fora de ponta
+ConsumoPontaMesPassado        ,consumption_peak_time            ,    162 ,   2 ,float32 ,monthly  ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Consumo no mês anterior no horário de ponta
+ConsumoForaPontaMesPassado    ,consumption_off_peak_time        ,    164 ,   2 ,float32 ,monthly  ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Consumo no mês anterior no horário fora de ponta
+EnergIndPontaMesPassado       ,inductive_power_peak_time        ,    168 ,   2 ,float32 ,monthly  ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Energia Indutiva no mês anterior no horário de ponta
+EnergIndForaPontaMesPassado   ,inductive_power_off_peak_time    ,    170 ,   2 ,float32 ,monthly  ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Energia Indutiva no mês anterior no horário fora de ponta
+EnergCapPontaMesPassado       ,capacitive_power_peak_time       ,    174 ,   2 ,float32 ,monthly  ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Energia Capacitiva no mês anterior no horário de ponta
+EnergCapForaPontaMesPassado   ,capacitive_power_off_peak_time   ,    176 ,   2 ,float32 ,monthly  ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Energia Capacitiva no mês anterior no horário fora de ponta
+MaxPotAtivPontaMesPassado     ,active_max_power_peak_time       ,    180 ,   2 ,float32 ,monthly  ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Máxima Potência Ativa acumulada em 15min. no mês anterior no horário de ponta
+MaxPotAtivForaPontaMesPassado ,active_max_power_off_peak_time   ,    182 ,   2 ,float32 ,monthly  ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Máxima Potência Ativa acumulada em 15min. no mês anterior no horário fora de ponta
+MaxPotReatPontaMesPassado     ,reactive_max_power_peak_time     ,    186 ,   2 ,float32 ,monthly  ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Máxima Potência Reativa acumulada em 15min. no mês anterior no horário de ponta
+MaxPotReatForaPontaMesPassado ,reactive_max_power_off_peak_time ,    188 ,   2 ,float32 ,monthly  ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Máxima Potência Reativa acumulada em 15min. no mês anterior no horário fora de ponta
+EnergGerPonta15min            ,generated_energy_peak_time       ,    264 ,   2 ,float32 ,quarterly ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Energia Gerada nos últimos 15 minutos no horário de ponta
+EnergGerForaPonta15min        ,generated_energy_off_peak_time   ,    266 ,   2 ,float32 ,quarterly ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Energia Gerada nos últimos 15 minutos no horário fora de ponta
+ConsumoPonta15min             ,consumption_peak_time            ,    270 ,   2 ,float32 ,quarterly ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Consumo nos últimos 15 minutos no horário de ponta
+ConsumoForaPonta15min         ,consumption_off_peak_time        ,    272 ,   2 ,float32 ,quarterly ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Consumo nos últimos 15 minutos no horário fora de ponta
+ConsumoReserv15min            ,consumption_reserve              ,    274 ,   2 ,float32 ,quarterly ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Consumo nos últimos 15 minutos no horário reservado
+EnergIndPonta15min            ,inductive_power_peak_time        ,    276 ,   2 ,float32 ,quarterly ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Energia Indutiva nos últimos 15 minutos no horário de ponta
+EnergIndForaPonta15min        ,inductive_power_off_peak_time    ,    278 ,   2 ,float32 ,quarterly ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Energia Indutiva nos últimos 15 minutos no horário fora de ponta
+EnergCapPonta15min            ,capacitive_power_peak_time       ,    282 ,   2 ,float32 ,quarterly ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Energia Capacitiva nos últimos 15 minutos no horário de ponta
+EnergCapForaPonta15min        ,capacitive_power_off_peak_time   ,    284 ,   2 ,float32 ,quarterly ,true   ,EXP_F0_F1_F2 ,Read_Holding_Registers ,Energia Capacitiva nos últimos 15 minutos no horário fora de ponta

@@ -1,0 +1,4 @@
+register ,attribute            ,address ,addr  ,size ,type  ,group     ,active ,byteorder    ,function            ,description
+U1       ,voltage_a            ,     10 ,30011 ,   2 ,f32   ,minutely  ,true   ,F2_F1_F0_EXP ,read_input_register ,Tensão Linha 1 (V)
+I1       ,current_a            ,     20 ,30021 ,   2 ,f32   ,minutely  ,true   ,F2_F1_F0_EXP ,read_input_register ,Corrente Linha 1 (A)
+C8-EA+   ,active_consumption   ,    200 ,30201 ,   2 ,f32   ,quarterly ,true   ,F2_F1_F0_EXP ,read_input_register ,Energia Ativa Positiva (KWh)

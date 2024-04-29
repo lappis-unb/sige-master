@@ -1,0 +1,7 @@
+register ,addr  ,size ,type  ,group     ,active ,byteorder    ,function           
+U1       ,30011 ,   2 ,f32   ,minutely  ,true   ,F2_F1_F0_EXP ,read_input_register
+U2       ,30013 ,   2 ,f32   ,minutely  ,true   ,F2_F1_F0_EXP ,read_input_register
+U3       ,30015 ,   2 ,f32   ,minutely  ,true   ,F2_F1_F0_EXP ,read_input_register
+I1       ,30021 ,   2 ,f32   ,minutely  ,true   ,F2_F1_F0_EXP ,read_input_register
+I2       ,30023 ,   2 ,f32   ,minutely  ,true   ,F2_F1_F0_EXP ,read_input_register
+I3       ,30025 ,   2 ,f32   ,minutely  ,true   ,F2_F1_F0_EXP ,read_input_register

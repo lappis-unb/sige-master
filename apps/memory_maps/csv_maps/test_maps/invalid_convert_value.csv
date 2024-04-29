@@ -1,0 +1,7 @@
+register ,attribute            ,address ,addr  ,size ,type  ,group     ,active ,byteorder    ,function           
+U1       ,voltage_a            ,     AV ,30011 ,   A ,f32   ,minutely  ,true   ,F2_F1_F0_EXP ,read_input_register 
+U2       ,voltage_b            ,     CA ,30013 ,   A ,f32   ,minutely  ,true   ,F2_F1_F0_EXP ,read_input_register 
+U3       ,voltage_c            ,     XC ,30015 ,   A ,f32   ,minutely  ,true   ,F2_F1_F0_EXP ,read_input_register 
+I1       ,current_a            ,     AG ,30021 ,   A ,f32   ,minutely  ,true   ,F2_F1_F0_EXP ,read_input_register 
+I2       ,current_b            ,     22 ,30023 ,   2 ,f32   ,minutely  ,true   ,F2_F1_F0_EXP ,read_input_register 
+I3       ,current_c            ,     24 ,30025 ,   2 ,f32   ,minutely  ,true   ,F2_F1_F0_EXP ,read_input_register

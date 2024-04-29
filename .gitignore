@@ -59,6 +59,9 @@ parts/
 sdist/
 var/
 wheels/
+fixtures/
+logs/
+staticfiles/
 MANIFEST
 
 # Unit test / coverage reports

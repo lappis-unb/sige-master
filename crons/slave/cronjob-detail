@@ -1,0 +1,25 @@
+HOME=/sige-slave/
+ENV_COMMAND="export \$(cat /root/env | xargs)"
+LOG_FILE="/sige-slave/logs/cronlog.log"
+
+#-------------------------------------------------------------------------------------------------------------------
+# collect minutely: At every minute 
+# Custom Command: "sige-slave/data_collector/management/commands/collect_data.py"
+ * * * * * sleep 15 && eval $($ENV_COMMAND) && python /sige-slave/manage.py collect_data minutely >> $LOG_FILE 2>&1
+#-------------------------------------------------------------------------------------------------------------------
+# Test transductors: At every 5th minute
+# Custom Command: "sige-slave/transcutor/management/commands/check_trans.py"
+*/5 * * * * sleep 30 && eval $($ENV_COMMAND) && python /sige-slave/manage.py check_trans >> $LOG_FILE 2>&1
+#-------------------------------------------------------------------------------------------------------------------
+# Collect quarterly: At every 15th minute
+# Custom Command: "sige-slave/data_collector/management/commands/collect_data.py"
+0,15,30,45 * * * * eval $($ENV_COMMAND) && python /sige-slave/manage.py collect_data quarterly >> $LOG_FILE 2>&1
+
+#-------------------------------------------------------------------------------------------------------------------
+# Collect monthly: At 00:00 on day-of-month 1 
+# Custom Command: "sige-slave/data_collector/management/commands/collect_data.py"
+0 0 1 * * eval $($ENV_COMMAND) && python /sige-slave/manage.py collect_data monthly >> $LOG_FILE 2>&1
+#-------------------------------------------------------------------------------------------------------------------
+# Daily logrotate: At 00:00
+# 0 0 * * * /usr/sbin/logrotate /etc/logrotate.d/sige_slave > /dev/null 2>&1
+#-------------------------------------------------------------------------------------------------------------------

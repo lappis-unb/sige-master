@@ -1,5 +1,12 @@
-[BASIC]
-max-line-length=119
+[MASTER]
+load-plugins=pylint_django
+
+[FORMAT]
+max-line-length=119         # Maximum number of characters on a single line.
+max-module-lines=1000
+indent-after-paren=4
+indent-string='    '
+
 
 [TYPECHECK]
 ignored-modules=django  # Ignorar erros E1101 (no-member) do Pylint

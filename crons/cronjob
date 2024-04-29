@@ -1,6 +1,7 @@
-* * * * * export $(cat /root/env | xargs) && python /sige-master/manage.py check_trans >> /sige-master/logs/cron_output.log 2>&1
-* * * * * sleep 10 && export $(cat /root/env | xargs) && python /sige-master/manage.py collect_data realtime >> /sige-master/logs/cron_output.log 2>&1
-* * * * * sleep 30 && export $(cat /root/env | xargs) && python /sige-master/manage.py get_events >> /sige-master/logs/cron_output.log 2>&1
-0 * * * * export $(cat /root/env | xargs) && python /sige-master/manage.py collect_data minutely >> /sige-master/logs/cron_output.log 2>&1
-5 * * * * export $(cat /root/env | xargs) && python /sige-master/manage.py collect_data quarterly >> /sige-master/logs/cron_output.log 2>&1
-10 * * * * export $(cat /root/env | xargs) && python /sige-master/manage.py collect_data monthly >> /sige-master/logs/cron_output.log 2>&1
+* * * * * export $(cat /root/env | xargs) && python /sige-master/manage.py check_trans            >> /sige-master/logs/cron_output.log 2>&1
+* * * * * sleep 15 && export $(cat /root/env | xargs) && python /sige-master/manage.py collect_data minutely  >> /sige-master/logs/cron_output.log 2>&1
+0,15,30,45 * * * * sleep 30 && export $(cat /root/env | xargs) && python /sige-master/manage.py collect_data quarterly >> /sige-master/logs/cron_output.log 2>&1
+
+
+# 0 0 1 * * export $(cat /root/env | xargs) && python /usr/sbin/logrotate /etc/logrotate.d/sige_master > /dev/null 2>&1
+# 0 0 * * * export $(cat /root/env | xargs) && python /sige-slave/manage.py delete_old_measurements >> /sige-slave/logs/cron_output.log 2>&1
