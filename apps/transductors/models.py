@@ -139,8 +139,6 @@ class StatusHistory(models.Model):
         output_field=models.DurationField(),
         db_persist=True,
     )
-    uptime = models.GeneratedField
-
     transductor = models.ForeignKey(
         Transductor,
         blank=False,
@@ -158,27 +156,37 @@ class StatusHistory(models.Model):
 
     def save(self, *args, **kwargs):
         with transaction.atomic():
-            if self.pk or self.manage_status_transition():
-                super().save(*args, **kwargs)
+            if self.pk:
+                logger.info(f"Closing status {self.transductor}")
+            elif self.manage_status_transition():
+                logger.info(f"Creating new status {self.transductor} - {self.get_status_display()}")
+            else:
+                return
+            super().save(*args, **kwargs)
 
     def manage_status_transition(self):
         current_status = self.get_open_status()
+        if current_status and current_status.status == self.status:
+            logger.info(f"{self.transductor} - Status already in {Status(self.status).name}.")
+            return False
         if current_status:
-            if current_status.status == self.status:
-                logger.info(f"{self.transductor} - Status already in {Status(self.status).name}.")
-                return False
             current_status.close_status()
         return True
 
     def close_status(self):
         if self.end_time is not None:
-            logger.error(f"{self.transductor} - Status already ended cannot be ended again.")
+            logger.error(f"{self.transductor} - Status is already closed.")
+            raise ValueError("Cannot close a status that is already closed")
 
         self.end_time = timezone.now()
         self.save(update_fields=["end_time"])
 
     def get_open_status(self):
-        status = self.transductor.status_history.filter(end_time__isnull=True).first()
-        if not status:
-            logger.error(f"{self.transductor} - No open status found.")
-        return status
+        open_status = self.transductor.status_history.filter(end_time__isnull=True)
+
+        if open_status.count() > 1:
+            logger.error(f"{self.transductor} - Multiple open statuses found.")
+            logger.info(f"Closing all open statuses: {open_status.count()} for {self.transductor}")
+            open_status.exclude(pk=self.pk).update(end_time=timezone.now())
+
+        return open_status.first() if open_status.exists() else None

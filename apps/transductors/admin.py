@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from apps.transductors.models import StatusHistory, Transductor, TransductorModel
@@ -102,5 +103,12 @@ class StatusHistoryAdmin(admin.ModelAdmin):
     list_display_links = ("id", "transductor")
     search_fields = ("transductor", "start_time", "end_time", "status")
     list_filter = ("transductor", "start_time", "end_time", "status")
-
     readonly_fields = ("start_time", "end_time", "duration")
+    actions = ("action_close_status",)
+
+    fieldsets = ((None, {"fields": ("transductor", "status", "start_time", "end_time", "notes")}),)
+
+    def action_close_status(self, request, queryset):
+        queryset.update(end_time=timezone.now())
+
+    action_close_status.short_description = "Close Status"

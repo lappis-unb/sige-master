@@ -21,11 +21,11 @@ class Command(BaseCommand):
     @log_execution_time(logger, level=logging.INFO)
     def handle(self, *args, **options) -> None:
         max_workers = options["max_workers"]
-        broken_transductors = Transductor.manager.broken()
-        self.log_start(broken_transductors, max_workers)
+        transductors = Transductor.manager.broken_and_non_status()
+        self.log_start(transductors, max_workers)
 
-        if broken_transductors.exists():
-            self.process_broken_transductors(broken_transductors, options["max_workers"])
+        if transductors.exists():
+            self.process_broken_transductors(transductors, options["max_workers"])
         else:
             logger.info("Halted. No broken transducers found.")
 
@@ -52,10 +52,10 @@ class Command(BaseCommand):
                 self.activate_transductor(transductor)
             else:
                 logger.error(f"Connection FAILED to transducer at: {transductor.ip_address}:{transductor.port}")
+                self.deactivate_transductor(transductor)
 
         except ConnectionException as e:
             logger.error(f"Connection Error to transducer at: {transductor.ip_address}:{transductor.port} - {str(e)}")
-            self.deactivate_transductor(transductor)
 
         finally:
             client.close()
@@ -64,8 +64,8 @@ class Command(BaseCommand):
         logger.info(f"Activated transducer: {transductor.ip_address}:{transductor.port}.")
         transductor.set_status(Status.ACTIVE, "Connection test successful.")
 
-    def deactivate_transductor(self, transductor: Transductor) -> None:
-        logger.error(f"Disabled transducer: {transductor.ip_address}:{transductor.port}")
+    def deactivate_transductor(self, transductor):
+        logger.info(f"Deactivated transducer: {transductor.ip_address}:{transductor.port}.")
         transductor.set_status(Status.BROKEN, "Connection test failed.")
 
     def log_start(self, transductors, max_workers):
