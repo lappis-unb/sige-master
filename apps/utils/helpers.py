@@ -8,10 +8,9 @@ from rest_framework.exceptions import ParseError
 
 
 def get_dynamic_fields(app_label, model_name):
-    print(f"app_label: {app_label}")
-    print(f"model_name: {model_name}")
+    ALLOWED_FIELDS = ["IntegerField", "FloatField", "DecimalField"]
     model = apps.get_model(app_label, model_name)
-    ALLOWED_FIELDS = ["IntegerField", "FloatField", "DecimalField", "DateTimeField"]
+    
     return [
         (field.name, getattr(field, "verbose_name", field.name))
         for field in model._meta.get_fields()

@@ -1,13 +1,9 @@
 import logging
 
 from django.db import models
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from apps.events.models import CumulativeMeasurementTrigger, InstantMeasurementTrigger
-from apps.events.services import TriggerService
 from apps.transductors.models import Transductor
 
 logger = logging.getLogger("apps")
@@ -56,6 +52,12 @@ class InstantMeasurement(models.Model):
     class Meta:
         verbose_name = _("Instantaneous measurement")
         verbose_name_plural = _("Instantaneous Measurements")
+        indexes = [
+            models.Index(
+                fields=["transductor", "collection_date"],
+                name="inst_transductor_date_idx",
+            ),
+        ]
 
     def __str__(self):
         return f"{self.transductor.ip_address} - {self.collection_date}"
@@ -103,6 +105,12 @@ class CumulativeMeasurement(models.Model):
     class Meta:
         verbose_name = _("Cumulative measurement")
         verbose_name_plural = _("Cumulative Measurements")
+        indexes = [
+            models.Index(
+                fields=["transductor", "collection_date"],
+                name="cumu_transductor_date_idx",
+            ),
+        ]
 
     def __str__(self):
         return f"{self.transductor.ip_address} - {self.collection_date}"
@@ -111,38 +119,3 @@ class CumulativeMeasurement(models.Model):
         if self.collection_date is None:
             self.collection_date = timezone.now()
         super().save(*args, **kwargs)
-
-
-# ---------------------------------------------------------------------------
-# Todo - Move it to signals.py file in the future
-# Signal to handle the creation of Events when a new measurement is created
-
-
-@receiver(post_save, sender=CumulativeMeasurement)
-def handle_cumulative_trigger(sender, instance, created, **kwargs):
-    if created:
-        logger.info("Cumulative measurement created")
-        triggers = CumulativeMeasurementTrigger.objects.filter(is_active=True)
-        if not triggers:
-            logger.info("No active triggers found for Cumulative measurement")
-            return
-
-        logger.info(f"Processing triggers for {instance.transductor.ip_address}")
-        for trigger in triggers:
-            trigger_service = TriggerService(trigger, instance)
-            trigger_service.perform_trigger()
-
-
-@receiver(post_save, sender=InstantMeasurement)
-def handle_instant_trigger(sender, instance, created, **kwargs):
-    if created:
-        logger.info("Instant measurement created")
-        triggers = InstantMeasurementTrigger.objects.filter(is_active=True)
-        if not triggers:
-            logger.info("No active triggers found for Instant measurement")
-            return
-
-        logger.info(f"Processing triggers for {instance.transductor.ip_address}")
-        for trigger in triggers:
-            trigger_service = TriggerService(trigger, instance)
-            trigger_service.perform_trigger()
