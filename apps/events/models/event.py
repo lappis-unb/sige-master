@@ -5,7 +5,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-# from apps.events.models import EventTrigger
+# from apps.events.models import Trigger
 from apps.transductors.models import Transductor
 
 logger = logging.getLogger("apps")
@@ -56,7 +56,7 @@ class Event(models.Model):
         related_name="events_type",
     )
     measurement_trigger = models.ForeignKey(
-        "events.EventTrigger",
+        "events.Trigger",
         on_delete=models.CASCADE,
         null=True,
         blank=True,

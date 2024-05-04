@@ -11,11 +11,10 @@ class TriggerService:
         self.trigger = trigger
         self.measurement = current_measurement
         self.field_name = trigger.field_name
-        self.field_value = None
+        self.field_value = getattr(current_measurement, trigger.field_name)
 
     @log_service()
     def perform_trigger(self):
-        self.field_value = getattr(self.measurement, self.field_name)
         self.log_start()
 
         if self.field_value is None:
@@ -28,10 +27,8 @@ class TriggerService:
             is_active=True,
         ).first()
 
-        self.handle_event(event)
-
-    def handle_event(self, event):
-        if event is not None:
+        if event.exists():
+            self.insert_log("Found existing event:")
             self.process_existing_event(event)
         else:
             self.insert_log("No active event found, creating new event.")
@@ -39,14 +36,16 @@ class TriggerService:
 
     def process_existing_event(self, event):
         self.insert_log(f"Processing existing event: {event.id}")
-        if self.meets_trigger_condition(self.trigger.lower_limit or self.trigger.upper_limit):
+        threshold = self.trigger.deactivate_threshold or self.trigger.active_threshold
+
+        if self.meets_trigger_condition(threshold):
             self.insert_log("No action taken: event remains active as conditions are not met.")
         else:
             event.close_event()
             self.insert_log(f"Event {event} closed: condition met.")
 
     def process_no_existing_event(self):
-        if self.meets_trigger_condition(self.trigger.upper_limit):
+        if self.meets_trigger_condition(self.trigger.active_threshold):
             new_event = Event.objects.create(
                 measurement_trigger=self.trigger,
                 transductor=self.measurement.transductor,
@@ -87,5 +86,8 @@ class TriggerService:
         logger.debug(f"   Field value: {self.field_value}")
         logger.info("-" * 85)
 
-    def insert_log(self, message, level=logging.INFO):
+    def add_log(self, message, level=logging.INFO, raise_exception=False):
         logger.log(level, f"Trigger {self.trigger.id}: {message}")
+
+        if raise_exception:
+            raise ValueError(message)

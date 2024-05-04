@@ -2,14 +2,19 @@ import logging
 from datetime import timedelta
 
 from django.db import models
+from django.db.models import Avg, Max, Min
+from django.utils import timezone
+from django.utils.functional import lazy
 from django.utils.translation import gettext_lazy as _
 
 from apps.events.models import EventType
+from apps.measurements.models import CumulativeMeasurement
+from apps.utils.helpers import get_dynamic_fields
 
 logger = logging.getLogger("apps")
 
 
-class EventTrigger(models.Model):
+class Trigger(models.Model):
     name = models.CharField(max_length=255)
     is_active = models.BooleanField(default=True)
     event_type = models.ForeignKey(EventType, on_delete=models.CASCADE)
@@ -30,68 +35,90 @@ class CompareOperator(models.TextChoices):
     NE = "ne", _("!= (Not Equal)")
 
 
-class MeasurementType(models.TextChoices):
-    INSTANT = "InstantMeasurement", _("Instant Measurement")
-    CUMULATIVE = "CumulativeMeasurement", _("Cumulative Measurement")
-
-
-class MeasurementTrigger(EventTrigger):
-    field_name = models.CharField(max_length=100, blank=False, null=False)
-    measurement_type = models.CharField(max_length=32, choices=MeasurementType.choices, blank=True)
-    upper_limit = models.DecimalField(max_digits=7, decimal_places=2, blank=False, null=False)
-    lower_limit = models.DecimalField(max_digits=7, decimal_places=2, blank=True, null=True)
+class InstantMeasurementTrigger(Trigger):
     operator = models.CharField(max_length=5, choices=CompareOperator.choices)
-    debouce_time = models.DurationField(default=timedelta(minutes=1))
+    active_threshold = models.FloatField(blank=True, null=True)
+    deactivate_threshold = models.FloatField(blank=True, null=True)
+    field_name = models.CharField(
+        max_length=64,
+        blank=False,
+        null=False,
+        choices=lazy(get_dynamic_fields, list)("measurements", "InstantMeasurement"),
+    )
 
     class Meta:
-        verbose_name = _("Measurement Trigger")
-        verbose_name_plural = _("Measurement Triggers")
+        verbose_name = _("Instant Measurement Trigger")
+        verbose_name_plural = _("Instant Measurement Triggers")
 
     def __str__(self):
         return f"{self.name}"
 
-    def save(self, *args, **kwargs):
-        if self._state.adding:
-            self.name = f"{self.measurement_type} - {self.field_name} {self.operator} {self.upper_limit}"
-        super().save(*args, **kwargs)
 
-    def get_details(self):
-        return {
-            "field_name": self.field_name,
-            "measurement_type": self.measurement_type,
-            "upper_limit": self.upper_limit,
-            "lower_limit": self.lower_limit,
-            "operator": self.operator,
-        }
+class DynamicMetric(models.TextChoices):
+    HOURLY_AVG = "hourly_avg", _("Hourly Average")
+    HOURLY_MAX = "hourly_max", _("Hourly Maximum")
+    HOURLY_MIN = "hourly_min", _("Hourly Minimum")
 
 
-class CumulativeMeasurementTrigger(MeasurementTrigger):
+class CumulativeMeasurementTrigger(Trigger):
+    dynamic_metric = models.CharField(max_length=32, choices=DynamicMetric.choices)
+    adjustment_factor = models.FloatField(default=0)
+    period_days = models.PositiveIntegerField(default=7)
+    field_name = models.CharField(
+        max_length=64,
+        blank=False,
+        null=False,
+        choices=lazy(get_dynamic_fields, list)("measurements", "CumulativeMeasurement"),
+    )
+
     class Meta:
-        proxy = True
+        verbose_name = _("Cumulative Measurement Trigger")
+        verbose_name_plural = _("Cumulative Measurement Triggers")
 
-    class Manager(models.Manager):
-        def get_queryset(self):
-            return super().get_queryset().filter(measurement_type=MeasurementType.CUMULATIVE)
+    def __str__(self):
+        return f"{self.name}"
 
-    objects = Manager()
+    @property
+    def active_threshold(self, transductor, target_hour):
+        base_threshold = self.get_threshold(transductor, target_hour)
+        return base_threshold * (1 + self.adjustment_factor)
+
+    @property
+    def deactivate_threshold(self, transductor, target_hour):
+        base_threshold = self.get_threshold(transductor, target_hour)
+        return base_threshold * (1 - self.adjustment_factor)
+
+    def get_threshold(self, transductor, target_hour):
+        measurement_queryset = self.fetch_measurement_data(transductor, target_hour)
+
+        if not measurement_queryset.exists():
+            logger.warning("No measurement data found")
+            return None
+
+        if self.dynamic_metric == DynamicMetric.HOURLY_AVG:
+            return measurement_queryset.aggregate(Avg("value"))["value__avg"]
+        elif self.dynamic_metric == DynamicMetric.HOURLY_MAX:
+            return measurement_queryset.aggregate(Max("value"))["value__max"]
+        elif self.dynamic_metric == DynamicMetric.HOURLY_MIN:
+            return measurement_queryset.aggregate(Min("value"))["value__min"]
+        elif self.dynamic_metric is None:
+            return measurement_queryset.last()
+
+    def fetch_measurement_data(self, transductor, target_hour):
+        return CumulativeMeasurement.objects.filter(
+            transductor=transductor,
+            collection_time__gte=timezone.now() - timedelta(days=self.period_days),
+            collection_time__hour=target_hour,
+        ).only(self.field_name)
+
+    def clean(self) -> None:
+        if self.adjustment_factor < 0 or self.adjustment_factor > 1:
+            logger.warning("Adjustment factor must be between 0 and 1")
+            raise ValueError("Adjustment factor must be between 0 and 1")
+
+        if self.period_days < 1:
+            raise ValueError("Period days must be at least 1")
 
     def save(self, *args, **kwargs):
-        if self._state.adding:
-            self.measurement_type = MeasurementType.CUMULATIVE
-        super().save(*args, **kwargs)
-
-
-class InstantMeasurementTrigger(MeasurementTrigger):
-    class Meta:
-        proxy = True
-
-    class Manager(models.Manager):
-        def get_queryset(self):
-            return super().get_queryset().filter(measurement_type=MeasurementType.INSTANT)
-
-    objects = Manager()
-
-    def save(self, *args, **kwargs):
-        if self._state.adding:
-            self.measurement_type = MeasurementType.INSTANT
+        self.full_clean()
         super().save(*args, **kwargs)
