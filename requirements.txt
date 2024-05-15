@@ -2,7 +2,6 @@ Django==5.0.*
 djangorestframework==3.15.*
 django-environ==0.11.*
 psycopg[binary,pool]==3.1.*
-# psycopg[binary]~=3.1.8
 numpy==1.26.*
 django-cors-headers==3.3.*
 python-dateutil==2.9.*
@@ -14,7 +13,7 @@ django-filter==24.*
 drf-spectacular==0.27.*
 djangorestframework-simplejwt==5.3.*
 pymodbus==3.6.*
-python-crontab==3.0.*
+pandas==2.2.*
 
 # Developer Tools
 # ------------------------------------------------------------------------------
@@ -26,8 +25,7 @@ ipdb==0.13.*
 ipython==8.23.*
 mkdocs==1.5.*
 flake8==7.0.*
-django-pdb
-
+# django-pdb
 
 
 # Testing

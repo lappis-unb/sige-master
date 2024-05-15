@@ -366,8 +366,8 @@ if settings.DEBUG:
 
     # DJANGO PDB
     # ------------------------------------------------------------------------------------------------
-    MIDDLEWARE += ["django_pdb.middleware.PdbMiddleware"]
-    INSTALLED_APPS += ["django_pdb"]
+    # MIDDLEWARE += ["django_pdb.middleware.PdbMiddleware"]
+    # INSTALLED_APPS += ["django_pdb"]
 
     # DJANGO EXTENSIONS
     # ------------------------------------------------------------------------------------------------

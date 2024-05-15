@@ -28,34 +28,18 @@ services:
         env_file: dev-env
         command: ['sh', 'scripts/start-dev.sh']
         ports:
-            - 443:8001
+            - 8001:8001
         networks:
             - sige-network
             - master-network
         volumes:
             - .:/sige-master
-            - pip_cache:/usr/local/lib/python3.11/site-packages
         depends_on:
             - master-db
-
-    # pgadmin:
-    #     container_name: pgadmin
-    #     restart: unless-stopped
-    #     image: dpage/pgadmin4
-    #     environment:
-    #         - PGADMIN_DEFAULT_EMAIL=admin@admin.com
-    #         - PGADMIN_DEFAULT_PASSWORD=admin
-    #         - PGADMIN_CONFIG_SERVER_MODE=False
-    #     ports:
-    #         - 8080:80
-    #     networks:
-    #         - master-network
 
 volumes:
     pg-data:
         name: master-pgdata
-    pip_cache:
-        name: master-pip-cache
 
 networks:
     master-network:
