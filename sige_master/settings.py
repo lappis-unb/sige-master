@@ -163,9 +163,10 @@ LOCALE_PATHS = (BASE_DIR / "locale",)
 USE_I18N = True
 USE_TZ = True
 
-
 # GENERAL
 # ------------------------------------------------------------------------------------------------
+LIMIT_FILTER = env("LIMIT_FILTER", default=500)
+
 ROOT_URLCONF = "sige_master.urls"
 WSGI_APPLICATION = "sige_master.wsgi.application"
 

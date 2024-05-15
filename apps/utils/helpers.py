@@ -18,6 +18,26 @@ def get_dynamic_fields(app_label, model_name):
     ]
 
 
+def get_boolean(value):
+    if isinstance(value, bool):
+        return value
+
+    if isinstance(value, str):
+        return value.lower() in ["true", "yes", "1"]
+
+    return bool(value)
+
+
+def calculate_memory_querysets(queryset):
+    size_bytes = sum(sys.getsizeof(obj) for obj in queryset)
+    if size_bytes < 1024:
+        return f"{size_bytes} bytes"
+    elif size_bytes < 1024 * 1024:
+        return f"{size_bytes / 1024:.2f} KB"
+    else:
+        return f"{size_bytes / (1024 * 1024):.2f} MB"
+
+
 def string_to_date(date_str):
     if isinstance(date_str, str):
         date_obj = datetime.fromisoformat(date_str)
@@ -26,6 +46,21 @@ def string_to_date(date_str):
         return date_str
     else:
         raise TypeError(f"Expected str or datetime, but got {type(date_str)}")
+
+
+def floor_datetime_minutes(dt, minutes=1):
+    new_minute = dt.minute - (dt.minute % minutes)
+    return dt.replace(minute=new_minute, second=0, microsecond=0)
+
+
+def get_boolean(value):
+    if isinstance(value, bool):
+        return value
+
+    if isinstance(value, str):
+        return value.lower() in ["true", "yes", "1"]
+
+    return bool(value)
 
 
 def parse_date(date_str):
