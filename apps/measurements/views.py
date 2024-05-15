@@ -1,6 +1,8 @@
 import logging
 
 import pandas as pd
+from django.db.models import Case, Count, Q, Sum, When
+from django.shortcuts import get_object_or_404
 from django.conf import settings
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
@@ -15,13 +17,17 @@ from apps.measurements.filters import (
 from apps.measurements.models import CumulativeMeasurement, InstantMeasurement
 from apps.measurements.pagination import MeasurementPagination
 from apps.measurements.serializers import (
-    CumulativeMeasurementSerializer,
-    GraphDataSerializer,
-    InstantMeasurementSerializer,
+    ReportQuerySerializer,
+    ReportSerializer,
+    UferDetailSerializer,
+    UferQuerySerializer,
+    UferSerializer,
 )
 from apps.measurements.lttb import LTTBDownSampler
+from apps.organizations.models import Entity
+from apps.transductors.models import Transductor
 
-logger = logging.getLogger("apps.measurements.graphics")
+logger = logging.getLogger("apps.measurements.views")
 
 
 class InstantMeasurementViewSet(viewsets.ReadOnlyModelViewSet):
@@ -203,6 +209,128 @@ class CumulativeGraphViewSet(viewsets.ReadOnlyModelViewSet):
         }
 
         return Response(responde, status=status.HTTP_200_OK)
+    
+    class ReportViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = CumulativeMeasurement.objects.all()
+    serializer_class = ReportSerializer
+
+    def get_queryset(self, *args, **kwargs):
+        try:
+            return super().get_queryset().values("collection_date", *kwargs.get("fields"))
+        except Exception as e:
+            logger.error(f"Error in get_queryset: {e}")
+            raise ValidationError({"error": str(e)})
+
+    def list(self, request, *args, **kwargs):
+        query_serializer = ReportQuerySerializer(data=request.query_params)
+        query_serializer.is_valid(raise_exception=True)
+        validated_params = query_serializer.validated_data
+
+        queryset = self.get_queryset(fields=validated_params["fields"])
+        if not queryset:
+            Response({"detail": "No data found."}, status=status.HTTP_204_NO_CONTENT)
+
+        entity = get_object_or_404(Entity, pk=validated_params.get("entity"))
+        transductor_ids = self._get_transductors_entities(entity, validated_params)
+        month_year = validated_params.get("month_year")
+
+        measurements = queryset.filter(
+            transductor__in=transductor_ids,
+            collection_date__year=month_year.year,
+            collection_date__month=month_year.month,
+        )
+
+        response_data = self._aggregate_data(measurements, validated_params["fields"])
+        response_data["month_year"] = month_year
+        response_data["entity"] = entity.name
+        serializer = self.get_serializer(data=response_data, context={"fields": validated_params["fields"]})
+        serializer.is_valid(raise_exception=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def _aggregate_data(self, queryset, fields):
+        aggregates = {field: Sum(field) for field in fields}
+        return queryset.aggregate(**aggregates)
+
+    def _get_transductors_entities(self, entity, params):
+        if params.get("descendants"):
+            entities = entity.get_descendants(include_self=True, max_depth=params.get("depth"))
+            return Transductor.objects.filter(located__in=entities).values_list("id", flat=True)
+        return [entity.id]
+
+
+class UferViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = InstantMeasurement.objects.all()
+    serializer_class = UferSerializer
+
+    def get_queryset(self, *args, **kwargs):
+        return (
+            super()
+            .get_queryset()
+            .exclude(power_factor_a=0, power_factor_b=0, power_factor_c=0)
+            .only(*kwargs.get("fields", "collection_date", "transductor"))
+        )
+
+    def list(self, request, *args, **kwargs):
+        query_serializer = UferQuerySerializer(data=request.query_params)
+        query_serializer.is_valid(raise_exception=True)
+        validated_params = query_serializer.validated_data
+        fields = validated_params["fields"]
+
+        queryset = self.get_queryset(fields=fields)
+        if not queryset:
+            Response({"detail": "No data found."}, status=status.HTTP_204_NO_CONTENT)
+
+        entity = get_object_or_404(Entity, pk=validated_params.get("entity"))
+        transductor_ids = self._get_transductors_entities(entity, validated_params)
+        month_year = validated_params.get("month_year")
+
+        measurements = self.get_queryset().filter(
+            transductor__in=transductor_ids,
+            collection_date__year=month_year.year,
+            collection_date__month=month_year.month,
+        )
+
+        aggregated_data = list(self._aggregate_data(measurements, fields))
+        detail_serializer = UferDetailSerializer(aggregated_data, many=True, context={"fields": fields})
+
+        response_data = {
+            "entity": entity.name,
+            "month_year": month_year,
+            "units": "percentage",
+            "data": detail_serializer.data,
+        }
+
+        response_serializer = self.get_serializer(data=response_data)
+        response_serializer.is_valid(raise_exception=True)
+        return Response(response_serializer.data, status=status.HTTP_200_OK)
+
+    def _get_transductors_entities(self, entity, params):
+        if params.get("descendants"):
+            entities = entity.get_descendants(include_self=True, max_depth=params.get("depth"))
+            return Transductor.objects.filter(located__in=entities).values_list("id", flat=True)
+        return [entity.id]
+
+    def _aggregate_data(self, queryset, fields):
+        filter_conditions = self._generate_filter_conditions(fields)
+        annotations = self._generate_annotations(fields, filter_conditions)
+        return queryset.values(
+            "transductor",
+            "transductor__ip_address",
+            "transductor__located__acronym",
+        ).annotate(**annotations)
+
+    def _generate_filter_conditions(self, fields, threshold=0.92):
+        conditions = Q()
+        for field in fields:
+            conditions |= Q(**{f"{field}__gt": 0.92}) | Q(**{f"{field}__lt": -0.92})
+        return conditions
+
+    def _generate_annotations(self, fields, filter_conditions):
+        annotations = {}
+        for field in fields:
+            annotations[f"{field}_len_total"] = Count(field)
+            annotations[f"{field}_len_quality"] = Count(Case(When(filter_conditions, then=1)))
+        return annotations
 
 
 # class MeasurementResults(mixins.RetrieveModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
@@ -259,111 +387,3 @@ class CumulativeGraphViewSet(viewsets.ReadOnlyModelViewSet):
 
 #         return queryset
 
-
-# class ReportViewSet(viewsets.ReadOnlyModelViewSet):
-#     serializer_class = ReportSerializer
-#     filter_backends = [DjangoFilterBackend]
-#     filterset_class = CumulativeMeasurementFilter
-#     fields = [
-#         "consumption_peak_time",
-#         "consumption_off_peak_time",
-#         "generated_energy_peak_time",
-#         "generated_energy_off_peak_time",
-#     ]
-
-#     def get_queryset(self):
-#         queryset = CumulativeMeasurement.objects.all().only(*self.fields)
-
-#         return self.filter_queryset(queryset)
-
-#     def list(self, request, *args, **kwargs):
-#         group = request.query_params.get("group")
-#         campus = request.query_params.get("campus")
-#         if not campus:
-#             return Response({"detail": "Campus parameter is required."}, status=status.HTTP_400_BAD_REQUEST)
-
-#         measurements = self.get_queryset()
-#         if not measurements.exists():
-#             return Response({}, status=status.HTTP_204_NO_CONTENT)
-
-#         aggregated_data = self.get_aggregated_monthy(measurements)
-#         aggregated_data["campus"] = campus
-
-#         serializer = self.get_serializer(data=aggregated_data)
-#         serializer.is_valid(raise_exception=True)
-
-#         return Response(serializer.data, status=status.HTTP_200_OK)
-
-#     def get_aggregated_monthy(self, measurements: QuerySet) -> dict:
-#         aggregates = {field: Sum(field) for field in self.fields}
-#         return measurements.aggregate(**aggregates)
-
-
-# class UferViewSet(viewsets.ReadOnlyModelViewSet):
-#     serializer_class = UferSerializer
-#     filter_backends = [DjangoFilterBackend]
-#     filterset_class = UferMeasurementFilter
-#     fields = ["power_factor_a", "power_factor_b", "power_factor_c"]
-
-#     def get_queryset(self):
-#         queryset = MinutelyMeasurement.objects.all().only(*self.fields, "collection_date")
-#         non_zero_queryset = queryset.exclude(power_factor_a=0, power_factor_b=0, power_factor_c=0)
-
-#         return self.filter_queryset(non_zero_queryset).select_related("transductor")
-
-#     def list(self, request):
-#         campus_id = request.query_params.get("campus")
-#         if not campus_id:
-#             return Response({"detail": "Campus parameter is required."}, status=status.HTTP_400_BAD_REQUEST)
-
-#         transductor_ids = Transductor.objects.values_list("id", flat=True)
-#         filtered_measurements = self.get_queryset().filter(transductor__in=transductor_ids)
-
-#         filter_conditions = self._generate_filter_conditions()
-#         annotations = self._generate_annotations(filter_conditions)
-#         aggregated_data = filtered_measurements.values("transductor", "transductor__name").annotate(**annotations)
-
-#         results = []
-#         for data in aggregated_data:
-#             transductor_info = {"id": data["transductor"], "name": data["transductor__name"]}
-#             percentage_data = self._calculate_percentage(data)
-#             results.append(self._serialize_transductor_data(percentage_data, transductor_info))
-
-#         return Response(results, status=status.HTTP_200_OK)
-
-#     def _generate_filter_conditions(self, threshold: float = 0.92) -> Q:
-#         conditions = Q()
-#         for field in self.fields:
-#             conditions |= Q(**{f"{field}__gt": -0.92}) & Q(**{f"{field}__lt": 0.92})
-
-#         return conditions
-
-#     def _generate_annotations(self, filter_conditions: Q) -> dict:
-#         annotations = {}
-#         for field in self.fields:
-#             annotations[f"{field}_total"] = Count(field)
-#             annotations[f"{field}_interval"] = Count(Case(When(filter_conditions, then=1)))
-
-#         return annotations
-
-#     def _calculate_percentage(self, measurements: dict) -> dict:
-#         data = {}
-
-#         for field in self.fields:
-#             total = measurements[f"{field}_total"]
-#             interval_count = measurements[f"{field}_interval"]
-#             data[field] = (interval_count / total) * 100 if total else 0
-#         return data
-
-#     def _serialize_transductor_data(self, percent_data: dict, transductor_info: dict) -> dict:
-#         serializer = self.serializer_class(
-#             data={
-#                 "transductor_id": transductor_info["id"],
-#                 "transductor_name": transductor_info["name"],
-#                 "phase_a": percent_data["power_factor_a"],
-#                 "phase_b": percent_data["power_factor_b"],
-#                 "phase_c": percent_data["power_factor_c"],
-#             }
-#         )
-#         serializer.is_valid(raise_exception=True)
-#         return serializer.validated_data

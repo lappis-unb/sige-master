@@ -1,5 +1,5 @@
 import logging
-
+import dateutil
 from django.utils import timezone
 from rest_framework import serializers
 
@@ -145,35 +145,86 @@ class CumulativeMeasurementSerializer(serializers.ModelSerializer):
         return ["active_consumption", "active_generated", "reactive_inductive", "reactive_capacitive"]
 
 
-# ---------------------------------------------------------------------------------------------------------------------
-
-
 class UferSerializer(serializers.Serializer):
-    transductor_id = serializers.IntegerField(min_value=1)
-    transductor_name = serializers.CharField(max_length=255)
-    phase_a = serializers.FloatField(min_value=0, max_value=100)
-    phase_b = serializers.FloatField(min_value=0, max_value=100)
-    phase_c = serializers.FloatField(min_value=0, max_value=100)
-
-
-class ReportSerializer(serializers.Serializer):
-    campus = serializers.CharField()
-    consumption_peak_time = serializers.FloatField()
-    consumption_off_peak_time = serializers.FloatField()
-    generated_energy_peak_time = serializers.FloatField()
-    generated_energy_off_peak_time = serializers.FloatField()
-    tariff_peak = serializers.FloatField(read_only=True)
-    tariff_off_peak = serializers.FloatField(read_only=True)
+    entity = serializers.CharField()
+    month_year = serializers.DateField(format="%m-%Y")
+    units = serializers.CharField()
+    data = serializers.ListField()
+    
+    
+class UferDetailSerializer(serializers.Serializer):
+    transductor = serializers.IntegerField()
+    ip = serializers.IPAddressField(source="transductor__ip_address")
+    located = serializers.CharField(source="transductor__located__acronym")
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
 
-        # tariffs = Tariff.objects.filter(campus=instance["campus"]).values("regular_tariff", "high_tariff").last()
-        # if tariffs:
-        #     data["tariff_peak"] = tariffs["high_tariff"]
-        #     data["tariff_off_peak"] = tariffs["regular_tariff"]
-
+        fields = self.context.get("fields", {})
+        for field in fields:
+            len_total = instance.get(f"{field}_len_total", 0)
+            len_quality = instance.get(f"{field}_len_quality", 0)
+            percent = round((len_quality / len_total) * 100, 2) if len_total else 0.0
+            data[f"pf_phase_{field[-1]}"] = percent
         return data
+
+
+class ReportSerializer(serializers.Serializer):
+    entity = serializers.CharField()
+    month_year = serializers.DateField(format="%Y-%m")
+
+    def __init__(self, *args, **kwargs):
+        context = kwargs.get("context", {})
+        fields = context.get("fields", [])
+        super(ReportSerializer, self).__init__(*args, **kwargs)
+
+        for field_name in fields:
+            if field_name not in self.fields:
+                self.fields[field_name] = serializers.FloatField(allow_null=True)
+
+# ---------------------------------------------------------------------------------------------------------------------
+# Query Serializers
+# ---------------------------------------------------------------------------------------------------------------------
+class BaseQuerySerializer(serializers.Serializer):
+    entity = serializers.IntegerField(min_value=1, required=True)
+    month_year = serializers.CharField(default=timezone.now().strftime("%m-%Y"))
+    descendants = serializers.BooleanField(default=True, required=False)
+    depth = serializers.IntegerField(min_value=0, default=0, required=False)
+    fields = serializers.CharField(default=None, required=False)
+
+    ALLOWED_FIELDS = []
+
+    def validate_fields(self, value):
+        if value is None:
+            return self.ALLOWED_FIELDS
+
+        fields = [field.strip() for field in value.split(",")] if value else []
+        for field in fields:
+            if field not in self.ALLOWED_FIELDS:
+                raise serializers.ValidationError(
+                    f"The field '{field}' is not allowed.Allowed fields: {self.ALLOWED_FIELDS}"
+                )
+        return fields
+
+    def validate_month_year(self, value):
+        try:
+            return dateutil.parser.parse(value, default=timezone.now()).date()
+        except ValueError:
+            raise serializers.ValidationError("Invalid date format for 'month_year'. Use 'YYYY-MM' or 'MM-YYYY'.")
+
+
+class UferQuerySerializer(BaseQuerySerializer):
+    ALLOWED_FIELDS = ["power_factor_a", "power_factor_b", "power_factor_c"]
+
+
+class ReportQuerySerializer(BaseQuerySerializer):
+    ALLOWED_FIELDS = ["active_consumption", "active_generated", "reactive_inductive", "reactive_capacitive"]
+
+
+# =====================================================================================================================
+#  Charts Serializers
+# =====================================================================================================================
+
 
 class GraphDataSerializer(serializers.BaseSerializer):
     def to_representation(self, instance):
