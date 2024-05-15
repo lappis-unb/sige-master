@@ -4,6 +4,7 @@ from operator import eq, ge, gt, le, lt, ne
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from rest_framework.exceptions import APIException
+from rest_framework.serializers import ValidationError
 
 from apps.organizations.models import Organization
 from apps.transductors.models import Transductor
@@ -47,7 +48,7 @@ class MeasurementParamsValidator:
     def get_ufer_fields():
         return [("date", MeasurementParamsValidator.validate_start_date), ("campus", MeasurementParamsValidator)]
 
-    def validate_query_params(params, ignore=None):
+    def validate_query_params(self, params, ignore=None):
         if ignore is None:
             ignore = []
         fields = MeasurementParamsValidator.get_fields()
@@ -61,7 +62,7 @@ class MeasurementParamsValidator:
 
                 except KeyError:
                     errors[field[0]] = _(f"It must have an {field[0]} argument")
-                except ValidationException as e:
+                except ValidationError as e:
                     errors[field[0]] = e
 
         exception = APIException(
@@ -77,7 +78,7 @@ class MeasurementParamsValidator:
         try:
             Organization.objects.get(id=campus_id)
         except Organization.DoesNotExist:
-            raise ValidationException(
+            raise ValidationError(
                 _("This id does not match with any Campus"),
             )
 
@@ -86,7 +87,7 @@ class MeasurementParamsValidator:
         try:
             Transductor.objects.get(id=transductor_id)
         except Transductor.DoesNotExist:
-            raise ValidationException(_("This id does not match with any Transductor"))
+            raise ValidationError(_("This id does not match with any Transductor"))
 
     @staticmethod
     def validate_start_date(start_date):
@@ -94,7 +95,7 @@ class MeasurementParamsValidator:
             timezone.datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S")
         except ValueError:
             message = "The start_date param must be a valid date in the format YYYY-MM-DD HH:MM:SS"
-            raise ValidationException(_(message))
+            raise ValidationError(_(message))
 
     @staticmethod
     def validate_end_date(end_date):
@@ -102,4 +103,4 @@ class MeasurementParamsValidator:
             timezone.datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")
         except ValueError:
             message = "The end_date param must be a valid date in the format YYYY-MM-DD HH:MM:SS"
-            raise ValidationException(_(message))
+            raise ValidationError(_(message))

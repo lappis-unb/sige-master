@@ -1,4 +1,5 @@
 import logging
+
 import dateutil
 from django.utils import timezone
 from rest_framework import serializers
@@ -150,8 +151,8 @@ class UferSerializer(serializers.Serializer):
     month_year = serializers.DateField(format="%m-%Y")
     units = serializers.CharField()
     data = serializers.ListField()
-    
-    
+
+
 class UferDetailSerializer(serializers.Serializer):
     transductor = serializers.IntegerField()
     ip = serializers.IPAddressField(source="transductor__ip_address")
@@ -181,6 +182,7 @@ class ReportSerializer(serializers.Serializer):
         for field_name in fields:
             if field_name not in self.fields:
                 self.fields[field_name] = serializers.FloatField(allow_null=True)
+
 
 # ---------------------------------------------------------------------------------------------------------------------
 # Query Serializers
