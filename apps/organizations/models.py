@@ -59,7 +59,7 @@ class Entity(models.Model):
         return self.parent is None
 
     def get_children(self):
-        return self.children.all()
+        return self.children.all()  # using related_name
         # return Entity.objects.filter(parent=self)
 
     def get_hierarchy(self, is_reversed=False, head=True):
@@ -71,12 +71,15 @@ class Entity(models.Model):
     def get_hierarchy_str(self, is_reversed=False, head=False):
         return "  -->  ".join(self.get_hierarchy())
 
-    def get_all_descendants(self):
-        descendants = []
+    def get_descendants(self, include_self=False, max_depth=None, depth=0):
+        descendants = [self] if include_self else []
         children = self.children.all()
+        if max_depth and depth >= max_depth or not children:
+            return descendants
+
         for child in children:
             descendants.append(child)
-            descendants.extend(child.get_all_descendants())
+            descendants.extend(child.get_descendants(max_depth=max_depth, depth=depth + 1))
         return descendants
 
 
