@@ -1,40 +1,40 @@
-# TODO Refactor this viewset to improve code quality and mantainability
 import logging
-import os
-from copy import copy
 
-import numpy as np
-from django.utils import timezone
+import pandas as pd
+from django.conf import settings
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from apps.measurements.filters import (
     CumulativeMeasurementFilter,
     InstantMeasurementFilter,
 )
-from apps.measurements.lttb import downsample
-from apps.measurements.missing_values import get_measurements_with_missing_values
 from apps.measurements.models import CumulativeMeasurement, InstantMeasurement
 from apps.measurements.pagination import MeasurementPagination
 from apps.measurements.serializers import (
     CumulativeMeasurementSerializer,
+    GraphDataSerializer,
     InstantMeasurementSerializer,
-    RealTimeMeasurementSerializer,
 )
+from apps.measurements.lttb import LTTBDownSampler
 
-logger = logging.getLogger("apps")
+logger = logging.getLogger("apps.measurements.graphics")
 
 
-class InstantaneousCreateViewSet(viewsets.ModelViewSet):
+class InstantMeasurementViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = InstantMeasurement.objects.all()
     serializer_class = InstantMeasurementSerializer
-    queryset = InstantMeasurement.objects.all().order_by("-id")
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = InstantMeasurementFilter
     pagination_class = MeasurementPagination
 
 
-class CumulativeCreateViewSet(viewsets.ModelViewSet):
+class CumulativeMeasurementViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = CumulativeMeasurementSerializer
-    queryset = CumulativeMeasurement.objects.all().order_by("-id")
+    queryset = CumulativeMeasurement.objects.all()
     pagination_class = MeasurementPagination
 
     def create(self, request, *args, **kwargs):
@@ -49,117 +49,61 @@ class CumulativeCreateViewSet(viewsets.ModelViewSet):
         return Response(data, status=status.HTTP_201_CREATED)
 
 
-class RealTimeMeasurementViewSet(viewsets.ModelViewSet):
-    serializer_class = RealTimeMeasurementSerializer
-    queryset = InstantMeasurement.objects.all().order_by("-id")
-
-
-class InstantMeasurementViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = InstantMeasurement.objects.all().order_by("-id")
-    serializer_class = InstantMeasurementSerializer
+class InstantGraphViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = InstantMeasurement.objects.all()
+    serializer_class = GraphDataSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = InstantMeasurementFilter
-    pagination_class = MeasurementPagination
-    fields = []
 
     def list(self, request, *args, **kwargs):
-        transductor = request.query_params.get("id")
-        filterset = self.filter_queryset(self.get_queryset())
+        query_params = self.get_query_params()
+        self.validate_params(query_params)
 
-        if not self.fields or not filterset:
-            return super().list(request, *args, **kwargs)
+        queryset = self.get_queryset(fields=query_params["fields"])
+        if not queryset:
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
-        minutely_measurements = []
-        IS_THREEPHASIC = 3
+        df = pd.DataFrame(list(queryset))
+        lttb = query_params["lttb"].lower() == "true"
+        response = self.apply_lttb(df) if lttb else df
+        serializer = self.get_serializer(response)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-        if len(self.fields) == IS_THREEPHASIC:
-            minutely_measurements = self.threephasic_measurement_collections(transductor, filterset)
-        else:
-            minutely_measurements = self.simple_measurement_collections(transductor, filterset)
-
-        return Response(minutely_measurements)
-
-    def threephasic_measurement_collections(self, transductor, queryset):
-        is_filtered = self.request.query_params.get("is_filtered")
-        phases = ["phase_a", "phase_b", "phase_c"]
-
-        measurements = {}
-        limits = {}
-
-        for idx, phase in enumerate(phases):
-            values = queryset.values(self.fields[idx], "collection_date")
-            measurements[phase] = get_measurements_with_missing_values(values, self.fields[idx])
-
-            if is_filtered == "True":
-                measurements[phase] = self._apply_lttb(measurements[phase])
-
-            limits[phase] = self._get_limits(measurements[phase])
-
-        minutely_measurements = {
-            "transductor": transductor,
-            "min": min(limits[phase]["min"] for phase in phases),
-            "max": max(limits[phase]["max"] for phase in phases),
+    def get_query_params(self):
+        fields = self.request.query_params.get("fields", "")
+        return {
+            "fields": fields.split(",") if fields else [],
+            "transductor": self.request.query_params.get("transductor", None),
+            "lttb": self.request.query_params.get("lttb", None),
+            "threshold": self.request.query_params.get("threshold", settings.LIMIT_FILTER),
         }
 
-        for phase in phases:
-            minutely_measurements[phase] = self._format_date_from_measurements(measurements[phase])
+    def validate_params(self, query_params):
+        required_params = ["transductor", "fields"]
+        missing_params = [param for param in required_params if query_params.get(param) is None]
 
-        return [minutely_measurements]
+        if missing_params:
+            message = f"Missing required parameters: {', '.join(missing_params)}"
+            logger.error(f"Error: {message}")
+            raise ValidationError({"error": message})
 
-    def simple_measurement_collections(self, transductor, queryset):
-        is_filtered = self.request.query_params.get("is_filtered")
+    def get_queryset(self, *args, **kwargs):
+        fields = kwargs.get("fields", [])
+        try:
+            queryset = super().get_queryset().values("collection_date", *fields)
+        except Exception as e:
+            logger.error(f"Error in get_queryset: {e}")
+            raise ValidationError({"error": str(e)})
+        return self.filter_queryset(queryset)
 
-        measurements = get_measurements_with_missing_values(
-            queryset.values(self.fields[0], "collection_date"), self.fields[0]
-        )
-
-        if is_filtered == "True":
-            measurements = self._apply_lttb(measurements)
-
-        limits = self._get_limits(measurements)
-
-        minutely_measurements = {
-            "transductor": transductor,
-            "min": limits["min"],
-            "max": limits["max"],
-            "measurements": self._format_date_from_measurements(measurements),
-        }
-
-        return [minutely_measurements]
-
-    def _apply_lttb(self, measurements) -> list:
-        threshold = int(self.request.query_params.get("threshold", os.getenv("LIMIT_FILTER")))
-
-        filtered_values = copy(measurements)
-        indexes = range(len(filtered_values))
-        filtered_values = [
-            [counter, item[1], timezone.datetime.timestamp(item[0])] for counter, item in zip(indexes, filtered_values)
-        ]
-        filtered_values = np.array(filtered_values)
-        filtered_values = downsample(filtered_values, threshold)
-        filtered_values = [[timezone.datetime.fromtimestamp(item[2]), item[1]] for item in filtered_values]
-
-        return filtered_values
-
-    def _get_limits(self, measurements: list) -> dict:
-        limits = {
-            "min": 0,
-            "max": 0,
-        }
-
-        if measurements and len(measurements):
-            limits["min"] = 1e9
-            for measurement in measurements:
-                measurement_value = measurement[1]
-                if measurement_value < limits["min"] and measurement_value > 0:
-                    limits["min"] = measurement_value
-                elif measurement_value > limits["max"]:
-                    limits["max"] = measurement_value
-
-        return limits
-
-    def _format_date_from_measurements(self, measurements):
-        return [[measurement[0].strftime("%m/%d/%Y %H:%M:%S"), measurement[1]] for measurement in measurements]
+    def apply_lttb(self, df):
+        threshold = int(self.request.query_params.get("threshold", settings.LIMIT_FILTER))
+        try:
+            downsampler = LTTBDownSampler(threshold, enable_parallel=False)
+            return downsampler.apply_lttb(df, dt_column="collection_date")
+        except Exception as e:
+            logger.error(f"Error in apply_lttb: {e}")
+            raise ValidationError({"error": str(e)})
 
 
 class CumulativeMeasurementViewSet(viewsets.ReadOnlyModelViewSet):
@@ -271,70 +215,6 @@ class CumulativeMeasurementViewSet(viewsets.ReadOnlyModelViewSet):
 #     filterset_class = MonthlyMeasurementFilter
 #     pagination_class = MeasurementPagination
 
-
-# class MinutelyActivePowerThreePhaseViewSet(MinutelyMeasurementViewSet):
-#     serializer_class = ThreePhaseSerializer
-#     fields = ["active_power_a", "active_power_b", "active_power_c"]
-
-
-# class MinutelyReactivePowerThreePhaseViewSet(MinutelyMeasurementViewSet):
-#     serializer_class = ThreePhaseSerializer
-#     fields = ["reactive_power_a", "reactive_power_b", "reactive_power_c"]
-
-
-# class MinutelyApparentPowerThreePhaseViewSet(MinutelyMeasurementViewSet):
-#     serializer_class = ThreePhaseSerializer
-#     fields = ["apparent_power_a", "apparent_power_b", "apparent_power_c"]
-
-
-# class MinutelyPowerFactorThreePhaseViewSet(MinutelyMeasurementViewSet):
-#     serializer_class = ThreePhaseSerializer
-#     fields = ["power_factor_a", "power_factor_b", "power_factor_c"]
-
-
-# class MinutelyDHTVoltageThreePhaseViewSet(MinutelyMeasurementViewSet):
-#     serializer_class = ThreePhaseSerializer
-#     fields = ["dht_voltage_a", "dht_voltage_b", "dht_voltage_c"]
-
-
-# class MinutelyDHTCurrentThreePhaseViewSet(MinutelyMeasurementViewSet):
-#     serializer_class = ThreePhaseSerializer
-#     fields = ["dht_current_a", "dht_current_b", "dht_current_c"]
-
-
-# class MinutelyTotalActivePowerViewSet(MinutelyMeasurementViewSet):
-#     serializer_class = MeasurementSerializer
-#     fields = ["total_active_power"]
-
-
-# class MinutelyTotalReactivePowerViewSet(MinutelyMeasurementViewSet):
-#     serializer_class = MeasurementSerializer
-#     fields = ["total_reactive_power"]
-
-
-# class MinutelyTotalApparentPowerViewSet(MinutelyMeasurementViewSet):
-#     serializer_class = MeasurementSerializer
-#     fields = ["total_apparent_power"]
-
-
-# class MinutelyTotalPowerFactorViewSet(MinutelyMeasurementViewSet):
-#     serializer_class = MeasurementSerializer
-#     fields = ["total_power_factor"]
-
-
-# class VoltageThreePhaseViewSet(MinutelyMeasurementViewSet):
-#     serializer_class = ThreePhaseSerializer
-#     fields = ["voltage_a", "voltage_b", "voltage_c"]
-
-
-# class CurrentThreePhaseViewSet(MinutelyMeasurementViewSet):
-#     serializer_class = ThreePhaseSerializer
-#     fields = ["current_a", "current_b", "current_c"]
-
-
-# class FrequencyViewSet(MinutelyMeasurementViewSet):
-#     serializer_class = MeasurementSerializer
-#     fields = ["frequency_a"]
 
 
 # class TotalConsumptionViewSet(CumulativeMeasurementViewSet):

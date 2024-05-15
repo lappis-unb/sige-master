@@ -174,3 +174,73 @@ class ReportSerializer(serializers.Serializer):
         #     data["tariff_off_peak"] = tariffs["regular_tariff"]
 
         return data
+
+class GraphDataSerializer(serializers.BaseSerializer):
+    def to_representation(self, instance):
+        """
+        Format data for graph representation
+        Example:
+        {
+            "information": {
+                "time_zone": "America/Sao_Paulo",
+                "date_format": "ISO-8601",
+                "fields": ["voltage_a", "voltage_b", "voltage_c"]
+            },
+
+            "timestamp": ["2024-05-01T00:00:00.000Z", "2024-05-01T00:05:00.000Z", ...],
+            "traces": [
+                {
+                    "field": "voltage_a",
+                    "count": 4,
+                    "avg": 222.68,
+                    "max_value": 227.05,
+                    "min_value": 217.48,
+                    "values": [
+                        219.32,
+                        227.05,
+                        217.48
+                    ]
+                },
+                {
+                    "field": "voltage_b",
+                    "count": 4,
+                    "avg": 222.2,
+                    "max_value": 226.27,
+                    "min_value": 217.06,
+                    "values": [
+                        226.21,
+                        226.27,
+                        217.06
+                    ]
+                },
+                ....
+            ],
+        }
+        """
+        response = {
+            "information": {
+                "time_zone": timezone.get_current_timezone_name(),
+                "date_format": "ISO-8601",
+                "count": instance.shape[0],
+                "fields": [field for field in instance.columns if field != "collection_date"],
+            },
+            "timestamp": [],
+            "traces": [],
+        }
+
+        timestamp = instance.collection_date.apply(lambda x: x.astimezone(timezone.get_current_timezone()).isoformat())
+        response["timestamp"] = timestamp.tolist()
+
+        for field in response["information"]["fields"]:
+            response["traces"].append(
+                {
+                    "field": field,
+                    "count": instance.shape[0],
+                    "avg": instance[field].mean().round(2),
+                    "max": instance[field].max(),
+                    "min": instance[field].min(),
+                    "values": instance[field].tolist(),
+                }
+            )
+
+        return response
