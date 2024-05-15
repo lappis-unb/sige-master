@@ -1,87 +1,124 @@
-import logging
-from datetime import datetime
+mport logging
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import numpy as np
+import pandas as pd
+
+from apps.utils.helpers import log_service
+
+logger = logging.getLogger("apps")
 
 
-def _areas_of_triangles(a, bs, c):
-    """Calculate areas of triangles from duples of vertex coordinates.
+class LTTBDownSampler:
+    """A service class for downsampling time series data using the LTTB algorithm,
+    supporting combined and reference-based indexing."""
 
-    Uses implicit numpy broadcasting along first axis of ``bs``.
+    def __init__(self, n_out, enable_parallel=False):
+        if n_out <= 2:
+            raise ValueError("n_out should be greater than 2.")
 
-    Returns
-    -------
-    numpy.array
-        Array of areas of shape (len(bs),)
-    """
-    bs_minus_a = bs - a
-    a_minus_bs = a - bs
-    return 0.5 * abs((a[0] - c[0]) * (bs_minus_a[:, 1]) - (a_minus_bs[:, 0]) * (c[1] - a[1]))
+        self.n_out = n_out
+        self.enable_parallel = enable_parallel
 
+    @log_service()
+    def apply_lttb(self, data, dt_column="collection_date", ref_column=None):
+        if self.n_out > data.shape[0]:
+            return data
 
-def downsample(data, n_out):
-    """Downsample ``data`` to ``n_out`` points using the LTTB algorithm.
+        try:
+            self.valid_dataframe(data, dt_column, ref_column)
+        except ValueError as e:
+            logger.warning(f"Invalid DataFrame: {e}")
+            return data
 
-    Reference
-    ---------
-    Sveinn Steinarsson. 2013. Downsampling Time Series for Visual
-    Representation. MSc thesis. University of Iceland.
+        df_prepared = self._prepare_dataframe(data, dt_column)
+        indices = self._downsample_dataframe(df_prepared, ref_column)
+        return data.loc[indices]
 
-    Constraints
-    -----------
-      - ncols(data) == 2
-      - 3 <= n_out <= nrows(data)
-      - ``data`` should be sorted on the first column.
+    def _prepare_dataframe(self, data, dt_column):
+        df = data.copy()
+        if dt_column not in df.columns:
+            raise ValueError(f"Column '{dt_column}' not found in the DataFrame.")
 
-    Returns
-    -------
-    numpy.array
-        Array of shape (n_out, 2)
-    """
-    # Validate input
-    if len(data) == 0:
-        return data
+        df = df.rename(columns={dt_column: "x"})
+        df["x"] = pd.to_datetime(df["x"]).apply(lambda x: x.timestamp())
+        return df
 
-    if data.shape[1] < 2:
-        raise ValueError("data should have a minimun 2 columns")
+    def _downsample_dataframe(self, df, ref_column):
+        if ref_column and ref_column not in df.columns:
+            raise ValueError(f"Column '{ref_column}' not found in DataFrame.")
 
-    if np.any(data[1:, 0] <= data[:-1, 0]):
-        raise ValueError("data should be sorted on first column")
-
-    if n_out > data.shape[0]:
-        return data
-
-    if n_out < 3:
-        raise ValueError("Can only downsample to a minimum of 3 points")
-
-    # Split data into bins
-    n_bins = n_out - 2
-    data_bins = np.array_split(data[1 : len(data) - 1], n_bins)
-
-    # Prepare output array
-    # First and last points are the same as in the input.
-    out = np.zeros((n_out, 3))
-    out[0] = data[0]
-    out[len(out) - 1] = data[len(data) - 1]
-
-    # Largest Triangle Three Buckets (LTTB):
-    # In each bin, find the point that makes the largest triangle
-    # with the point saved in the previous bin
-    # and the centroid of the points in the next bin.
-    for i in range(len(data_bins)):
-        this_bin = data_bins[i]
-
-        if i < n_bins - 1:
-            next_bin = data_bins[i + 1]
+        if ref_column is None:
+            indices = self._downsample_all_columns(df)
+            return list(np.unique(indices))
+        elif self.enable_parallel:
+            return self._downsample_parallel(df)
         else:
-            next_bin = data[len(data) - 1 :]
+            downsample_df = df[["x", ref_column]].rename(columns={ref_column: "y"})
+            return self._downsample_column(downsample_df)
 
-        a = out[i]
-        bs = this_bin
-        c = next_bin.mean(axis=0)
+    def _parallel_downsample(self, df):
+        indices = []
 
-        areas = _areas_of_triangles(a, bs, c)
+        num_workers = min(len(df.columns), 8)
+        with ThreadPoolExecutor(max_workers=num_workers) as executor:
+            futures = []
+            for column in df.columns[1:]:
+                df_downsample = df[["x", column]].rename(columns={column: "y"})
+                futures.append(executor.submit(self._downsample_column, df_downsample))
 
-        out[i + 1] = bs[np.argmax(areas)]
+            for future in as_completed(futures):
+                indices.extend(future.result())
+        return np.unique(indices)
 
-    return out
+    def _downsample_all_columns(self, df):
+        indices_columns = []
+        for column in df.columns[1:]:
+            df_downsample = df[["x", column]].rename(columns={column: "y"})
+            indices = self._downsample_column(df_downsample)
+            indices_columns.extend(indices)
+        return np.unique(indices_columns)
+
+    def _downsample_column(self, df):
+        if df["y"].dtype != float:
+            df["y"] = df["y"].astype(float, errors="ignore")
+
+        data = df[["x", "y"]].to_numpy()
+        return self._lttb_core(data)
+
+    def _lttb_core(self, data):
+        n_bins = self.n_out - 2
+        data_bins = np.array_split(data[1:-1], n_bins)
+        indices = np.zeros(self.n_out, dtype=int)  # Array to store indices
+        indices[0], indices[-1] = 0, len(data) - 1
+        start_indices = self._calculate_start_indices(data_bins)
+
+        for i in range(n_bins):
+            a = data[indices[i]]
+            bs = data_bins[i]
+            next_bin = data_bins[i + 1] if i < n_bins - 1 else data[-1:]
+            c = next_bin.mean(axis=0)
+            areas = self._areas_of_triangles(a, bs, c)
+            max_index = np.argmax(areas)
+            indices[i + 1] = start_indices[i] + max_index
+        return indices
+
+    def _areas_of_triangles(self, a, bs, c):
+        a_to_c = c - a
+        return 0.5 * np.abs(a_to_c[0] * (bs[:, 1] - a[1]) - a_to_c[1] * (bs[:, 0] - a[0]))
+
+    def _calculate_start_indices(self, data_bins):
+        start_indices = [1]
+        for i in range(1, len(data_bins)):
+            start_indices.append(start_indices[-1] + len(data_bins[i - 1]))
+        return start_indices
+
+    def valid_dataframe(self, df, dt_column, ref_column):
+        if not isinstance(df, pd.DataFrame):
+            raise ValueError("Input data should be a pandas DataFrame.")
+
+        if df.columns[0] != dt_column:
+            raise ValueError(f"Column '{df.columns[0]}' should not be '{dt_column}'")
+
+        if len(df.columns) < 2:
+            raise ValueError("Dataframe should have at least 2 columns.")
