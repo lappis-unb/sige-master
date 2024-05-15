@@ -52,6 +52,7 @@ class InstantMeasurement(models.Model):
     class Meta:
         verbose_name = _("Instantaneous measurement")
         verbose_name_plural = _("Instantaneous Measurements")
+        ordering = ["-collection_date"]
         indexes = [
             models.Index(
                 fields=["transductor", "collection_date"],
@@ -105,6 +106,7 @@ class CumulativeMeasurement(models.Model):
     class Meta:
         verbose_name = _("Cumulative measurement")
         verbose_name_plural = _("Cumulative Measurements")
+        ordering = ["-collection_date"]
         indexes = [
             models.Index(
                 fields=["transductor", "collection_date"],
