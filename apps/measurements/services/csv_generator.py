@@ -3,6 +3,7 @@ import logging
 from io import StringIO
 
 from django.http import HttpResponse
+from django.utils import timezone
 
 logger = logging.getLogger("apps.measurements.services.csv_generator")
 
@@ -20,13 +21,14 @@ class CSVGenerator:
             self.fields = [field.name for field in self.queryset.model._meta.fields]
 
         csv_writer.writerow(self.fields)
+        tz = timezone.get_current_timezone()
 
         for instance in self.queryset:
             row = []
             for field in self.fields:
                 value = getattr(instance, field)
                 if hasattr(value, "isoformat"):
-                    value = value.isoformat()
+                    value = value.astimezone(tz).isoformat()
                 elif isinstance(value, str):
                     value = value.encode("utf-8")
                 row.append(value)
@@ -36,10 +38,10 @@ class CSVGenerator:
         return csv_file.getvalue()
 
 
-def generate_csv_response(queryset, fields=None, filename=None):
-    csv_generator = CSVGenerator(queryset)
+def generate_csv_response(queryset, fields=None, filename="data.csv"):
+    csv_generator = CSVGenerator(queryset, fields)
     csv_data = csv_generator.generate_csv()
 
     response = HttpResponse(csv_data, content_type="text/csv")
-    response["Content-Disposition"] = "attachment; filename=instant_measurements.csv"
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
     return response
