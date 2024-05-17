@@ -1,4 +1,5 @@
 import logging
+import re
 
 import dateutil
 from django.utils import timezone
@@ -10,6 +11,7 @@ from apps.measurements.models import (
     ReferenceMeasurement,
 )
 from apps.measurements.services import CumulativeMeasurementManager
+from apps.measurements.utils import get_error_messages
 
 logger = logging.getLogger("apps")
 
@@ -184,45 +186,6 @@ class ReportSerializer(serializers.Serializer):
                 self.fields[field_name] = serializers.FloatField(allow_null=True)
 
 
-# ---------------------------------------------------------------------------------------------------------------------
-# Query Serializers
-# ---------------------------------------------------------------------------------------------------------------------
-class BaseQuerySerializer(serializers.Serializer):
-    entity = serializers.IntegerField(min_value=1, required=True)
-    month_year = serializers.CharField(default=timezone.now().strftime("%m-%Y"))
-    descendants = serializers.BooleanField(default=True, required=False)
-    depth = serializers.IntegerField(min_value=0, default=0, required=False)
-    fields = serializers.CharField(default=None, required=False)
-
-    ALLOWED_FIELDS = []
-
-    def validate_fields(self, value):
-        if value is None:
-            return self.ALLOWED_FIELDS
-
-        fields = [field.strip() for field in value.split(",")] if value else []
-        for field in fields:
-            if field not in self.ALLOWED_FIELDS:
-                raise serializers.ValidationError(
-                    f"The field '{field}' is not allowed.Allowed fields: {self.ALLOWED_FIELDS}"
-                )
-        return fields
-
-    def validate_month_year(self, value):
-        try:
-            return dateutil.parser.parse(value, default=timezone.now()).date()
-        except ValueError:
-            raise serializers.ValidationError("Invalid date format for 'month_year'. Use 'YYYY-MM' or 'MM-YYYY'.")
-
-
-class UferQuerySerializer(BaseQuerySerializer):
-    ALLOWED_FIELDS = ["power_factor_a", "power_factor_b", "power_factor_c"]
-
-
-class ReportQuerySerializer(BaseQuerySerializer):
-    ALLOWED_FIELDS = ["active_consumption", "active_generated", "reactive_inductive", "reactive_capacitive"]
-
-
 # =====================================================================================================================
 #  Charts Serializers
 # =====================================================================================================================
@@ -297,3 +260,83 @@ class GraphDataSerializer(serializers.BaseSerializer):
             )
 
         return response
+
+
+# ---------------------------------------------------------------------------------------------------------------------
+# Query Parameters Serializers
+# ---------------------------------------------------------------------------------------------------------------------
+class BaseQuerySerializer(serializers.Serializer):
+    start_date = serializers.DateTimeField(error_messages=get_error_messages("date"))
+    end_date = serializers.DateTimeField(error_messages=get_error_messages("date"))
+    period = serializers.CharField(error_messages=get_error_messages())
+    fields = serializers.CharField(error_messages=get_error_messages())
+
+    MODEL_ALLOWED_FIELDS = []
+    REQUIRED_PARAMETERS = []
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields:
+            if field not in self.REQUIRED_PARAMETERS:
+                self.fields[field].required = False
+
+    def validate_period(self, value):
+        if not value:
+            return value
+
+        pattern = re.compile(r"last_(\d+)_?(day|month|year)")
+        match = pattern.match(value)
+        if not match:
+            raise serializers.ValidationError(f"Invalid period format: {value}, Use 'last_<number>_<day|month|year>'")
+
+        return value
+
+    def validate_fields(self, value: str):
+        fields = value.split(",")
+        invalid_fields = set(fields) - set(self.MODEL_ALLOWED_FIELDS)
+        if invalid_fields:
+            raise serializers.ValidationError(
+                f"Invalid fields: {', '.join(invalid_fields)}, allowed fields: {', '.join(self.MODEL_ALLOWED_FIELDS)}."
+            )
+        return fields
+
+    def validate(self, attrs):
+        start_date = attrs.get("start_date", None)
+        end_date = attrs.get("end_date", timezone.now() if start_date else None)
+        period = attrs.get("period", None)
+
+        if start_date and start_date > end_date:
+            raise serializers.ValidationError("Start date must be earlier than end date.")
+
+        if period and start_date:
+            raise serializers.ValidationError("You can't use 'start' and 'period' parameters together.")
+
+        if period:
+            _, number, unit = period.split("_")
+            unit += "s"
+            start_date = timezone.now() - dateutil.relativedelta.relativedelta(**{unit: int(number)})
+            attrs["start_date"] = start_date
+            attrs["end_date"] = end_date
+        return attrs
+
+
+class InstantMeasurementQuerySerializer(BaseQuerySerializer):
+    transductor = serializers.IntegerField(min_value=1, error_messages=get_error_messages("integer"))
+
+    REQUIRED_PARAMETERS = ["transductor"]
+    MODEL_ALLOWED_FIELDS = [
+        str(field.name)
+        for field in InstantMeasurement._meta.fields
+        if field.name not in {"id", "collection_date", "transductor"}
+    ]
+
+
+class CumulativeMeasurementQuerySerializer(BaseQuerySerializer):
+    transductor = serializers.IntegerField(min_value=1, error_messages=get_error_messages("integer"))
+
+    REQUIRED_PARAMETERS = ["transductor"]
+    MODEL_ALLOWED_FIELDS = [
+        str(field.name)
+        for field in CumulativeMeasurement._meta.fields
+        if field.name not in {"id", "collection_date", "transductor", "is_calculated"}
+    ]
