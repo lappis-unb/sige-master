@@ -17,8 +17,10 @@ from apps.measurements.filters import (
 from apps.measurements.models import CumulativeMeasurement, InstantMeasurement
 from apps.measurements.pagination import MeasurementPagination
 from apps.measurements.serializers import (
+    CumulativeMeasurementQuerySerializer,
     CumulativeMeasurementSerializer,
     GraphDataSerializer,
+    InstantMeasurementQuerySerializer,
     InstantMeasurementSerializer,
     ReportQuerySerializer,
     ReportSerializer,
@@ -26,6 +28,7 @@ from apps.measurements.serializers import (
     UferQuerySerializer,
     UferSerializer,
 )
+from apps.measurements.services.csv_generator import generate_csv_response
 from apps.measurements.services.downsampler import LTTBDownSampler
 from apps.organizations.models import Entity
 from apps.transductors.models import Transductor
@@ -40,22 +43,33 @@ class InstantMeasurementViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_class = InstantMeasurementFilter
     pagination_class = MeasurementPagination
 
+    @action(detail=False, methods=["get"], url_path="export-csv")
+    def export_csv(self, request):
+        params_serializer = InstantMeasurementQuerySerializer(data=request.query_params)
+        params_serializer.is_valid(raise_exception=True)
+        validated_params = params_serializer.validated_data
+
+        queryset = self.filter_queryset(self.get_queryset())
+        fields = validated_params.get("fields", [])
+        return generate_csv_response(queryset, fields=fields, filename="instant_measurements.csv")
+
 
 class CumulativeMeasurementViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = CumulativeMeasurementSerializer
     queryset = CumulativeMeasurement.objects.all()
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = CumulativeMeasurementFilter
     pagination_class = MeasurementPagination
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        created_measurements = serializer.save()
+    @action(detail=False, methods=["get"], url_path="export-csv")
+    def export_csv(self, request):
+        params_serializer = CumulativeMeasurementQuerySerializer(data=request.query_params)
+        params_serializer.is_valid(raise_exception=True)
+        validated_params = params_serializer.validated_data
 
-        if isinstance(created_measurements, CumulativeMeasurement):
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        data = self.get_serializer(created_measurements, many=True).data
-        return Response(data, status=status.HTTP_201_CREATED)
+        queryset = self.filter_queryset(self.get_queryset())
+        fields = validated_params.get("fields", [])
+        return generate_csv_response(queryset, fields=fields, filename="cumulative_measurements.csv")
 
 
 class InstantGraphViewSet(viewsets.ReadOnlyModelViewSet):
