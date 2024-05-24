@@ -201,6 +201,7 @@ class GraphDataSerializer(serializers.BaseSerializer):
             "information": {
                 "time_zone": "America/Sao_Paulo",
                 "date_format": "ISO-8601",
+                "count": 4,
                 "fields": ["voltage_a", "voltage_b", "voltage_c"]
             },
 
@@ -208,10 +209,9 @@ class GraphDataSerializer(serializers.BaseSerializer):
             "traces": [
                 {
                     "field": "voltage_a",
-                    "count": 4,
-                    "avg": 222.68,
+                    "avg_value": 222.68,
                     "max_value": 227.05,
-                    "min_value": 217.48,
+                    "min_value: 217.48,
                     "values": [
                         219.32,
                         227.05,
@@ -234,10 +234,13 @@ class GraphDataSerializer(serializers.BaseSerializer):
             ],
         }
         """
+        tz = timezone.get_current_timezone()
         response = {
             "information": {
                 "time_zone": timezone.get_current_timezone_name(),
                 "date_format": "ISO-8601",
+                "start_date": instance.collection_date.min().astimezone(tz).isoformat(),
+                "end_date": instance.collection_date.max().astimezone(tz).isoformat(),
                 "count": instance.shape[0],
                 "fields": [field for field in instance.columns if field != "collection_date"],
             },
@@ -245,21 +248,19 @@ class GraphDataSerializer(serializers.BaseSerializer):
             "traces": [],
         }
 
-        timestamp = instance.collection_date.apply(lambda x: x.astimezone(timezone.get_current_timezone()).isoformat())
+        timestamp = instance.collection_date.apply(lambda ts: ts.astimezone(tz).isoformat())
         response["timestamp"] = timestamp.tolist()
 
         for field in response["information"]["fields"]:
             response["traces"].append(
                 {
                     "field": field,
-                    "count": instance.shape[0],
-                    "avg": instance[field].mean().round(2),
-                    "max": instance[field].max(),
-                    "min": instance[field].min(),
+                    "avg_value": instance[field].mean().round(2),
+                    "max_value": instance[field].max(),
+                    "min_value": instance[field].min(),
                     "values": instance[field].tolist(),
                 }
             )
-
         return response
 
 
@@ -333,3 +334,93 @@ class CumulativeMeasurementQuerySerializer(BaseQuerySerializer):
         for field in CumulativeMeasurement._meta.fields
         if field.name not in {"id", "collection_date", "transductor", "is_calculated"}
     ]
+
+
+class InstantGraphQuerySerializer(BaseQuerySerializer):
+    transductor = serializers.IntegerField(min_value=1, error_messages=get_error_messages("integer"))
+    lttb = serializers.BooleanField(default=True, required=False)
+    threshold = serializers.IntegerField(min_value=2, default=settings.LIMIT_FILTER, required=False)
+
+    REQUIRED_PARAMETERS = ["transductor", "fields"]
+    MODEL_ALLOWED_FIELDS = [
+        str(field.name)
+        for field in InstantMeasurement._meta.fields
+        if field.name not in {"id", "collection_date", "transductor", "is_calculated"}
+    ]
+
+    def validate_lttb(self, value):
+        if not isinstance(value, bool):
+            raise serializers.ValidationError("Invalid value for 'lttb' parameter. Use 'true' or 'false'.")
+        return bool(value)
+
+
+class CumulativeGraphQuerySerializer(BaseQuerySerializer):
+    transductor = serializers.IntegerField(min_value=1, error_messages=get_error_messages("integer"))
+    freq = serializers.CharField(required=False)
+    agg = serializers.CharField(required=False)
+
+    REQUIRED_PARAMETERS = ["transductor", "fields"]
+    MODEL_ALLOWED_FIELDS = [
+        str(field.name)
+        for field in CumulativeMeasurement._meta.fields
+        if field.name not in {"id", "collection_date", "transductor", "is_calculated"}
+    ]
+
+    def validate_freq(self, value):
+        try:
+            time_delta = pd.to_timedelta(value)
+        except ValueError:
+            raise serializers.ValidationError("Invalid frequency format. Use ISO 8601 duration format.")
+
+        if time_delta.total_seconds() < 900:
+            raise serializers.ValidationError("Invalid frequency. Use a minimum of 15 minutes.")
+        return time_delta
+
+    def validate_agg(self, value):
+        if value not in ["sum", "mean", "max", "min"]:
+            raise serializers.ValidationError("Invalid aggregation function. Use 'sum', 'mean', 'max' or 'min'.")
+        return value
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        if bool(attrs.get("freq")) ^ bool(attrs.get("agg")):
+            raise serializers.ValidationError("You must provide 'freq' and 'agg' parameters together.")
+        return attrs
+
+
+class UferQuerySerializer(BaseQuerySerializer):
+    entity = serializers.IntegerField(min_value=1, required=True)
+    inc_desc = serializers.BooleanField(default=True, required=False)
+    depth = serializers.IntegerField(min_value=0, default=0, required=False)
+    th_percent = serializers.IntegerField(min_value=1, max_value=100, default=92, required=False)
+    only_day = serializers.BooleanField(required=False)
+
+    REQUIRED_PARAMETERS = ["entity"]
+    MODEL_ALLOWED_FIELDS = ["power_factor_a", "power_factor_b", "power_factor_c"]
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        if not attrs.get("fields"):
+            attrs["fields"] = self.MODEL_ALLOWED_FIELDS
+        return attrs
+
+    def validate_period(self, value):
+        value = super().validate_period(value)
+
+        if value > pd.Timedelta("30 days"):
+            raise serializers.ValidationError("The maximum period allowed is 30 days.")
+
+
+class ReportQuerySerializer(BaseQuerySerializer):
+    entity = serializers.IntegerField(min_value=1)
+    inc_desc = serializers.BooleanField(default=True)
+    depth = serializers.IntegerField(min_value=0, default=0)
+
+    REQUIRED_PARAMETERS = ["entity"]
+    MODEL_ALLOWED_FIELDS = ["active_consumption", "active_generated", "reactive_inductive", "reactive_capacitive"]
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        if not attrs.get("fields"):
+            attrs["fields"] = self.MODEL_ALLOWED_FIELDS
+        return attrs
