@@ -38,7 +38,6 @@ logger = logging.getLogger("apps.measurements.views")
 class InstantMeasurementViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = InstantMeasurement.objects.all()
     serializer_class = InstantMeasurementSerializer
-    filter_backends = [DjangoFilterBackend]
     filterset_class = InstantMeasurementFilter
     pagination_class = MeasurementPagination
 
@@ -162,32 +161,53 @@ class CumulativeGraphViewSet(viewsets.ReadOnlyModelViewSet):
         params_serializer.is_valid(raise_exception=raise_exception)
         return params_serializer.validated_data
 
-    @action(detail=False, methods=["get"])
-    def hourly(self, request, *args, **kwargs):
-        query_params = self.get_query_params()
-        self.validate_params(query_params)
+    @action(detail=False, methods=["get"], url_path="daily-profile")
+    def daily_profile(self, request, *args, **kwargs):
+        self.validated_params = self._validate_params(request, raise_exception=True)
+        fields = self.validated_params["fields"]
 
-        queryset = self.get_queryset(field=query_params["field"])
-        if not queryset.exists():
-            return Response(status=status.HTTP_204_NO_CONTENT)
+        queryset = self.get_queryset()
+        agg_queryset = queryset.aggregate_hourly("sum", fields)
+        data = pd.DataFrame(list(agg_queryset))
 
-        data = pd.DataFrame(list(queryset))
-        data.set_index("collection_date", inplace=True)
-        data_hourly = data.resample("h").apply("sum")
+        df = pd.DataFrame({"hour": range(24)})
+        for field in fields:
+            data_hourly = data.groupby("hour")[field].mean().reset_index()
+            data_hourly[field] = data_hourly[field].apply(lambda x: round(x, 2))
+            df = pd.concat([df, data_hourly[field]], axis=1)
 
-        data_hourly = data_hourly.groupby(data_hourly.index.hour).mean()
-        data_hourly = data_hourly.reset_index()
-        data_hourly.rename(columns={"collection_date": "hour"}, inplace=True)
-        data_hourly.rename(columns={query_params["field"]: "value"}, inplace=True)
-
-        responde = {
-            "field": query_params["field"],
-            "start_date": data.index[0],
-            "end_date": data.index[-1],
-            "data": data_hourly.to_dict(orient="records"),
+        response_data = {
+            "count": df.shape[0],
+            "results": df.to_dict(orient="records"),
         }
+        return Response(response_data, status=status.HTTP_200_OK)
 
-        return Response(responde, status=status.HTTP_200_OK)
+    @action(detail=False, methods=["get"], url_path="detail-daily-profile")
+    def detail_daily_profile(self, request, *args, **kwargs):
+        self.validated_params = self._validate_params(request, raise_exception=True)
+        fields = self.validated_params["fields"]
+        quarter_hourly_avg = self.get_queryset().quarter_hourly_avg(fields)
+        serializer = DetailDailySerializer(quarter_hourly_avg, many=True, context={"fields": fields})
+
+        response_data = {
+            "count": quarter_hourly_avg.count(),
+            "results": serializer.data,
+        }
+        return Response(response_data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=["get"], url_path="peak_hours")
+    def peak_hours(self, request, *args, **kwargs):
+        self.validated_params = self._validate_params(request, raise_exception=True)
+        fields = self.validated_params["fields"]
+        peak_hours = self.get_queryset().aggregate_peak_hours(fields)
+        return Response(peak_hours, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=["get"], url_path="off-peak-hours")
+    def off_peak_hours(self, request, *args, **kwargs):
+        self.validated_params = self._validate_params(request, raise_exception=True)
+        fields = self.validated_params["fields"]
+        off_peak_hours = self.get_queryset().aggregate_off_peak_hours(fields)
+        return Response(off_peak_hours, status=status.HTTP_200_OK)
 
 
 class ReportViewSet(viewsets.ReadOnlyModelViewSet):
