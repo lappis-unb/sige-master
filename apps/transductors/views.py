@@ -1,10 +1,8 @@
 import logging
 
-from django.shortcuts import get_object_or_404
-from rest_framework import status, viewsets
+from rest_framework import viewsets
 from rest_framework.response import Response
 
-from apps.organizations.models import Entity
 from apps.transductors.models import StatusHistory, Transductor, TransductorModel
 from apps.transductors.serializers import (
     TransductorCreateSerializer,
@@ -33,23 +31,12 @@ class TransductorViewSet(viewsets.ModelViewSet):
             return TransductorCreateSerializer
 
     def list(self, request, *args, **kwargs):
-        entity = request.query_params.get("entity", None)
-        if not entity:
+        entity_id = request.query_params.get("entity", None)
+        if not entity_id:
             return super().list(request, *args, **kwargs)
 
-        queryset = self.get_queryset()
-        if not queryset.exists():
-            return Response({"detail": "No data found."}, status=status.HTTP_204_NO_CONTENT)
-
-        entity = get_object_or_404(Entity, pk=entity)
-        descendants = get_boolean(request.query_params.get("descendants", True))
-        if descendants:
-            max_depth = request.query_params.get("depth", 0)
-            entities = entity.get_descendants(include_self=True, max_depth=int(max_depth))
-        else:
-            entities = [entity]
-
-        transductors = Transductor.objects.filter(located__in=entities)
+        inc_desc = get_boolean(request.query_params.get("inc_desc", "true"))
+        transductors = self.get_queryset().entity(entity_id, inc_desc)
         serializer = self.get_serializer(transductors, many=True)
         return Response(serializer.data)
 
