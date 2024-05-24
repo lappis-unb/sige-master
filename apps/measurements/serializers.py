@@ -133,7 +133,6 @@ class CumulativeMeasurementSerializer(serializers.ModelSerializer):
         try:
             self.update_reference_measurement(last_measurement, validated_data, fields)
         except Exception as e:
-            print(f"Error updating reference measurement: {e}", flush=True)
             logger.error(f"Error updating reference measurement: {e}")
             raise ValueError("Error updating reference measurement")
 
@@ -150,41 +149,51 @@ class CumulativeMeasurementSerializer(serializers.ModelSerializer):
 
 
 class UferSerializer(serializers.Serializer):
-    entity = serializers.CharField()
-    month_year = serializers.DateField(format="%m-%Y")
-    units = serializers.CharField()
-    data = serializers.ListField()
-
-
-class UferDetailSerializer(serializers.Serializer):
+    total_measurements = serializers.IntegerField()
     transductor = serializers.IntegerField()
-    ip = serializers.IPAddressField(source="transductor__ip_address")
-    located = serializers.CharField(source="transductor__located__acronym")
+
+    def __init__(self, *args, **kwargs):
+        super(UferSerializer, self).__init__(*args, **kwargs)
+        fields = self.context.get("fields", [])
+        for field in fields:
+            self.fields[f"pf_phase_{field[-1]}"] = serializers.FloatField(required=False)
 
     def to_representation(self, instance):
-        data = super().to_representation(instance)
-
-        fields = self.context.get("fields", {})
-        for field in fields:
-            len_total = instance.get(f"{field}_len_total", 0)
-            len_quality = instance.get(f"{field}_len_quality", 0)
-            percent = round((len_quality / len_total) * 100, 2) if len_total else 0.0
-            data[f"pf_phase_{field[-1]}"] = percent
-        return data
+        transductor = (
+            Transductor.objects.filter(pk=instance["transductor"])
+            .values("located__acronym", "located__name", "ip_address")
+            .first()
+        )
+        rep = {
+            "located": f"{transductor['located__acronym']} - {transductor['located__name']}",
+            "ip_address": transductor["ip_address"],
+        }
+        rep.update(super().to_representation(instance))
+        return rep
 
 
 class ReportSerializer(serializers.Serializer):
-    entity = serializers.CharField()
-    month_year = serializers.DateField(format="%Y-%m")
+    # entity = serializers.CharField()
 
     def __init__(self, *args, **kwargs):
-        context = kwargs.get("context", {})
-        fields = context.get("fields", [])
+        fields = kwargs["context"].get("fields", [])
         super(ReportSerializer, self).__init__(*args, **kwargs)
 
         for field_name in fields:
             if field_name not in self.fields:
                 self.fields[field_name] = serializers.FloatField(allow_null=True)
+
+
+class DetailDailySerializer(serializers.Serializer):
+    time = serializers.TimeField()
+
+    def __init__(self, *args, **kwargs):
+        fields = kwargs["context"].get("fields", [])
+        super(DetailDailySerializer, self).__init__(*args, **kwargs)
+
+        if fields:
+            for field in fields:
+                self.fields[field] = serializers.FloatField()
 
 
 # =====================================================================================================================
