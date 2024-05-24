@@ -4,8 +4,29 @@ from django.db import models
 from django.db.models import Count, Q
 from django.utils import timezone
 
+from apps.organizations.models import Entity
+
+
+class TransductorQuerySet(models.QuerySet):
+    def entity(self, entity_id, include_descendants=True):
+        if not include_descendants:
+            return self.filter(located_id=entity_id)
+
+        entity = Entity.objects.filter(id=entity_id).first()
+        if not entity:
+            return self.none()
+
+        entities = entity.get_descendants(include_self=True)
+        return self.filter(located__in=entities)
+
 
 class TransductorsManager(models.Manager):
+    def get_queryset(self):
+        return TransductorQuerySet(self.model, using=self._db)
+
+    def entity(self, entity_id, include_descendants=True):
+        return self.get_queryset().entity(entity_id, include_descendants)
+
     def status(self, status):
         return self.get_queryset().filter(
             status_history__status=status,

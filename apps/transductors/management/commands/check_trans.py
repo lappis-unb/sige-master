@@ -21,7 +21,7 @@ class Command(BaseCommand):
     @log_execution_time(logger, level=logging.INFO)
     def handle(self, *args, **options) -> None:
         max_workers = options["max_workers"]
-        transductors = Transductor.manager.broken_and_non_status()
+        transductors = Transductor.objects.broken_and_non_status()
         self.log_start(transductors, max_workers)
 
         if transductors.exists():

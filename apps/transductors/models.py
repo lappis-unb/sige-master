@@ -46,9 +46,6 @@ class TransductorModel(models.Model):
 
 
 class Transductor(models.Model):
-    objects = models.Manager()
-    manager = TransductorsManager()
-
     ip_address = models.GenericIPAddressField(protocol="IPv4")
     port = models.PositiveIntegerField(default=502)
     firmware_version = models.CharField(max_length=20, blank=True)
@@ -81,6 +78,8 @@ class Transductor(models.Model):
         on_delete=models.PROTECT,
         related_name="transductors",
     )
+
+    objects = TransductorsManager()
 
     @property
     def memory_map(self):
