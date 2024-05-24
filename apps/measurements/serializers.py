@@ -1,7 +1,7 @@
 import logging
-import re
 
-import dateutil
+import pandas as pd
+from django.conf import settings
 from django.utils import timezone
 from rest_framework import serializers
 
@@ -12,6 +12,7 @@ from apps.measurements.models import (
 )
 from apps.measurements.services import CumulativeMeasurementManager
 from apps.measurements.utils import get_error_messages
+from apps.transductors.models import Transductor
 
 logger = logging.getLogger("apps")
 
@@ -281,42 +282,34 @@ class BaseQuerySerializer(serializers.Serializer):
                 self.fields[field].required = False
 
     def validate_period(self, value):
-        if not value:
-            return value
-
-        pattern = re.compile(r"last_(\d+)_?(day|month|year)")
-        match = pattern.match(value)
-        if not match:
-            raise serializers.ValidationError(f"Invalid period format: {value}, Use 'last_<number>_<day|month|year>'")
-
+        try:
+            value = pd.to_timedelta(value)
+        except ValueError as e:
+            raise serializers.ValidationError(f"Invalid period format. {e}")
         return value
 
     def validate_fields(self, value: str):
         fields = value.split(",")
         invalid_fields = set(fields) - set(self.MODEL_ALLOWED_FIELDS)
+
         if invalid_fields:
             raise serializers.ValidationError(
-                f"Invalid fields: {', '.join(invalid_fields)}, allowed fields: {', '.join(self.MODEL_ALLOWED_FIELDS)}."
+                f"Cannot resolve fields: {', '.join(invalid_fields)}, "
+                f"Choices are: {', '.join(self.MODEL_ALLOWED_FIELDS)}."
             )
         return fields
 
     def validate(self, attrs):
-        start_date = attrs.get("start_date", None)
-        end_date = attrs.get("end_date", timezone.now() if start_date else None)
-        period = attrs.get("period", None)
+        start_date = attrs.get("start_date")
+        end_date = attrs.get("end_date", timezone.now())
+        period = attrs.get("period")
 
         if start_date and start_date > end_date:
             raise serializers.ValidationError("Start date must be earlier than end date.")
 
         if period and start_date:
-            raise serializers.ValidationError("You can't use 'start' and 'period' parameters together.")
+            raise serializers.ValidationError("You can't use 'start_date' and 'period' parameters together.")
 
-        if period:
-            _, number, unit = period.split("_")
-            unit += "s"
-            start_date = timezone.now() - dateutil.relativedelta.relativedelta(**{unit: int(number)})
-            attrs["start_date"] = start_date
-            attrs["end_date"] = end_date
         return attrs
 
 
