@@ -4,9 +4,10 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from apps.measurements.managers import CumulativeMeasurementsManager
 from apps.transductors.models import Transductor
 
-logger = logging.getLogger("apps")
+logger = logging.getLogger("apps.measurements")
 
 
 class InstantMeasurement(models.Model):
@@ -102,6 +103,8 @@ class CumulativeMeasurement(models.Model):
         related_name="cumulative_measurements",
         on_delete=models.PROTECT,
     )
+
+    objects = CumulativeMeasurementsManager()
 
     class Meta:
         verbose_name = _("Cumulative measurement")
