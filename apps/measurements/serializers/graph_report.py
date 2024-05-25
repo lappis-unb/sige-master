@@ -2,6 +2,7 @@ import logging
 
 import dateutil
 from django.utils import timezone
+from pandas import Timestamp
 from rest_framework import serializers
 
 from apps.transductors.models import Transductor
@@ -59,73 +60,54 @@ class DetailDailySerializer(serializers.Serializer):
         return dateutil.parser.parse(time).time()
 
 
-class GraphDataSerializer(serializers.BaseSerializer):
-    def to_representation(self, instance):
-        """
-        Format data for graph representation
-        Example:
-        {
-            "information": {
-                "time_zone": "America/Sao_Paulo",
-                "date_format": "ISO-8601",
-                "count": 4,
-                "fields": ["voltage_a", "voltage_b", "voltage_c"]
-            },
+class GraphDataSerializer(serializers.Serializer):
+    information = serializers.SerializerMethodField()
+    timestamp = serializers.ListField(child=serializers.CharField(), allow_null=True)
+    traces = serializers.ListField(child=serializers.DictField(), allow_null=True)
 
-            "timestamp": ["2024-05-01T00:00:00.000Z", "2024-05-01T00:05:00.000Z", ...],
-            "traces": [
-                {
-                    "field": "voltage_a",
-                    "avg_value": 222.68,
-                    "max_value": 227.05,
-                    "min_value: 217.48,
-                    "values": [
-                        219.32,
-                        227.05,
-                        217.48
-                    ]
-                },
-                {
-                    "field": "voltage_b",
-                    "count": 4,
-                    "avg": 222.2,
-                    "max_value": 226.27,
-                    "min_value": 217.06,
-                    "values": [
-                        226.21,
-                        226.27,
-                        217.06
-                    ]
-                },
-                ....
-            ],
-        }
-        """
+    def get_information(self, instance):
         tz = timezone.get_current_timezone()
-        response = {
-            "information": {
-                "time_zone": timezone.get_current_timezone_name(),
-                "date_format": "ISO-8601",
-                "start_date": instance.collection_date.min().astimezone(tz).isoformat(),
-                "end_date": instance.collection_date.max().astimezone(tz).isoformat(),
-                "count": instance.shape[0],
-                "fields": [field for field in instance.columns if field != "collection_date"],
-            },
-            "timestamp": [],
-            "traces": [],
+        return {
+            "time_zone": f"{tz.key} (UTC{tz.tzname(instance.collection_date.min())})",
+            "date_format": "ISO-8601",
+            "start_date": instance.collection_date.min().astimezone(tz),
+            "end_date": instance.collection_date.max().astimezone(tz),
+            "count": len(instance),
+            "fields": [field for field in instance.columns if field != "collection_date"],
         }
 
-        timestamp = instance.collection_date.apply(lambda ts: ts.astimezone(tz).isoformat())
-        response["timestamp"] = timestamp.tolist()
+    def get_timestamp(self, instance):
+        tz = timezone.get_current_timezone()
+        return instance.collection_date.apply(lambda ts: ts.astimezone(tz).isoformat()).tolist()
 
-        for field in response["information"]["fields"]:
-            response["traces"].append(
-                {
-                    "field": field,
-                    "avg_value": instance[field].mean().round(2),
-                    "max_value": instance[field].max(),
-                    "min_value": instance[field].min(),
-                    "values": instance[field].tolist(),
-                }
-            )
-        return response
+    def get_traces(self, instance):
+        traces = []
+        for field in instance["information"]["fields"]:
+            field_data = {
+                "field": field,
+                "avg_value": instance[field].mean().round(2),
+                "max_value": instance[field].max(),
+                "min_value": instance[field].min(),
+                "values": instance[field].tolist(),
+            }
+            traces.append(field_data)
+        return traces
+
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+        tz = timezone.get_current_timezone()
+        timestamp = instance.collection_date.apply(lambda ts: ts.astimezone(tz))
+        rep["timestamp"] = timestamp.tolist()
+
+        traces = []
+        for field in rep["information"]["fields"]:
+            field_data = {
+                "field": field,
+                "avg_value": instance[field].mean().round(2),
+                "max_value": instance[field].max(),
+                "min_value": instance[field].min(),
+                "values": instance[field].tolist(),
+            }
+            traces.append(field_data)
+        rep["traces"] = traces
+        return rep
