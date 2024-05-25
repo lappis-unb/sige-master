@@ -6,13 +6,12 @@ from apps.events.models import (
     CumulativeMeasurementTrigger,
     Event,
     InstantMeasurementTrigger,
-    Trigger,
 )
 from apps.events.serializers import (
     CumulativeMeasurementTriggerSerializer,
+    EventSerializer,
     EventTypeSerializer,
     InstantMeasurementTriggerSerializer,
-    TriggerSerializer,
 )
 
 logger = logging.getLogger("apps.events.views")
@@ -23,16 +22,16 @@ class EventTypeViewSet(viewsets.ModelViewSet):
     serializer_class = EventTypeSerializer
 
 
-class TriggerViewSet(viewsets.ModelViewSet):
-    queryset = Trigger.objects.all()
-    serializer_class = TriggerSerializer
+class EventViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Event.objects.all()
+    serializer_class = EventSerializer
 
 
-class InstantMeasurementTriggerViewSet(viewsets.ModelViewSet):
+class InstantMeasurementTriggerViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = InstantMeasurementTrigger.objects.all()
     serializer_class = InstantMeasurementTriggerSerializer
 
 
-class CumulativeMeasurementTriggerViewSet(viewsets.ModelViewSet):
+class CumulativeMeasurementTriggerViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = CumulativeMeasurementTrigger.objects.all()
     serializer_class = CumulativeMeasurementTriggerSerializer
