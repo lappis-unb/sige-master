@@ -21,17 +21,17 @@ from .query_params import (
 
 __all__ = [
     "CumulativeMeasurementSerializer",
+    "CumulativeMeasurementQuerySerializer",
+    "CumulativeGraphQuerySerializer",
     "InstantMeasurementSerializer",
+    "InstantMeasurementQuerySerializer",
+    "InstantGraphQuerySerializer",
     "RealTimeMeasurementSerializer",
     "ReferenceMeasurementSerializer",
     "DetailDailySerializer",
     "GraphDataSerializer",
     "ReportSerializer",
     "UferSerializer",
-    "InstantMeasurementQuerySerializer",
-    "InstantGraphQuerySerializer",
-    "CumulativeGraphQuerySerializer",
     "UferQuerySerializer",
     "ReportQuerySerializer",
-    "CumulativeMeasurementQuerySerializer",
 ]
