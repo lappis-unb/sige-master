@@ -93,9 +93,9 @@ class CumulativeMeasurementsQuerySet(models.QuerySet):
                 minute=ExtractMinute("collection_date"),
                 time=Concat("hour", Value(":"), "minute", output_field=models.TimeField()),
             )
-            .values("time")
+            .values("hour", "minute")
             .annotate(**annotations)
-            .order_by("time")
+            .order_by("hour", "minute")
         )
 
     def _get_aggregate_function(self, agg_type, field):
