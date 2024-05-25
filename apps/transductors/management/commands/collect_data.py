@@ -13,9 +13,9 @@ from apps.measurements.serializers import (
 from apps.memory_maps.modbus.data_reader import ModbusClientFactory
 from apps.memory_maps.modbus.helpers import get_now
 from apps.memory_maps.modbus.settings import (
+    DATA_GROUPS,
     DATA_GROUP_CUMULATIVE,
     DATA_GROUP_INSTANT,
-    DATA_GROUPS,
 )
 from apps.transductors.models import Transductor
 from apps.utils.helpers import log_execution_time
@@ -41,7 +41,7 @@ class Command(BaseCommand):
         max_workers = options["max_workers"]
         self.log_start(data_group, max_workers)
 
-        active_transductors = Transductor.manager.active().select_related("model__memory_map")
+        active_transductors = Transductor.objects.active().select_related("model__memory_map")
         self.log_active_transductor(active_transductors)
 
         if data_group not in DATA_GROUPS:
