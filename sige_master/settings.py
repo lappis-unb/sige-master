@@ -346,10 +346,19 @@ SIMPLE_JWT = {
 # SPECTACULAR SETTINGS
 # ---------------------------------------------------------------------------------------------------------------------
 SPECTACULAR_SETTINGS = {
-    "TITLE": "SIGE - Energy Management System",
+    "TITLE": "SIGE API - Energy Management System",
     "DESCRIPTION": " API for collecting and managing data from the energy monitoring system",
     "VERSION": "1.0.0",
     "DISABLE_ERRORS_AND_WARNINGS": True,
+    "COERCE_DECIMAL_TO_STRING": True,
+    "COMPONENT_SPLIT_REQUEST": True,
+    "SWAGGER_UI_SETTINGS": {
+        "deepLinking": True,
+        "displayOperationId": False,
+        "defaultModelExpandDepth": -1,
+        "persistAuthorization": True,
+        "displayRequestDuration": True,
+    },
 }
 
 
@@ -372,4 +381,3 @@ if settings.DEBUG:
     # DJANGO EXTENSIONS
     # ------------------------------------------------------------------------------------------------
     INSTALLED_APPS += ["django_extensions"]
-

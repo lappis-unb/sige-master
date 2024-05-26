@@ -1,10 +1,13 @@
 import logging
 
 import pandas as pd
-from rest_framework import status, viewsets
+from drf_spectacular.utils import extend_schema
+from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
+from rest_framework.mixins import ListModelMixin
 from rest_framework.response import Response
+from rest_framework.viewsets import GenericViewSet
 
 from apps.measurements.filters import (
     CumulativeMeasurementFilter,
@@ -13,7 +16,7 @@ from apps.measurements.filters import (
 from apps.measurements.models import CumulativeMeasurement, InstantMeasurement
 from apps.measurements.serializers import (
     CumulativeGraphQuerySerializer,
-    DetailDailySerializer,
+    DailyProfileSerializer,
     GraphDataSerializer,
     InstantGraphQuerySerializer,
 )
@@ -22,7 +25,8 @@ from apps.measurements.services.downsampler import LTTBDownSampler
 logger = logging.getLogger("apps.measurements.views.graph")
 
 
-class InstantGraphViewSet(viewsets.ReadOnlyModelViewSet):
+@extend_schema(parameters=[InstantGraphQuerySerializer])
+class InstantGraphViewSet(ListModelMixin, GenericViewSet):
     queryset = InstantMeasurement.objects.all()
     serializer_class = GraphDataSerializer
     filterset_class = InstantMeasurementFilter
@@ -65,7 +69,8 @@ class InstantGraphViewSet(viewsets.ReadOnlyModelViewSet):
         return params_serializer.validated_data
 
 
-class CumulativeGraphViewSet(viewsets.ReadOnlyModelViewSet):
+@extend_schema(parameters=[CumulativeGraphQuerySerializer])
+class CumulativeGraphViewSet(ListModelMixin, GenericViewSet):
     queryset = CumulativeMeasurement.objects.all()
     serializer_class = GraphDataSerializer
     filterset_class = CumulativeMeasurementFilter
@@ -110,6 +115,7 @@ class CumulativeGraphViewSet(viewsets.ReadOnlyModelViewSet):
         params_serializer.is_valid(raise_exception=raise_exception)
         return params_serializer.validated_data
 
+    @extend_schema(responses={200: DailyProfileSerializer(many=True)})
     @action(detail=False, methods=["get"], url_path="daily-profile")
     def daily_profile(self, request, *args, **kwargs):
         self.validated_params = self._validate_params(request, raise_exception=True)
@@ -125,24 +131,18 @@ class CumulativeGraphViewSet(viewsets.ReadOnlyModelViewSet):
             data_hourly[field] = data_hourly[field].apply(lambda x: round(x, 2))
             df = pd.concat([df, data_hourly[field]], axis=1)
 
-        response_data = {
-            "count": df.shape[0],
-            "results": df.to_dict(orient="records"),
-        }
-        return Response(response_data, status=status.HTTP_200_OK)
+        response_data = df.to_dict(orient="records")
+        serializer = DailyProfileSerializer(response_data, many=True, context={"fields": fields})
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @extend_schema(responses={200: DailyProfileSerializer(many=True)})
     @action(detail=False, methods=["get"], url_path="detail-daily-profile")
     def detail_daily_profile(self, request, *args, **kwargs):
         self.validated_params = self._validate_params(request, raise_exception=True)
         fields = self.validated_params["fields"]
-        quarter_hourly_avg = self.get_queryset().quarter_hourly_avg(fields)
-        serializer = DetailDailySerializer(quarter_hourly_avg, many=True, context={"fields": fields})
-
-        response_data = {
-            "count": quarter_hourly_avg.count(),
-            "results": serializer.data,
-        }
-        return Response(response_data, status=status.HTTP_200_OK)
+        quarter_hourly_qs = self.get_queryset().quarter_hourly_avg(fields)
+        serializer = DailyProfileSerializer(quarter_hourly_qs, many=True, context={"fields": fields})
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=["get"], url_path="peak_hours")
     def peak_hours(self, request, *args, **kwargs):

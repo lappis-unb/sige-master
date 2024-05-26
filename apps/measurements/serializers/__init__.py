@@ -5,7 +5,7 @@ from .base import (
     ReferenceMeasurementSerializer,
 )
 from .graph_report import (
-    DetailDailySerializer,
+    DailyProfileSerializer,
     GraphDataSerializer,
     ReportSerializer,
     UferSerializer,
@@ -28,7 +28,7 @@ __all__ = [
     "InstantGraphQuerySerializer",
     "RealTimeMeasurementSerializer",
     "ReferenceMeasurementSerializer",
-    "DetailDailySerializer",
+    "DailyProfileSerializer",
     "GraphDataSerializer",
     "ReportSerializer",
     "UferSerializer",

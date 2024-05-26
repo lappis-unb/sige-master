@@ -1,15 +1,21 @@
 import logging
 
-import dateutil
 from django.utils import timezone
-from pandas import Timestamp
+from drf_spectacular.utils import extend_schema_serializer
 from rest_framework import serializers
 
+from apps.measurements.serializers.doc_api import (
+    daily_profile_hourly_example,
+    energy_report_example,
+    graph_data_example,
+    ufer_report_example,
+)
 from apps.transductors.models import Transductor
 
-logger = logging.getLogger("apps")
+logger = logging.getLogger("apps.measurements.serializers.graph_report")
 
 
+@extend_schema_serializer(examples=[ufer_report_example])
 class UferSerializer(serializers.Serializer):
     total_measurements = serializers.IntegerField()
     transductor = serializers.IntegerField()
@@ -34,32 +40,41 @@ class UferSerializer(serializers.Serializer):
         return rep
 
 
+@extend_schema_serializer(examples=[energy_report_example])
 class ReportSerializer(serializers.Serializer):
     def __init__(self, *args, **kwargs):
-        fields = kwargs["context"].get("fields", [])
-        super(ReportSerializer, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
+        self.add_dynamic_fields()
 
-        for field_name in fields:
-            if field_name not in self.fields:
-                self.fields[field_name] = serializers.FloatField(allow_null=True)
+    def add_dynamic_fields(self):
+        fields = self.context.get("fields", [])
+        if fields:
+            for field in fields:
+                self.fields[field] = serializers.FloatField()
 
 
-class DetailDailySerializer(serializers.Serializer):
+@extend_schema_serializer(examples=[daily_profile_hourly_example])
+class DailyProfileSerializer(serializers.Serializer):
     time = serializers.SerializerMethodField()
 
     def __init__(self, *args, **kwargs):
-        fields = kwargs["context"].get("fields", [])
-        super(DetailDailySerializer, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
+        self.add_dynamic_fields()
 
+    def add_dynamic_fields(self):
+        fields = self.context.get("fields", [])
         if fields:
             for field in fields:
                 self.fields[field] = serializers.FloatField()
 
     def get_time(self, obj):
-        time = f"{obj['hour']}:{obj['minute']}"
-        return dateutil.parser.parse(time).time()
+        hour = obj.get("hour", 0)
+        minute = obj.get("minute", 0)
+        second = obj.get("second", 0)
+        return f"{hour:02}:{minute:02}:{second:02}"
 
 
+@extend_schema_serializer(examples=[graph_data_example])
 class GraphDataSerializer(serializers.Serializer):
     information = serializers.SerializerMethodField()
     timestamp = serializers.ListField(child=serializers.CharField(), allow_null=True)
@@ -75,23 +90,6 @@ class GraphDataSerializer(serializers.Serializer):
             "count": len(instance),
             "fields": [field for field in instance.columns if field != "collection_date"],
         }
-
-    def get_timestamp(self, instance):
-        tz = timezone.get_current_timezone()
-        return instance.collection_date.apply(lambda ts: ts.astimezone(tz).isoformat()).tolist()
-
-    def get_traces(self, instance):
-        traces = []
-        for field in instance["information"]["fields"]:
-            field_data = {
-                "field": field,
-                "avg_value": instance[field].mean().round(2),
-                "max_value": instance[field].max(),
-                "min_value": instance[field].min(),
-                "values": instance[field].tolist(),
-            }
-            traces.append(field_data)
-        return traces
 
     def to_representation(self, instance):
         rep = super().to_representation(instance)

@@ -1,9 +1,12 @@
 import logging
 
 from django.db.models import Case, Count, Max, Min, Q, Sum, When
+from drf_spectacular.utils import extend_schema
 from rest_framework import status, viewsets
 from rest_framework.exceptions import ValidationError
+from rest_framework.mixins import ListModelMixin
 from rest_framework.response import Response
+from rest_framework.viewsets import GenericViewSet
 
 from apps.measurements.filters import (
     CumulativeMeasurementFilter,
@@ -22,7 +25,8 @@ from apps.transductors.models import Transductor
 logger = logging.getLogger("apps.measurements.views.report")
 
 
-class ReportViewSet(viewsets.ReadOnlyModelViewSet):
+@extend_schema(parameters=[ReportQuerySerializer])
+class ReportViewSet(ListModelMixin, GenericViewSet):
     queryset = CumulativeMeasurement.objects.all()
     serializer_class = ReportSerializer
     filterset_class = CumulativeMeasurementFilter
@@ -88,7 +92,8 @@ class ReportViewSet(viewsets.ReadOnlyModelViewSet):
         }
 
 
-class UferViewSet(viewsets.ReadOnlyModelViewSet):
+@extend_schema(parameters=[UferQuerySerializer])
+class UferViewSet(ListModelMixin, GenericViewSet):
     queryset = InstantMeasurement.objects.all()
     serializer_class = UferSerializer
     filterset_class = InstantMeasurementFilter
