@@ -17,13 +17,14 @@ class BaseQuerySerializer(serializers.Serializer):
     period = serializers.CharField(error_messages=get_error_messages())
     fields = serializers.CharField(error_messages=get_error_messages())
 
-    MODEL_ALLOWED_FIELDS = []
-    REQUIRED_PARAMETERS = []
+    class Meta:
+        required_parameters = []
+        model_allowed_fields = []
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field in self.fields:
-            if field not in self.REQUIRED_PARAMETERS:
+            if field not in self.Meta.required_parameters:
                 self.fields[field].required = False
 
     def validate_period(self, value):
@@ -35,12 +36,12 @@ class BaseQuerySerializer(serializers.Serializer):
 
     def validate_fields(self, value: str):
         fields = value.split(",")
-        invalid_fields = set(fields) - set(self.MODEL_ALLOWED_FIELDS)
+        invalid_fields = set(fields) - set(self.Meta.model_allowed_fields)
 
         if invalid_fields:
             raise serializers.ValidationError(
                 f"Cannot resolve fields: {', '.join(invalid_fields)}, "
-                f"Choices are: {', '.join(self.MODEL_ALLOWED_FIELDS)}."
+                f"Choices are: {', '.join(self.Meta.model_allowed_fields)}."
             )
         return fields
 
@@ -61,23 +62,25 @@ class BaseQuerySerializer(serializers.Serializer):
 class InstantMeasurementQuerySerializer(BaseQuerySerializer):
     transductor = serializers.IntegerField(min_value=1, error_messages=get_error_messages("integer"))
 
-    REQUIRED_PARAMETERS = ["transductor"]
-    MODEL_ALLOWED_FIELDS = [
-        str(field.name)
-        for field in InstantMeasurement._meta.fields
-        if field.name not in {"id", "collection_date", "transductor"}
-    ]
+    class Meta:
+        required_parameters = ["transductor"]
+        model_allowed_fields = [
+            str(field.name)
+            for field in InstantMeasurement._meta.fields
+            if field.name not in {"id", "collection_date", "transductor"}
+        ]
 
 
 class CumulativeMeasurementQuerySerializer(BaseQuerySerializer):
     transductor = serializers.IntegerField(min_value=1, error_messages=get_error_messages("integer"))
 
-    REQUIRED_PARAMETERS = ["transductor"]
-    MODEL_ALLOWED_FIELDS = [
-        str(field.name)
-        for field in CumulativeMeasurement._meta.fields
-        if field.name not in {"id", "collection_date", "transductor", "is_calculated"}
-    ]
+    class Meta:
+        required_parameters = ["transductor"]
+        model_allowed_fields = [
+            str(field.name)
+            for field in CumulativeMeasurement._meta.fields
+            if field.name not in {"id", "collection_date", "transductor", "is_calculated"}
+        ]
 
 
 class InstantGraphQuerySerializer(BaseQuerySerializer):
@@ -85,12 +88,13 @@ class InstantGraphQuerySerializer(BaseQuerySerializer):
     lttb = serializers.BooleanField(default=True, required=False)
     threshold = serializers.IntegerField(min_value=2, default=settings.LIMIT_FILTER, required=False)
 
-    REQUIRED_PARAMETERS = ["transductor", "fields"]
-    MODEL_ALLOWED_FIELDS = [
-        str(field.name)
-        for field in InstantMeasurement._meta.fields
-        if field.name not in {"id", "collection_date", "transductor", "is_calculated"}
-    ]
+    class Meta:
+        required_parameters = ["transductor", "fields"]
+        model_allowed_fields = [
+            str(field.name)
+            for field in InstantMeasurement._meta.fields
+            if field.name not in {"id", "collection_date", "transductor", "is_calculated"}
+        ]
 
     def validate_lttb(self, value):
         if not isinstance(value, bool):
@@ -103,12 +107,13 @@ class CumulativeGraphQuerySerializer(BaseQuerySerializer):
     freq = serializers.CharField(required=False)
     agg = serializers.CharField(required=False)
 
-    REQUIRED_PARAMETERS = ["transductor", "fields"]
-    MODEL_ALLOWED_FIELDS = [
-        str(field.name)
-        for field in CumulativeMeasurement._meta.fields
-        if field.name not in {"id", "collection_date", "transductor", "is_calculated"}
-    ]
+    class Meta:
+        required_parameters = ["transductor", "fields"]
+        model_allowed_fields = [
+            str(field.name)
+            for field in CumulativeMeasurement._meta.fields
+            if field.name not in {"id", "collection_date", "transductor", "is_calculated"}
+        ]
 
     def validate_freq(self, value):
         try:
@@ -139,17 +144,14 @@ class UferQuerySerializer(BaseQuerySerializer):
     th_percent = serializers.IntegerField(min_value=1, max_value=100, default=92, required=False)
     only_day = serializers.BooleanField(required=False)
 
-    REQUIRED_PARAMETERS = ["entity"]
-    MODEL_ALLOWED_FIELDS = [
-        "power_factor_a",
-        "power_factor_b",
-        "power_factor_c",
-    ]
+    class Meta:
+        required_parameters = ["entity"]
+        model_allowed_fields = ["power_factor_a", "power_factor_b", "power_factor_c"]
 
     def validate(self, attrs):
         attrs = super().validate(attrs)
         if not attrs.get("fields"):
-            attrs["fields"] = self.MODEL_ALLOWED_FIELDS
+            attrs["fields"] = self.Meta.model_allowed_fields
         return attrs
 
     def validate_period(self, value):
@@ -164,16 +166,17 @@ class ReportQuerySerializer(BaseQuerySerializer):
     inc_desc = serializers.BooleanField(default=True)
     depth = serializers.IntegerField(min_value=0, default=0)
 
-    REQUIRED_PARAMETERS = ["entity"]
-    MODEL_ALLOWED_FIELDS = [
-        "active_consumption",
-        "active_generated",
-        "reactive_inductive",
-        "reactive_capacitive",
-    ]
+    class Meta:
+        required_parameters = ["entity"]
+        model_allowed_fields = [
+            "active_consumption",
+            "active_generated",
+            "reactive_inductive",
+            "reactive_capacitive",
+        ]
 
     def validate(self, attrs):
         attrs = super().validate(attrs)
         if not attrs.get("fields"):
-            attrs["fields"] = self.MODEL_ALLOWED_FIELDS
+            attrs["fields"] = self.Meta.model_allowed_fields
         return attrs
