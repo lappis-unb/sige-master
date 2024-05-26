@@ -2,7 +2,7 @@ import logging
 
 from django.db.models import Case, Count, Max, Min, Q, Sum, When
 from drf_spectacular.utils import extend_schema
-from rest_framework import status, viewsets
+from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.mixins import ListModelMixin
 from rest_framework.response import Response

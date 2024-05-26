@@ -1,21 +1,20 @@
 import logging
 
 import pandas as pd
-from django.conf import settings
 from django.utils import timezone
 from rest_framework import serializers
 
 from apps.measurements.models import CumulativeMeasurement, InstantMeasurement
-from apps.measurements.serializers.utils import get_error_messages
+from apps.measurements.serializers.utils import field_params
 
 logger = logging.getLogger("apps.measurements.serializers.query_params")
 
 
 class BaseQuerySerializer(serializers.Serializer):
-    start_date = serializers.DateTimeField(error_messages=get_error_messages("date"))
-    end_date = serializers.DateTimeField(error_messages=get_error_messages("date"))
-    period = serializers.CharField(error_messages=get_error_messages())
-    fields = serializers.CharField(error_messages=get_error_messages())
+    start_date = serializers.DateTimeField(**field_params("date"))
+    end_date = serializers.DateTimeField(**field_params("date"))
+    period = serializers.CharField(**field_params("period"))
+    fields = serializers.CharField(**field_params("fields"))
 
     class Meta:
         required_parameters = []
@@ -60,7 +59,7 @@ class BaseQuerySerializer(serializers.Serializer):
 
 
 class InstantMeasurementQuerySerializer(BaseQuerySerializer):
-    transductor = serializers.IntegerField(min_value=1, error_messages=get_error_messages("integer"))
+    transductor = serializers.IntegerField(min_value=1, **field_params("transductor"))
 
     class Meta:
         required_parameters = ["transductor"]
@@ -72,7 +71,7 @@ class InstantMeasurementQuerySerializer(BaseQuerySerializer):
 
 
 class CumulativeMeasurementQuerySerializer(BaseQuerySerializer):
-    transductor = serializers.IntegerField(min_value=1, error_messages=get_error_messages("integer"))
+    transductor = serializers.IntegerField(min_value=1, **field_params("transductor"))
 
     class Meta:
         required_parameters = ["transductor"]
@@ -84,9 +83,9 @@ class CumulativeMeasurementQuerySerializer(BaseQuerySerializer):
 
 
 class InstantGraphQuerySerializer(BaseQuerySerializer):
-    transductor = serializers.IntegerField(min_value=1, error_messages=get_error_messages("integer"))
-    lttb = serializers.BooleanField(default=True, required=False)
-    threshold = serializers.IntegerField(min_value=2, default=settings.LIMIT_FILTER, required=False)
+    transductor = serializers.IntegerField(min_value=1, **field_params("transductor"))
+    lttb = serializers.BooleanField(required=False, **field_params("lttb"))
+    threshold = serializers.IntegerField(min_value=2, required=False, **field_params("threshold"))
 
     class Meta:
         required_parameters = ["transductor", "fields"]
@@ -103,9 +102,9 @@ class InstantGraphQuerySerializer(BaseQuerySerializer):
 
 
 class CumulativeGraphQuerySerializer(BaseQuerySerializer):
-    transductor = serializers.IntegerField(min_value=1, error_messages=get_error_messages("integer"))
-    freq = serializers.CharField(required=False)
-    agg = serializers.CharField(required=False)
+    transductor = serializers.IntegerField(min_value=1, **field_params("transductor"))
+    freq = serializers.CharField(required=False, **field_params("freq"))
+    agg = serializers.CharField(required=False, **field_params("agg"))
 
     class Meta:
         required_parameters = ["transductor", "fields"]
@@ -138,11 +137,16 @@ class CumulativeGraphQuerySerializer(BaseQuerySerializer):
 
 
 class UferQuerySerializer(BaseQuerySerializer):
-    entity = serializers.IntegerField(min_value=1, required=True)
-    inc_desc = serializers.BooleanField(default=True, required=False)
-    depth = serializers.IntegerField(min_value=0, default=0, required=False)
-    th_percent = serializers.IntegerField(min_value=1, max_value=100, default=92, required=False)
-    only_day = serializers.BooleanField(required=False)
+    entity = serializers.IntegerField(min_value=1, required=True, **field_params("entity"))
+    inc_desc = serializers.BooleanField(required=False, **field_params("inc_desc"))
+    depth = serializers.IntegerField(min_value=0, required=False, **field_params("depth"))
+    only_day = serializers.BooleanField(required=False, **field_params("only_day"))
+    th_percent = serializers.IntegerField(
+        min_value=1,
+        max_value=100,
+        required=False,
+        **field_params("th_percent"),
+    )
 
     class Meta:
         required_parameters = ["entity"]
@@ -162,9 +166,9 @@ class UferQuerySerializer(BaseQuerySerializer):
 
 
 class ReportQuerySerializer(BaseQuerySerializer):
-    entity = serializers.IntegerField(min_value=1)
-    inc_desc = serializers.BooleanField(default=True)
-    depth = serializers.IntegerField(min_value=0, default=0)
+    entity = serializers.IntegerField(min_value=1, **field_params("entity"))
+    inc_desc = serializers.BooleanField(**field_params("inc_desc"))
+    depth = serializers.IntegerField(min_value=0, **field_params("depth"))
 
     class Meta:
         required_parameters = ["entity"]
