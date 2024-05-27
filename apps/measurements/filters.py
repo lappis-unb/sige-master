@@ -26,8 +26,8 @@ class BaseMeasurementFilter(filters.FilterSet):
     def filter_only_day(self, queryset, name, value):
         if value:
             # TODO: Validar se a conversão de timezone está buscando o horário correto
-            start_hour_utc = 8  # 05:00 em São Paulo -> 08:00 UTC
-            end_hour_utc = 22  # 19:00 em São Paulo -> 22:00 UTC
+            start_hour_utc = 5  # 05:00 em São Paulo -> 08:00 UTC
+            end_hour_utc = 19  # 19:00 em São Paulo -> 22:00 UTC
 
             queryset = queryset.annotate(hour=ExtractHour("collection_date")).filter(
                 Q(hour__gte=start_hour_utc) & Q(hour__lt=end_hour_utc)
@@ -65,16 +65,16 @@ class DailyProfileFilter(BaseMeasurementFilter):
             "off_peak_hours",
         ]
 
-    def filter_peak_hours(self, queryset, name, value):
-        if value:
-            queryset = queryset.annotate(hour=ExtractHour("collection_date")).filter(
-                Q(hour__gte=21) & Q(hour__lte=23),  # dentro do horário de pico 18:00 - 20:59 (UTC-3)
-            )
-        return queryset
-
     def filter_off_peak_hours(self, queryset, name, value):
         if value:
             queryset = queryset.annotate(hour=ExtractHour("collection_date")).exclude(
-                Q(hour__gte=21) & Q(hour__lte=23)  # fora do horário de pico (18:00 - 20:59 UTC-3)
+                Q(hour__gt=18) & Q(hour__lt=21),
+            )
+        return queryset
+
+    def filter_peak_hours(self, queryset, name, value):
+        if value:
+            queryset = queryset.annotate(hour=ExtractHour("collection_date")).filter(
+                Q(hour__gte=18) & Q(hour__lt=21),
             )
         return queryset

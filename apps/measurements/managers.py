@@ -36,9 +36,9 @@ class CumulativeMeasurementsQuerySet(models.QuerySet):
             annotations[field] = agg_func
 
         return (
-            self.annotate(date=TruncHour(adjusted_hour))  #
+            self.annotate(date=TruncHour(adjusted_hour))
             .values("date")
-            .annotate(**annotations, hour=ExtractHour("date"))
+            .annotate(**annotations, hour=ExtractHour(adjusted_hour))
             .order_by("date")
         )
 
