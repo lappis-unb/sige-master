@@ -82,18 +82,12 @@ class CumulativeMeasurementQuerySerializer(BaseQuerySerializer):
         ]
 
 
-class InstantGraphQuerySerializer(BaseQuerySerializer):
-    transductor = serializers.IntegerField(min_value=1, **field_params("transductor"))
+class InstantGraphQuerySerializer(InstantMeasurementQuerySerializer):
     lttb = serializers.BooleanField(required=False, **field_params("lttb"))
     threshold = serializers.IntegerField(min_value=2, required=False, **field_params("threshold"))
 
     class Meta:
         required_parameters = ["transductor", "fields"]
-        model_allowed_fields = [
-            str(field.name)
-            for field in InstantMeasurement._meta.fields
-            if field.name not in {"id", "collection_date", "transductor", "is_calculated"}
-        ]
 
     def validate_lttb(self, value):
         if not isinstance(value, bool):
@@ -101,18 +95,27 @@ class InstantGraphQuerySerializer(BaseQuerySerializer):
         return bool(value)
 
 
-class CumulativeGraphQuerySerializer(BaseQuerySerializer):
-    transductor = serializers.IntegerField(min_value=1, **field_params("transductor"))
+class DailyProfileQuerySerializer(CumulativeMeasurementQuerySerializer):
+    detail = serializers.BooleanField(required=False, **field_params("detail_profile"))
+    peak_hours = serializers.BooleanField(required=False, **field_params("peak_hours"))
+    off_peak_hours = serializers.BooleanField(required=False, **field_params("off_peak_hours"))
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        if attrs.get("peak_hours") and attrs.get("off_peak_hours"):
+            raise serializers.ValidationError("You can't use 'peak_hours' and 'off_peak_hours' parameters together.")
+
+        if not attrs.get("fields"):
+            attrs["fields"] = self.Meta.model_allowed_fields
+        return attrs
+
+
+class CumulativeGraphQuerySerializer(CumulativeMeasurementQuerySerializer):
     freq = serializers.CharField(required=False, **field_params("freq"))
     agg = serializers.CharField(required=False, **field_params("agg"))
 
     class Meta:
         required_parameters = ["transductor", "fields"]
-        model_allowed_fields = [
-            str(field.name)
-            for field in CumulativeMeasurement._meta.fields
-            if field.name not in {"id", "collection_date", "transductor", "is_calculated"}
-        ]
 
     def validate_freq(self, value):
         try:

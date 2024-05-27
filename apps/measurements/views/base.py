@@ -1,5 +1,6 @@
 import logging
 
+from drf_spectacular.utils import extend_schema
 from rest_framework import viewsets
 from rest_framework.decorators import action
 
@@ -26,6 +27,7 @@ class InstantMeasurementViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_class = InstantMeasurementFilter
     pagination_class = MeasurementPagination
 
+    @extend_schema(parameters=[InstantMeasurementQuerySerializer])
     @action(detail=False, methods=["get"], url_path="export-csv")
     def export_csv(self, request):
         validated_params = self._validate_params(request, raise_exception=True)
