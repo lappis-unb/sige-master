@@ -4,7 +4,7 @@ from django.utils import timezone
 from drf_spectacular.utils import extend_schema_serializer
 from rest_framework import serializers
 
-from apps.measurements.serializers.doc_api import (
+from apps.measurements.serializers.utils import (
     daily_profile_hourly_example,
     energy_report_example,
     graph_data_example,
