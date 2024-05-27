@@ -36,12 +36,45 @@ class BaseMeasurementFilter(filters.FilterSet):
 
 
 class InstantMeasurementFilter(BaseMeasurementFilter):
+    only_day = None
+
     class Meta:
         model = InstantMeasurement
-        fields = ["transductor", "start_date", "end_date", "period", "only_day"]
+        fields = ["transductor", "start_date", "end_date", "period"]
 
 
 class CumulativeMeasurementFilter(BaseMeasurementFilter):
     class Meta:
         model = CumulativeMeasurement
         fields = ["transductor", "start_date", "end_date", "period", "only_day"]
+
+
+class DailyProfileFilter(BaseMeasurementFilter):
+    only_day = None
+    peak_hours = filters.BooleanFilter(method="filter_peak_hours")
+    off_peak_hours = filters.BooleanFilter(method="filter_off_peak_hours")
+
+    class Meta:
+        model = CumulativeMeasurement
+        fields = [
+            "transductor",
+            "start_date",
+            "end_date",
+            "period",
+            "peak_hours",
+            "off_peak_hours",
+        ]
+
+    def filter_peak_hours(self, queryset, name, value):
+        if value:
+            queryset = queryset.annotate(hour=ExtractHour("collection_date")).filter(
+                Q(hour__gte=21) & Q(hour__lte=23),  # dentro do horário de pico 18:00 - 20:59 (UTC-3)
+            )
+        return queryset
+
+    def filter_off_peak_hours(self, queryset, name, value):
+        if value:
+            queryset = queryset.annotate(hour=ExtractHour("collection_date")).exclude(
+                Q(hour__gte=21) & Q(hour__lte=23)  # fora do horário de pico (18:00 - 20:59 UTC-3)
+            )
+        return queryset

@@ -60,30 +60,6 @@ class CumulativeMeasurementsQuerySet(models.QuerySet):
             .order_by("daily")
         )
 
-    # Django USE_TZ = True => Filter by UTC hour (UTC-3)
-    def aggregate_peak_hours(self, fields):
-        data_agg_hourly = self.aggregate_hourly("sum", fields)
-        peak_hours_data = data_agg_hourly.filter(
-            hour__gte=21,  # 18:00 - 20:59 (UTC-3)
-            hour__lte=23,
-        )
-        for item in peak_hours_data:
-            item.pop("hour")
-
-        return peak_hours_data
-
-    # Django USE_TZ = True => Filter by UTC hour (UTC-3)
-    def aggregate_off_peak_hours(self, fields):
-        data_agg_hourly = self.aggregate_hourly("sum", fields)
-        peak_off_hours_data = data_agg_hourly.exclude(
-            hour__gte=21,  # 18:00 - 20:59 (UTC-3)
-            hour__lt=23,
-        )
-        for item in peak_off_hours_data:
-            item.pop("hour")
-
-        return peak_off_hours_data
-
     def quarter_hourly_avg(self, fields):
         annotations = {field: Round(Avg(field), 2) for field in fields}
 
