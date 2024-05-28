@@ -88,6 +88,7 @@ class InstantGraphQuerySerializer(InstantMeasurementQuerySerializer):
 
     class Meta:
         required_parameters = ["transductor", "fields"]
+        model_allowed_fields = InstantMeasurementQuerySerializer.Meta.model_allowed_fields
 
     def validate_lttb(self, value):
         if not isinstance(value, bool):
@@ -99,6 +100,8 @@ class DailyProfileQuerySerializer(CumulativeMeasurementQuerySerializer):
     detail = serializers.BooleanField(required=False, **field_params("detail_profile"))
     peak_hours = serializers.BooleanField(required=False, **field_params("peak_hours"))
     off_peak_hours = serializers.BooleanField(required=False, **field_params("off_peak_hours"))
+
+    # adicionar campos a superclasse na Meta:
 
     def validate(self, attrs):
         attrs = super().validate(attrs)
@@ -116,6 +119,7 @@ class CumulativeGraphQuerySerializer(CumulativeMeasurementQuerySerializer):
 
     class Meta:
         required_parameters = ["transductor", "fields"]
+        model_allowed_fields = CumulativeMeasurementQuerySerializer.Meta.model_allowed_fields
 
     def validate_freq(self, value):
         try:
