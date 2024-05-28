@@ -47,6 +47,7 @@ class CumulativeMeasurementViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_class = CumulativeMeasurementFilter
     pagination_class = MeasurementPagination
 
+    @extend_schema(parameters=[CumulativeMeasurementQuerySerializer])
     @action(detail=False, methods=["get"], url_path="export-csv")
     def export_csv(self, request):
         validated_params = self._validate_params(request, raise_exception=True)
