@@ -101,8 +101,6 @@ class DailyProfileQuerySerializer(CumulativeMeasurementQuerySerializer):
     peak_hours = serializers.BooleanField(required=False, **field_params("peak_hours"))
     off_peak_hours = serializers.BooleanField(required=False, **field_params("off_peak_hours"))
 
-    # adicionar campos a superclasse na Meta:
-
     def validate(self, attrs):
         attrs = super().validate(attrs)
         if attrs.get("peak_hours") and attrs.get("off_peak_hours"):
@@ -144,9 +142,10 @@ class CumulativeGraphQuerySerializer(CumulativeMeasurementQuerySerializer):
 
 
 class UferQuerySerializer(BaseQuerySerializer):
-    entity = serializers.IntegerField(min_value=1, required=True, **field_params("entity"))
+    transductor = serializers.IntegerField(min_value=1, **field_params("transductor"))
+    entity = serializers.IntegerField(min_value=1, **field_params("entity"))
     inc_desc = serializers.BooleanField(required=False, **field_params("inc_desc"))
-    depth = serializers.IntegerField(min_value=0, required=False, **field_params("depth"))
+    max_depth = serializers.IntegerField(min_value=0, required=False, **field_params("depth"))
     only_day = serializers.BooleanField(required=False, **field_params("only_day"))
     th_percent = serializers.IntegerField(
         min_value=1,
@@ -163,6 +162,10 @@ class UferQuerySerializer(BaseQuerySerializer):
         attrs = super().validate(attrs)
         if not attrs.get("fields"):
             attrs["fields"] = self.Meta.model_allowed_fields
+
+        if attrs.get("start_date") and (attrs.get("end_date") - attrs.get("start_date")).days > 30:
+            raise serializers.ValidationError("The maximum period allowed is 30 days.")
+
         return attrs
 
     def validate_period(self, value):
@@ -170,9 +173,11 @@ class UferQuerySerializer(BaseQuerySerializer):
 
         if value > pd.Timedelta("30 days"):
             raise serializers.ValidationError("The maximum period allowed is 30 days.")
+        return value
 
 
 class ReportQuerySerializer(BaseQuerySerializer):
+    transductor = serializers.IntegerField(min_value=1, **field_params("transductor"))
     entity = serializers.IntegerField(min_value=1, **field_params("entity"))
     inc_desc = serializers.BooleanField(**field_params("inc_desc"))
     depth = serializers.IntegerField(min_value=0, **field_params("depth"))
@@ -190,4 +195,15 @@ class ReportQuerySerializer(BaseQuerySerializer):
         attrs = super().validate(attrs)
         if not attrs.get("fields"):
             attrs["fields"] = self.Meta.model_allowed_fields
+
+        if attrs.get("start_date") and (attrs.get("end_date") - attrs.get("start_date")).days > 30:
+            raise serializers.ValidationError("The maximum period allowed is 30 days.")
+
         return attrs
+
+    def validate_period(self, value):
+        value = super().validate_period(value)
+
+        if value > pd.Timedelta("30 days"):
+            raise serializers.ValidationError("The maximum period allowed is 30 days.")
+        return value

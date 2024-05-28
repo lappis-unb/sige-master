@@ -83,7 +83,7 @@ def field_params(field_type):
         },
         "th_percent": {
             "help_text": "Threshold value to filter the power factor.",
-            "default": 0.92,
+            "default": 92,
         },
         "detail_profile": {
             "help_text": "Return the detailed profile average per quarter-hour of the period.",

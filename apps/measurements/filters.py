@@ -36,11 +36,9 @@ class BaseMeasurementFilter(filters.FilterSet):
 
 
 class InstantMeasurementFilter(BaseMeasurementFilter):
-    only_day = None
-
     class Meta:
         model = InstantMeasurement
-        fields = ["transductor", "start_date", "end_date", "period"]
+        fields = ["transductor", "start_date", "end_date", "period", "only_day"]
 
 
 class CumulativeMeasurementFilter(BaseMeasurementFilter):

@@ -45,14 +45,20 @@ class ReportViewSet(ListModelMixin, GenericViewSet):
     def list(self, request, *args, **kwargs):
         self.validated_params = self._validate_params(request, raise_exception=True)
         fields = self.validated_params.get("fields")
-        entity_id = self.validated_params.get("entity")
-        include_descendants = self.validated_params.get("inc_desc")
 
         queryset = self.get_queryset()
-        transductors = Transductor.objects.entity(entity_id, include_descendants)
-        measurements_qs = queryset.filter(transductor__in=transductors)
-        aggregated_qs = self._aggregate_data(measurements_qs, fields)
+        if self.validated_params.get("transductor"):
+            transductors = Transductor.objects.filter(pk=self.validated_params.get("transductor"))
+            measurements_qs = queryset
+        else:
+            transductors = Transductor.objects.entity(
+                id=self.validated_params.get("entity"),
+                inc_desc=self.validated_params.get("inc_desc"),
+                depth=self.validated_params.get("max_depth"),
+            )
+            measurements_qs = queryset.filter(transductor__in=transductors)
 
+        aggregated_qs = self._aggregate_data(measurements_qs, fields)
         serializer = self.get_serializer(data=aggregated_qs, context={"fields": fields})
         serializer.is_valid(raise_exception=True)
 
@@ -105,7 +111,7 @@ class UferViewSet(ListModelMixin, GenericViewSet):
             queryset = (
                 super()
                 .get_queryset()
-                .exclude(power_factor_a=0, power_factor_b=0, power_factor_c=0)
+                # .exclude(power_factor_a=0, power_factor_b=0, power_factor_c=0)
                 .values(*fields, "collection_date", "transductor")
             )
         except Exception as e:
@@ -117,13 +123,18 @@ class UferViewSet(ListModelMixin, GenericViewSet):
     def list(self, request, *args, **kwargs):
         self.validated_params = self._validate_params(request, raise_exception=True)
         fields = self.validated_params.get("fields")
-        entity_id = self.validated_params.get("entity")
-        include_descendants = self.validated_params.get("inc_desc")
         threshold_percent = self.validated_params.get("th_percent")
-
         queryset = self.get_queryset()
-        transductors = Transductor.objects.entity(entity_id, include_descendants)
-        measurements_qs = queryset.filter(transductor__in=transductors)
+        if self.validated_params.get("transductor"):
+            transductors = Transductor.objects.filter(pk=self.validated_params.get("transductor"))
+            measurements_qs = queryset
+        else:
+            transductors = Transductor.objects.entity(
+                id=self.validated_params.get("entity"),
+                inc_desc=self.validated_params.get("inc_desc"),
+                depth=self.validated_params.get("max_depth"),
+            )
+            measurements_qs = queryset.filter(transductor__in=transductors)
 
         aggregated_qs = self._aggregate_data(measurements_qs, fields, threshold_percent)
         processed_data = [self.calculate_percent(data, fields) for data in aggregated_qs]
