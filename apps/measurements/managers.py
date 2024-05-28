@@ -24,11 +24,14 @@ class CumulativeMeasurementsQuerySet(models.QuerySet):
     hour from 00:00 to 23:59.
     """
 
-    def aggregate_hourly(self, agg_type, fields):
-        adjusted_hour = ExpressionWrapper(
-            F("collection_date") - timedelta(minutes=15),
-            output_field=DateTimeField(),
-        )
+    def aggregate_hourly(self, agg_type, fields, adjust_hour=True):
+        if adjust_hour:
+            hour_expression = ExpressionWrapper(
+                F("collection_date") - timedelta(minutes=15),
+                output_field=DateTimeField(),
+            )
+        else:
+            hour_expression = F("collection_date")
 
         annotations = {}
         for field in fields:
@@ -36,9 +39,9 @@ class CumulativeMeasurementsQuerySet(models.QuerySet):
             annotations[field] = agg_func
 
         return (
-            self.annotate(date=TruncHour(adjusted_hour))
+            self.annotate(date=TruncHour(hour_expression))
             .values("date")
-            .annotate(**annotations, hour=ExtractHour(adjusted_hour))
+            .annotate(**annotations, hour=ExtractHour(hour_expression))
             .order_by("date")
         )
 

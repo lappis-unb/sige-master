@@ -129,9 +129,10 @@ class DailyProfileViewSet(CumulativeGraphViewSet):
         self.validated_params = self._validate_params(request, raise_exception=True)
         fields = self.validated_params.get("fields")
         detail = self.validated_params.get("detail")
-
         queryset = self.get_queryset()
         response_data = self._aggregate_data(queryset, fields, detail)
+        if not response_data:
+            return Response({"detail": "No data found."}, status=status.HTTP_204_NO_CONTENT)
         serializer = self.get_serializer(response_data, many=True, context={"fields": fields})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -139,12 +140,11 @@ class DailyProfileViewSet(CumulativeGraphViewSet):
         if detail:
             return queryset.quarter_hourly_avg(fields)
 
-        aggregate_qs = queryset.aggregate_hourly("sum", fields)
-        data = pd.DataFrame(list(aggregate_qs))
+        aggregate_qs = queryset.aggregate_hourly("sum", fields, adjust_hour=False)
+        if not aggregate_qs:
+            return []
 
-        df = pd.DataFrame({"hour": range(24)})
-        for field in fields:
-            data_hourly = data.groupby("hour")[field].mean().reset_index()
-            data_hourly[field] = data_hourly[field].apply(lambda x: round(x, 2))
-            df = pd.concat([df, data_hourly[field]], axis=1)
-        return df.to_dict(orient="records")
+        data = pd.DataFrame(list(aggregate_qs))
+        grouped_data = data.groupby("hour")[fields].mean().reset_index()
+        grouped_data[fields] = grouped_data[fields].astype(float).round(4)
+        return grouped_data.to_dict(orient="records")
