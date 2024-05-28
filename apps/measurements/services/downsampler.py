@@ -6,7 +6,7 @@ import pandas as pd
 
 from apps.utils.helpers import log_service
 
-logger = logging.getLogger("apps")
+logger = logging.getLogger("apps.measurements.services.downsampler")
 
 
 class LTTBDownSampler:
@@ -48,14 +48,15 @@ class LTTBDownSampler:
         if ref_column and ref_column not in df.columns:
             raise ValueError(f"Column '{ref_column}' not found in DataFrame.")
 
-        if ref_column is None:
-            indices = self._downsample_all_columns(df)
-            return list(np.unique(indices))
-        elif self.enable_parallel:
-            return self._downsample_parallel(df)
-        else:
+        if self.enable_parallel and ref_column is None:
+            return self._parallel_downsample(df)
+
+        if ref_column:
             downsample_df = df[["x", ref_column]].rename(columns={ref_column: "y"})
             return self._downsample_column(downsample_df)
+
+        indices = self._downsample_all_columns(df)
+        return list(np.unique(indices))
 
     def _parallel_downsample(self, df):
         indices = []

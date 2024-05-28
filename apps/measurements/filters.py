@@ -68,7 +68,7 @@ class DailyProfileFilter(BaseMeasurementFilter):
     def filter_off_peak_hours(self, queryset, name, value):
         if value:
             queryset = queryset.annotate(hour=ExtractHour("collection_date")).exclude(
-                Q(hour__gt=18) & Q(hour__lt=21),
+                Q(hour__gte=18) & Q(hour__lt=21),
             )
         return queryset
 
