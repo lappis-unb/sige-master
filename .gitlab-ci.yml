@@ -19,7 +19,7 @@ variables:
 before_script:
   - docker --version
   - docker compose version
-  # - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
 
 build:
   stage: build
@@ -53,9 +53,9 @@ release-image:
   stage: release
   script:
     echo "Criar novas credenciais do Container Registry $CI_REGISTRY_USER e $CI_REGISTRY_PASSWORD"
-    # - docker pull $IMAGE_STG
-    # - docker tag $IMAGE_STG $RELEASE_IMAGE
-    # - docker push $RELEASE_IMAGE
+    - docker pull $IMAGE_STG
+    - docker tag $IMAGE_STG $RELEASE_IMAGE
+    - docker push $RELEASE_IMAGE
   dependencies:
     - build
   only:
