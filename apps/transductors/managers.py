@@ -8,7 +8,11 @@ from apps.organizations.models import Entity
 
 
 class TransductorQuerySet(models.QuerySet):
-    def entity(self, entity_id, include_descendants=True):
+    def entity(self, *args, **kwargs):
+        entity_id = kwargs.get("id", None)
+        include_descendants = kwargs.get("inc_desc", True)
+        max_depth = kwargs.get("depth", None)
+
         if not include_descendants:
             return self.filter(located_id=entity_id)
 
@@ -16,7 +20,7 @@ class TransductorQuerySet(models.QuerySet):
         if not entity:
             return self.none()
 
-        entities = entity.get_descendants(include_self=True)
+        entities = entity.get_descendants(include_self=True, max_depth=max_depth)
         return self.filter(located__in=entities)
 
 
@@ -24,8 +28,8 @@ class TransductorsManager(models.Manager):
     def get_queryset(self):
         return TransductorQuerySet(self.model, using=self._db)
 
-    def entity(self, entity_id, include_descendants=True):
-        return self.get_queryset().entity(entity_id, include_descendants)
+    def entity(self, *args, **kwargs):
+        return self.get_queryset().entity(*args, **kwargs)
 
     def status(self, status):
         return self.get_queryset().filter(
