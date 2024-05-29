@@ -2,7 +2,6 @@ FROM python:3.11.2-slim-bullseye
 
 # Prevents Python from writing pyc files to disc
 ENV PYTHONDONTWRITEBYTECODE 1  
-
 # Prevents Python from buffering stdout and stderr
 ENV PYTHONUNBUFFERED 1
 

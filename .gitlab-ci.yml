@@ -52,7 +52,6 @@ test:
 release-image:
   stage: release
   script:
-    echo "Criar novas credenciais do Container Registry $CI_REGISTRY_USER e $CI_REGISTRY_PASSWORD"
     - docker pull $IMAGE_STG
     - docker tag $IMAGE_STG $RELEASE_IMAGE
     - docker push $RELEASE_IMAGE
