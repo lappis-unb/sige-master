@@ -314,13 +314,13 @@ LOGGING = {
         },
     },
     "loggers": {
-        "django": {"handlers": ["rich-console"], "propagate": True},
-        "": {"handlers": ["error_file", "rich-console"], "level": "INFO", "propagate": True},  # root logger
+        "django": {"handlers": ["error_file"], "propagate": True},
+        "": {"handlers": ["error_file"], "level": "INFO", "propagate": True},  # root logger
         "django.server": {"handlers": ["django.server"], "level": "INFO", "propagate": False},
-        "django.request": {"handlers": ["console"], "level": "ERROR", "propagate": False},
+        "django.request": {"handlers": ["error_file"], "level": "ERROR", "propagate": False},
         "django.db.backends": {"handlers": ["console"], "level": "INFO"},
-        "tasks": {"handlers": ["tasks-file", "rich-console"], "level": "DEBUG", "propagate": False},
-        "apps": {"handlers": ["apps-file", "rich-console"], "level": "DEBUG", "propagate": False},
+        "tasks": {"handlers": ["tasks-file"], "level": "INFO", "propagate": False},
+        "apps": {"handlers": ["apps-file"], "level": "INFO", "propagate": False},
     },
 }
 
