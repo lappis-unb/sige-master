@@ -2,8 +2,6 @@ import logging
 
 from rest_framework import serializers
 
-from apps.locations.models import Address, GeographicLocation
-from apps.locations.serializers import AddressSerializer, GeographicLocationSerializer
 from apps.organizations.models import Entity, Organization
 
 logger = logging.getLogger("apps")

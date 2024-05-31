@@ -2,7 +2,7 @@ import logging
 
 from django.core.management import BaseCommand
 
-from utils.helpers import log_execution_time
+from apps.utils.helpers import log_execution_time
 
 logger = logging.getLogger("tasks")
 

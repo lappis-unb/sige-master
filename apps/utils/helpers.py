@@ -1,4 +1,5 @@
 import logging
+import sys
 import time
 from datetime import datetime
 from pathlib import Path
@@ -7,10 +8,15 @@ from django.apps import apps
 from rest_framework.exceptions import ParseError
 
 
+def get_model_fields(app_label, model_name):
+    model = apps.get_model(app_label, model_name)
+    return [field.name for field in model._meta.get_fields()]
+
+
 def get_dynamic_fields(app_label, model_name):
     ALLOWED_FIELDS = ["IntegerField", "FloatField", "DecimalField"]
     model = apps.get_model(app_label, model_name)
-    
+
     return [
         (field.name, getattr(field, "verbose_name", field.name))
         for field in model._meta.get_fields()
@@ -51,16 +57,6 @@ def string_to_date(date_str):
 def floor_datetime_minutes(dt, minutes=1):
     new_minute = dt.minute - (dt.minute % minutes)
     return dt.replace(minute=new_minute, second=0, microsecond=0)
-
-
-def get_boolean(value):
-    if isinstance(value, bool):
-        return value
-
-    if isinstance(value, str):
-        return value.lower() in ["true", "yes", "1"]
-
-    return bool(value)
 
 
 def parse_date(date_str):

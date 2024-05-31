@@ -6,7 +6,6 @@ from pymodbus.client.udp import ModbusUdpClient
 from pymodbus.constants import Endian
 from pymodbus.exceptions import ModbusException
 from pymodbus.payload import BinaryPayloadDecoder
-from rich import print
 
 from apps.memory_maps.modbus.helpers import (
     ModbusTypeDecoder,
