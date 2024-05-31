@@ -20,13 +20,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     apt-get clean -y && \
     rm -rf /var/lib/apt/lists/*
 
-    COPY requirements.txt .
-    
-    RUN pip install --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt
-    
-    COPY . /sige-master
-    WORKDIR /sige-master
+WORKDIR /sige-master
+COPY requirements.txt .
+RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
+COPY . /sige-master
 
 # ----------------------------< locale and timezone >-------------------------------------
 RUN sed -i 's/# pt_BR.UTF-8 UTF-8/pt_BR.UTF-8 UTF-8/' /etc/locale.gen &&\

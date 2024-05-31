@@ -21,7 +21,7 @@ services:
     master-api:
         container_name: master-api
         restart: unless-stopped
-        image: ${RELEASE_IMAGE:-master-api}
+        image: ${BI_PATH:-master-api:latest}
         build:
             context: .
             dockerfile: Dockerfile
