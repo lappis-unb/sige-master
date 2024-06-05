@@ -1,16 +1,16 @@
-version: "3.9"
+version: '3.9'
 services:
     master-db:
         container_name: master-db
         restart: unless-stopped
         image: postgres:15.2-bullseye
         env_file: dev-env
-        environment:        
+        environment:
             - TZ=America/Sao_Paulo
         volumes:
             - pg-data:/var/lib/postgresql/data
         healthcheck:
-            test: ["CMD-SHELL", "pg_isready -U postgres"]
+            test: ['CMD-SHELL', 'pg_isready -U postgres']
             interval: 5m
             timeout: 30s
             retries: 3
@@ -21,28 +21,25 @@ services:
     master-api:
         container_name: master-api
         restart: unless-stopped
-        image: ${RELEASE_IMAGE:-master-api}
+        image: ${BI_PATH:-master-api:latest}
         build:
             context: .
             dockerfile: Dockerfile
         env_file: dev-env
-        command: ["sh", "scripts/start-dev.sh"]
+        command: ['sh', 'scripts/start-dev.sh']
         ports:
-            - 443:8001
+            - 8001:8001
         networks:
             - sige-network
             - master-network
         volumes:
             - .:/sige-master
-            - pip_cache:/usr/local/lib/python3.11/site-packages
         depends_on:
             - master-db
 
 volumes:
     pg-data:
         name: master-pgdata
-    pip_cache:
-        name: master-pip-cache
 
 networks:
     master-network:

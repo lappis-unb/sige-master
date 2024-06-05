@@ -1,0 +1,45 @@
+register ,attribute            ,address ,addr  ,size ,type  ,group     ,active ,byteorder    ,function            ,description
+U1       ,voltage_a            ,     10 ,30011 ,   2 ,f32   ,minutely  ,true   ,F2_F1_F0_EXP ,read_input_register ,Tensão Linha 1 (V)
+U2       ,voltage_b            ,     12 ,30013 ,   2 ,f32   ,minutely  ,true   ,F2_F1_F0_EXP ,read_input_register ,Tensão Linha 2 (V)
+U3       ,voltage_c            ,     14 ,30015 ,   2 ,f32   ,minutely  ,true   ,F2_F1_F0_EXP ,read_input_register ,Tensão Linha 3 (V)
+I1       ,current_a            ,     20 ,30021 ,   2 ,f32   ,minutely  ,true   ,F2_F1_F0_EXP ,read_input_register ,Corrente Linha 1 (A)
+I2       ,current_b            ,     22 ,30023 ,   2 ,f32   ,minutely  ,true   ,F2_F1_F0_EXP ,read_input_register ,Corrente Linha 2 (A)
+I3       ,current_c            ,     24 ,30025 ,   2 ,f32   ,minutely  ,true   ,F2_F1_F0_EXP ,read_input_register ,Corrente Linha 3 (A)
+Freq-FA  ,frequency_a          ,     26 ,30027 ,   2 ,f32   ,minutely  ,true   ,F2_F1_F0_EXP ,read_input_register ,Frequência Linha 1
+Freq-FB  ,frequency_b          ,     28 ,30029 ,   2 ,f32   ,minutely  ,true   ,F2_F1_F0_EXP ,read_input_register ,Frequência Linha 2
+Freq-FC  ,frequency_c          ,     30 ,30031 ,   2 ,f32   ,minutely  ,true   ,F2_F1_F0_EXP ,read_input_register ,Frequência Linha 3
+Freq-IEC ,frequency_iec        ,     32 ,30033 ,   2 ,f32   ,minutely  ,true   ,F2_F1_F0_EXP ,read_input_register ,Frequência Linha 1 (IEC – 10s)
+P0       ,total_active_power   ,     34 ,30035 ,   2 ,f32   ,minutely  ,true   ,F2_F1_F0_EXP ,read_input_register ,Potência Ativa Trifásica (W)
+P1       ,active_power_a       ,     36 ,30037 ,   2 ,f32   ,minutely  ,true   ,F2_F1_F0_EXP ,read_input_register ,Potência Ativa Linha 1 (W)
+P2       ,active_power_b       ,     38 ,30039 ,   2 ,f32   ,minutely  ,true   ,F2_F1_F0_EXP ,read_input_register ,Potência Ativa Linha 2 (W)
+P3       ,active_power_c       ,     40 ,30041 ,   2 ,f32   ,minutely  ,true   ,F2_F1_F0_EXP ,read_input_register ,Potência Ativa Linha 3 (W)
+Q0       ,total_reactive_power ,     42 ,30043 ,   2 ,f32   ,minutely  ,true   ,F2_F1_F0_EXP ,read_input_register ,Potência Reativa Trifásica (VAr)
+Q1       ,reactive_power_a     ,     44 ,30045 ,   2 ,f32   ,minutely  ,true   ,F2_F1_F0_EXP ,read_input_register ,Potência Reativa Linha 1 (VAr)
+Q2       ,reactive_power_b     ,     46 ,30047 ,   2 ,f32   ,minutely  ,true   ,F2_F1_F0_EXP ,read_input_register ,Potência Reativa Linha 2 (VAr)
+Q3       ,reactive_power_c     ,     48 ,30049 ,   2 ,f32   ,minutely  ,true   ,F2_F1_F0_EXP ,read_input_register ,Potência Reativa Linha 3 (VAr)
+S0       ,total_apparent_power ,     50 ,30051 ,   2 ,f32   ,minutely  ,true   ,F2_F1_F0_EXP ,read_input_register ,Potência Aparente Trifásica (VA)
+S1       ,apparent_power_a     ,     52 ,30053 ,   2 ,f32   ,minutely  ,true   ,F2_F1_F0_EXP ,read_input_register ,Potência Aparente Linha 1 (VA)
+S2       ,apparent_power_b     ,     54 ,30055 ,   2 ,f32   ,minutely  ,true   ,F2_F1_F0_EXP ,read_input_register ,Potência Aparente Linha 2 (VA)
+S3       ,apparent_power_c     ,     56 ,30057 ,   2 ,f32   ,minutely  ,true   ,F2_F1_F0_EXP ,read_input_register ,Potência Aparente Linha 3 (VA)
+FP0      ,total_power_factor   ,     58 ,30059 ,   2 ,f32   ,minutely  ,true   ,F2_F1_F0_EXP ,read_input_register ,Fator de Potência Trifásico
+FP1      ,power_factor_a       ,     60 ,30061 ,   2 ,f32   ,minutely  ,true   ,F2_F1_F0_EXP ,read_input_register ,Fator de Potência Linha 1
+FP2      ,power_factor_b       ,     62 ,30063 ,   2 ,f32   ,minutely  ,true   ,F2_F1_F0_EXP ,read_input_register ,Fator de Potência Linha 2
+FP3      ,power_factor_c       ,     64 ,30065 ,   2 ,f32   ,minutely  ,true   ,F2_F1_F0_EXP ,read_input_register ,Fator de Potência Linha 3
+UAN-THD  ,dht_voltage_a        ,   3000 ,33001 ,   1 ,int16 ,minutely  ,true   ,MSB_LSB      ,read_input_register ,THD da Tensão da fase 1
+UBN-THD  ,dht_voltage_b        ,   3001 ,33002 ,   1 ,int16 ,minutely  ,true   ,MSB_LSB      ,read_input_register ,THD da Tensão da fase 2
+UCN-THD  ,dht_voltage_c        ,   3002 ,33003 ,   1 ,int16 ,minutely  ,true   ,MSB_LSB      ,read_input_register ,THD da Tensão da fase 3
+IA-THD   ,dht_current_a        ,   3003 ,33004 ,   1 ,int16 ,minutely  ,true   ,MSB_LSB      ,read_input_register ,THD da Corrente da fase 1
+IB-THD   ,dht_current_b        ,   3004 ,33005 ,   1 ,int16 ,minutely  ,true   ,MSB_LSB      ,read_input_register ,THD da Corrente da fase 2
+IC-THD   ,dht_current_c        ,   3005 ,33006 ,   1 ,int16 ,minutely  ,true   ,MSB_LSB      ,read_input_register ,THD da Corrente da fase 3
+C8-EA+   ,active_consumption   ,    200 ,30201 ,   2 ,f32   ,quarterly ,true   ,F2_F1_F0_EXP ,read_input_register ,Energia Ativa Positiva (KWh)
+CA-ER+   ,reactive_inductive   ,    202 ,30203 ,   2 ,f32   ,quarterly ,true   ,F2_F1_F0_EXP ,read_input_register ,Energia Reativa Positiva(KVArh)
+CC-EA-   ,active_generated     ,    204 ,30205 ,   2 ,f32   ,quarterly ,true   ,F2_F1_F0_EXP ,read_input_register ,Energia Ativa Negativa (KWh)
+CE-ER-   ,reactive_capacitive  ,    206 ,30207 ,   2 ,f32   ,quarterly ,true   ,F2_F1_F0_EXP ,read_input_register ,Energia Reativa Negativa (KQh)
+D2-DA    ,active_demand        ,    210 ,30211 ,   2 ,f32   ,quarterly ,false  ,F2_F1_F0_EXP ,read_input_register ,Demanda Ativa (KW)
+D6-DS    ,apparent_demand      ,    214 ,30215 ,   2 ,f32   ,quarterly ,false  ,F2_F1_F0_EXP ,read_input_register ,Demanda Aparente (KVA)
+C8-EA+   ,active_consumption   ,    200 ,30201 ,   2 ,f32   ,monthly   ,true   ,F2_F1_F0_EXP ,read_input_register ,Energia Ativa Positiva (KWh)
+CA-ER+   ,reactive_inductive   ,    202 ,30203 ,   2 ,f32   ,monthly   ,true   ,F2_F1_F0_EXP ,read_input_register ,Energia Reativa Positiva(KVArh)
+CC-EA-   ,active_generated     ,    204 ,30205 ,   2 ,f32   ,monthly   ,true   ,F2_F1_F0_EXP ,read_input_register ,Energia Ativa Negativa (KWh)
+CE-ER-   ,reactive_capacitive  ,    206 ,30207 ,   2 ,f32   ,monthly   ,true   ,F2_F1_F0_EXP ,read_input_register ,Energia Reativa Negativa (KQh)
+D2-DA    ,active_demand        ,    210 ,30211 ,   2 ,f32   ,monthly   ,false  ,F2_F1_F0_EXP ,read_input_register ,Demanda Ativa (KW)
+D6-DS    ,apparent_demand      ,    214 ,30215 ,   2 ,f32   ,monthly   ,false  ,F2_F1_F0_EXP ,read_input_register ,Demanda Aparente (KVA)

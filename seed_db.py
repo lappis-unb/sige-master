@@ -91,7 +91,7 @@ class Seeder:
         slave = Slave.objects.first()
         campus = Campus.objects.all()
         group = Group.objects.first()
-        self.energyTransductors = EnergyTransductor.objects.bulk_create([
+        self.energyTransductors = Transductor.objects.bulk_create([
             EnergyTransductor(
                 serial_number="30000481",
                 ip_address="164.41.86.42",
@@ -157,7 +157,7 @@ class Seeder:
         
     def create_events(self):
         print('\t- Creating Events')
-        t = EnergyTransductor.objects.all()
+        t = Transductor.objects.all()
         self.events = []
         self.events.append([
             CriticalVoltageEvent.objects.create(
@@ -204,7 +204,7 @@ class Seeder:
     
     def create_quartely_measurements(self):
         print('\t- Creating QuarterlyMeasurement...')
-        t = EnergyTransductor.objects.all()
+        t = Transductor.objects.all()
         now = datetime.now()
         for i in range(7 * 24 * 4):
             QuarterlyMeasurement.objects.create(
@@ -218,7 +218,7 @@ class Seeder:
         
     def create_minutely_measurements(self):
         print('\t- Creating MinutelyMeasurement...')
-        t = EnergyTransductor.objects.all()
+        t = Transductor.objects.all()
         now = datetime.now()
         """ TODO Improve ranges """ 
         days = 1
@@ -278,19 +278,22 @@ class Seeder:
 
 if __name__ == '__main__':
     import os
-    import django
     import sys
+
+    import django
 
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'smi_master.settings')
     django.setup()
-    from campi.models import Campus
-    from slaves.models import Slave
-    from groups.models import GroupType, Group
-    from transductors.models import EnergyTransductor
-    from events.models import *
-    from measurements.models import *
-    from datetime import datetime, timedelta
     import random
+    from datetime import datetime, timedelta
+
+    from events.models import *
+    from groups.models import Group, GroupType
+    from measurements.models import *
+    from slaves.models import Slave
+
+    from apps.institutions.models import Campus
+    from apps.transductors.models import Transductor
 
     seeder = Seeder()
 

@@ -1,0 +1,271 @@
+register                            ,address ,size ,data                               ,Type  ,group      ,active ,byteorder   ,datamodel        ,description
+                                    ,      0 ,   2 ,Versão                             ,float ,           ,       ,B3_B2_B1_B0 ,COIL             ,Versão atual de Firmware
+                                    ,      2 ,   1 ,FuncRemota                         ,short ,           ,       ,B0_B1_B2_B3 ,DISCRET          ,Função Remota
+                                    ,      3 ,   1 ,Reservado                          ,short ,           ,       ,B1_B0_B3_B2 ,HOLDING_REGISTER ,Reservado Embrasul (Nao Utilizar)
+                                    ,      4 ,   1 ,relacaoTPpri                       ,short ,           ,       ,B2_B3_B0_B1 ,INPUT_REGISTER   ,Relação TP primário
+                                    ,      5 ,   1 ,relacaoTPsec                       ,short ,           ,       ,B1_B0_B3_B2 ,                 ,Relação TP secundário
+                                    ,      6 ,   1 ,relacaoTPfat                       ,short ,           ,       ,B1_B0       ,                 ,Relação TP fator de multiplicação
+                                    ,      7 ,   1 ,relacaoTCpri                       ,short ,           ,       ,B0_B1       ,                 ,Relação TC primário
+                                    ,      8 ,   1 ,relacaoTCsec                       ,short ,           ,       ,            ,                 ,Relação TC secundário
+                                    ,      9 ,   1 ,relacaoTCfat                       ,short ,           ,       ,            ,                 ,Relação TC fator de multiplicação
+year                                ,     10 ,   1 ,RTC_Ano                            ,short ,datetime   ,true   ,            ,                 ,Ano
+month                               ,     11 ,   1 ,RTC_Mes                            ,Short ,datetime   ,true   ,            ,                 ,Mês
+day_of_the_year                     ,     12 ,   1 ,RTC_DiaDoAno                       ,short ,datetime   ,true   ,            ,                 ,Dia do Ano
+day_of_the_week                     ,     13 ,   1 ,RTC_DiaDaSemana                    ,short ,datetime   ,true   ,            ,                 ,Dia da Semana
+day_of_the_month                    ,     14 ,   1 ,RTC_DiaDoMes                       ,short ,datetime   ,true   ,            ,                 ,Dia do Mês
+hour                                ,     15 ,   1 ,RTC_Hora                           ,short ,datetime   ,true   ,            ,                 ,Hora
+minute                              ,     16 ,   1 ,RTC_Minuto                         ,short ,datetime   ,true   ,            ,                 ,Minuto
+second                              ,     17 ,   1 ,RTC_Segundo                        ,short ,datetime   ,true   ,            ,                 ,Segundo
+                                    ,     18 ,   1 ,hora_ponta_inicio1                 ,short ,           ,       ,            ,                 ,Horário de ponta – início 1(hora)
+                                    ,     19 ,   1 ,min_ponta_inicio1                  ,short ,           ,       ,            ,                 ,Horário de ponta – iníco 1(minuto)
+                                    ,     20 ,   1 ,hora_fora_ponta_inicio1            ,short ,           ,       ,            ,                 ,Fora ponta – início 1(hora)
+                                    ,     21 ,   1 ,min_fora_ponta_inicio1             ,short ,           ,       ,            ,                 ,Fora ponta – início 1(minuto)
+                                    ,     22 ,   1 ,hora_reserv_inicio1                ,short ,           ,       ,            ,                 ,Horário reservado – início 1(hora)
+                                    ,     23 ,   1 ,min_reserv_inicio1                 ,short ,           ,       ,            ,                 ,Horário reservado – início 1(minuto)
+                                    ,     24 ,   1 ,hora_ponta_inicio2                 ,short ,           ,       ,            ,                 ,Horário de ponta – início 2(hora)
+                                    ,     25 ,   1 ,min_ponta_inicio2                  ,short ,           ,       ,            ,                 ,Horário de ponta – iníco 2(minuto)
+                                    ,     26 ,   1 ,hora_fora_ponta_inicio2            ,short ,           ,       ,            ,                 ,Fora ponta – início 2(hora)
+                                    ,     27 ,   1 ,min_fora_ponta_inicio2             ,short ,           ,       ,            ,                 ,Fora ponta – início 2(minuto)
+                                    ,     28 ,   1 ,hora_reserv_inicio2                ,short ,           ,       ,            ,                 ,Horário reservado – início 2(hora)
+                                    ,     29 ,   1 ,min_reserv_inicio2                 ,short ,           ,       ,            ,                 ,Horário reservado – início 2(minuto)
+                                    ,     30 ,   1 ,hora_ponta_inicio3                 ,short ,           ,       ,            ,                 ,Horário de ponta – início 3(hora)
+                                    ,     31 ,   1 ,min_ponta_inicio3                  ,short ,           ,       ,            ,                 ,Horário de ponta – iníco 3(minuto)
+                                    ,     32 ,   1 ,hora_fora_ponta_inicio3            ,short ,           ,       ,            ,                 ,Fora ponta – início 3(hora)
+                                    ,     33 ,   1 ,min_fora_ponta_inicio3             ,short ,           ,       ,            ,                 ,Fora ponta – início 3(minuto)
+                                    ,     34 ,   1 ,hora_reserv_inicio3                ,short ,           ,       ,            ,                 ,Horário reservado – início 3(hora)
+                                    ,     35 ,   1 ,min_reserv_inicio3                 ,short ,           ,       ,            ,                 ,Horário reservado – início 3(minuto)
+                                    ,     36 ,   1 ,hora_ponta_inicio4                 ,short ,           ,       ,            ,                 ,Horário de ponta – início 4(hora)
+                                    ,     37 ,   1 ,min_ponta_inicio4                  ,short ,           ,       ,            ,                 ,Horário de ponta – iníco 4(minuto)
+                                    ,     38 ,   1 ,hora_fora_ponta_inicio4            ,short ,           ,       ,            ,                 ,Fora ponta – início 4(hora)
+                                    ,     39 ,   1 ,min_fora_ponta_inicio4             ,short ,           ,       ,            ,                 ,Fora ponta – início 4(minuto)
+                                    ,     40 ,   1 ,hora_reserv_inicio4                ,short ,           ,       ,            ,                 ,Horário reservado – início 4(hora)
+                                    ,     41 ,   1 ,min_reserv_inicio4                 ,short ,           ,       ,            ,                 ,Horário reservado – início 4(minuto)
+                                    ,      0 ,   0 ,Feriados                           ,short ,           ,       ,            ,                 ,Feriados no formato DIA/MES
+                                    ,     62 ,   2 ,RelaçãoTP                          ,float ,           ,       ,            ,                 ,Relação TP
+                                    ,     64 ,   2 ,RelaçãoTC                          ,float ,           ,       ,            ,                 ,Relação TC
+frequency_a                         ,     66 ,   2 ,FreqA                              ,float ,minutely   ,true   ,            ,                 ,Medição Frequência fase A
+voltage_a                           ,     68 ,   2 ,UrmsA                              ,float ,minutely   ,true   ,            ,                 ,Tensão na Fase A
+voltage_b                           ,     70 ,   2 ,UrmsB                              ,float ,minutely   ,true   ,            ,                 ,Tensão na Fase B
+voltage_c                           ,     72 ,   2 ,UrmsC                              ,float ,minutely   ,true   ,            ,                 ,Tensão na Fase C
+current_a                           ,     74 ,   2 ,IrmsA                              ,float ,minutely   ,true   ,            ,                 ,Corrente na Fase A
+current_b                           ,     76 ,   2 ,IrmsB                              ,float ,minutely   ,true   ,            ,                 ,Corrente na Fase B
+current_c                           ,     78 ,   2 ,IrmsC                              ,float ,minutely   ,true   ,            ,                 ,Corrente na Fase C
+active_power_a                      ,     80 ,   2 ,PotAtivA                           ,float ,minutely   ,true   ,            ,                 ,Potência Ativa na Fase A
+active_power_b                      ,     82 ,   2 ,PotAtivB                           ,float ,minutely   ,true   ,            ,                 ,Potência Ativa na Fase B
+active_power_c                      ,     84 ,   2 ,PotAtivC                           ,float ,minutely   ,true   ,            ,                 ,Potência Ativa na Fase C
+total_active_power                  ,     86 ,   2 ,PotAtivT                           ,float ,minutely   ,true   ,            ,                 ,Potência Ativa Total
+reactive_power_a                    ,     88 ,   2 ,PotReatA                           ,float ,minutely   ,true   ,            ,                 ,Potência Reativa na Fase A
+reactive_power_b                    ,     90 ,   2 ,PotReatB                           ,float ,minutely   ,true   ,            ,                 ,Potência Reativa na Fase B
+reactive_power_c                    ,     92 ,   2 ,PotReatC                           ,float ,minutely   ,true   ,            ,                 ,Potência Reativa na Fase C
+total_reactive_power                ,     94 ,   2 ,PotReatT                           ,float ,minutely   ,true   ,            ,                 ,Potência Reativa Total
+apparent_power_a                    ,     96 ,   2 ,PotAparA                           ,float ,minutely   ,true   ,            ,                 ,Potência Aparente na Fase A
+apparent_power_b                    ,     98 ,   2 ,PotAparB                           ,float ,minutely   ,true   ,            ,                 ,Potência Aparente na Fase B
+apparent_power_c                    ,    100 ,   2 ,PotAparC                           ,float ,minutely   ,true   ,            ,                 ,Potência Aparente na Fase C
+total_apparent_power                ,    102 ,   2 ,PotAparT                           ,float ,minutely   ,true   ,            ,                 ,Potência Aparente Total
+power_factor_a                      ,    104 ,   2 ,FatPotA                            ,float ,minutely   ,true   ,            ,                 ,Fator de Potência Fase A
+power_factor_b                      ,    106 ,   2 ,FatPotB                            ,float ,minutely   ,true   ,            ,                 ,Fator de Potência Fase B
+power_factor_c                      ,    108 ,   2 ,FatPotC                            ,float ,minutely   ,true   ,            ,                 ,Fator de Potência Fase C
+total_power_factor                  ,    110 ,   2 ,FatPotT                            ,float ,minutely   ,true   ,            ,                 ,Fator de Potência Total
+dht_voltage_a                       ,    112 ,   2 ,DhtUA                              ,float ,minutely   ,true   ,            ,                 ,DHT Tesão Fase A
+dht_voltage_b                       ,    114 ,   2 ,DhtUB                              ,float ,minutely   ,true   ,            ,                 ,DHT Tesão Fase B
+dht_voltage_c                       ,    116 ,   2 ,DhtUC                              ,float ,minutely   ,true   ,            ,                 ,DHT Tesão Fase C
+dht_current_a                       ,    118 ,   2 ,DhtIA                              ,float ,minutely   ,true   ,            ,                 ,DHT Corrente Fase A
+dht_current_b                       ,    120 ,   2 ,DhtIB                              ,float ,minutely   ,true   ,            ,                 ,DHT Corrente Fase B
+dht_current_c                       ,    122 ,   2 ,DhtIC                              ,float ,minutely   ,true   ,            ,                 ,DHT Corrente Fase C
+                                    ,    124 ,   2 ,EnergGerA                          ,float ,           ,       ,            ,                 ,Energia gerada fase A (desde o último reset)
+                                    ,    126 ,   2 ,EnergGerB                          ,float ,           ,       ,            ,                 ,Energia gerada fase B (desde o último reset)
+                                    ,    128 ,   2 ,EnergGerC                          ,float ,           ,       ,            ,                 ,Energia gerada fase C (desde o último reset)
+kron konect - active_generate       ,    130 ,   2 ,EnergGerT                          ,float ,           ,       ,            ,                 ,Energia gerada total (desde o último reset)
+consumption_a                       ,    132 ,   2 ,ConsumoA                           ,float ,minutely   ,true   ,            ,                 ,Consumo fase A (desde o último reset)
+consumption_b                       ,    134 ,   2 ,ConsumoB                           ,float ,minutely   ,true   ,            ,                 ,Consumo fase B (desde o último reset)
+consumption_c                       ,    136 ,   2 ,ConsumoC                           ,float ,minutely   ,true   ,            ,                 ,Consumo fase C (desde o último reset)
+kron konect - active_consumption    ,    138 ,   2 ,ConsumoT                           ,float ,minutely   ,true   ,            ,                 ,Consumo total (desde o último reset)
+                                    ,    140 ,   2 ,EnergindA                          ,float ,           ,       ,            ,                 ,Energia indutiva fase A (desde o último reset)
+                                    ,    142 ,   2 ,EnergindB                          ,float ,           ,       ,            ,                 ,Energia indutiva fase B (desde o último reset)
+                                    ,    144 ,   2 ,EnergindC                          ,float ,           ,       ,            ,                 ,Energia indutiva fase C (desde o último reset)
+kron konect - reactive_inducti      ,    146 ,   2 ,EnergindT                          ,float ,           ,       ,            ,                 ,Energia indutiva total (desde o último reset)
+                                    ,    148 ,   2 ,EnergcapA                          ,float ,           ,       ,            ,                 ,Energia capacitiva fase A (desde o último reset)
+                                    ,    150 ,   2 ,EnergcapB                          ,float ,           ,       ,            ,                 ,Energia capacitiva fase B (desde o último reset)
+                                    ,    152 ,   2 ,EnergcapC                          ,float ,           ,       ,            ,                 ,Energia capacitiva fase C (desde o último reset)
+kron konect - reactive_capacitive   ,    154 ,   2 ,EnergcapT                          ,float ,           ,       ,            ,                 ,Energia capacitiva total (desde o último reset)
+generated_energy_peak_monthly       ,    156 ,   2 ,EnergGerPontaMesPassado            ,float ,monthly    ,true   ,            ,                 ,Energia gerada no mês anterior no horário de ponta
+generated_energy_off_peak_monthly   ,    158 ,   2 ,EnergGerForaPontaMesPassado        ,float ,monthly    ,true   ,            ,                 ,Energia gerada no mês anterior no horário fora de ponta
+                                    ,    160 ,   2 ,EnergGerReservMesPassado           ,float ,monthly    ,       ,            ,                 ,Energia gerada no mês anterior no horário reservado
+consumption_peak_monthly            ,    162 ,   2 ,ConsumoPontaMesPassado             ,float ,monthly    ,true   ,            ,                 ,Consumo no mês anterior no horário de ponta
+consumption_off_peak_monthly        ,    164 ,   2 ,ConsumoForaPontaMesPassado         ,float ,monthly    ,true   ,            ,                 ,Consumo no mês anterior no horário fora de ponta
+                                    ,    166 ,   2 ,ConsumoReservMesPassado            ,float ,monthly    ,       ,            ,                 ,Consumo no mês anterior no horário reservado
+inductive_power_peak_monthly        ,    168 ,   2 ,EnergIndPontaMesPassado            ,float ,monthly    ,true   ,            ,                 ,Energia Indutiva no mês anterior no horário de ponta
+inductive_power_off_peak_monthly    ,    170 ,   2 ,EnergIndForaPontaMesPassado        ,float ,monthly    ,true   ,            ,                 ,Energia Indutiva no mês anterior no horário fora de ponta
+                                    ,    172 ,   2 ,EnergIndReservMesPassado           ,float ,monthly    ,       ,            ,                 ,Energia Indutiva no mês anterior no horário reservado
+capacitive_power_peak_monthly       ,    174 ,   2 ,EnergCapPontaMesPassado            ,float ,monthly    ,true   ,            ,                 ,Energia Capacitiva no mês anterior no horário de ponta
+capacitive_power_off_peak_monthly   ,    176 ,   2 ,EnergCapForaPontaMesPassado        ,float ,monthly    ,true   ,            ,                 ,Energia Capacitiva no mês anterior no horário fora de ponta
+                                    ,    178 ,   2 ,EnergCapReservMesPassado           ,float ,monthly    ,       ,            ,                 ,Energia Capacitiva no mês anterior no horário reservado
+active_max_power_peak_monthly       ,    180 ,   2 ,MaxPotAtivPontaMesPassado          ,float ,monthly    ,true   ,            ,                 ,Máxima Potência Ativa acumulada em 15min. no mês anterior no horário de ponta
+active_max_power_off_peak_monthly   ,    182 ,   2 ,MaxPotAtivForaPontaMesPassado      ,float ,monthly    ,true   ,            ,                 ,Máxima Potência Ativa acumulada em 15min. no mês anterior no horário fora de ponta
+                                    ,    184 ,   2 ,MaxPotAtivReservMesPassado         ,float ,monthly    ,       ,            ,                 ,Máxima Potência Ativa acumulada em 15min. no mês anterior no horário reservado
+reactive_max_power_peak_monthly     ,    186 ,   2 ,MaxPotReatPontaMesPassado          ,float ,monthly    ,true   ,            ,                 ,Máxima Potência Reativa acumulada em 15min. no mês anterior no horário de ponta
+reactive_max_power_off_peak_monthly ,    188 ,   2 ,MaxPotReatForaPontaMesPassado      ,float ,monthly    ,true   ,            ,                 ,Máxima Potência Reativa acumulada em 15min. no mês anterior no horário fora de ponta
+                                    ,    190 ,   2 ,MaxPotReatReservMesPassado         ,float ,           ,       ,            ,                 ,Máxima Potência Reativa acumulada em 15min. no mês anterior no horário reservado
+                                    ,    192 ,   2 ,EnergGerPontaEsteMesAteAgora       ,float ,           ,       ,            ,                 ,Energia Gerada neste mês até este instante no horário de ponta
+                                    ,    194 ,   2 ,EnergGerForaPontaEsteMesAteAgora   ,float ,           ,       ,            ,                 ,Energia Gerada neste mês até este instante no horário fora de ponta
+                                    ,    196 ,   2 ,EnergGerReservEsteMesAteAgora      ,float ,           ,       ,            ,                 ,Energia Gerada neste mês até este instante no horário reservado
+                                    ,    198 ,   2 ,ConsumoPontaEsteMesAteAgora        ,float ,           ,       ,            ,                 ,Consumo neste mês até este instante no horário de ponta
+data_rescue_get1                    ,    200 ,   2 ,ConsumoForaPontaEsteMesAteAgora    ,float ,rescue_get ,       ,            ,                 ,Consumo neste mês até este instante no horário fora de ponta
+data_rescue_get2                    ,    202 ,   2 ,ConsumoReservEsteMesAteAgora       ,float ,rescue_get ,       ,            ,                 ,Consumo neste mês até este instante no horário reservado
+data_rescue_get3                    ,    204 ,   2 ,EnergIndPontaEsteMesAteAgora       ,float ,rescue_get ,       ,            ,                 ,Energia Indutiva neste mês até este instante no horário de ponta
+data_rescue_get4                    ,    206 ,   2 ,EnergIndForaPontaEsteMesAteAgora   ,float ,rescue_get ,       ,            ,                 ,Energia Indutiva neste mês até este instante no horário fora de ponta
+data_rescue_get5                    ,    208 ,   2 ,EnergIndReservEsteMesAteAgora      ,float ,rescue_get ,       ,            ,                 ,Energia Indutiva neste mês até este instante no horário reservado
+data_rescue_get6                    ,    210 ,   2 ,EnergCapPontaEsteMesAteAgora       ,float ,rescue_get ,       ,            ,                 ,Energia Capacitiva neste mês até este instante no horário de ponta
+data_rescue_get7                    ,    212 ,   2 ,EnergCapForaPontaEsteMesAteAgora   ,float ,rescue_get ,       ,            ,                 ,Energia Capacitiva neste mês até este instante no horário fora de ponta
+data_rescue_get8                    ,    214 ,   2 ,EnergCapReservEsteMesAteAgora      ,float ,rescue_get ,       ,            ,                 ,Máxima Potência Ativa acumulada em 15min. neste mês até este instante no horário de ponta
+data_rescue_get9                    ,    216 ,   2 ,MaxPotAtivPontaEsteMesAteAgora     ,float ,rescue_get ,       ,            ,                 ,Máxima Potência Ativa acumulada em 15min. neste mês até este instante no horário fora de ponta
+data_rescue_get10                   ,    218 ,   2 ,MaxPotAtivForaPontaEsteMesAteAgora ,float ,rescue_get ,       ,            ,                 ,Máxima Potência Ativa acumulada em 15min. neste mês até este instante no horário reservado
+data_rescue_get11                   ,    220 ,   2 ,MaxPotAtivReservEsteMesAteAgora    ,float ,rescue_get ,       ,            ,                 ,Máxima Potência Reativa acumulada em 15min. neste mês até este instante no horário de ponta
+                                    ,    222 ,   2 ,MaxPotReatPontaEsteMesAteAgora     ,float ,           ,       ,            ,                 ,Máxima Potência Reativa acumulada em 15min. neste mês até este instante no horário fora de ponta
+                                    ,    224 ,   2 ,MaxPotReatForaPontaEsteMesAteAgora ,float ,           ,       ,            ,                 ,Máxima Potência Reativa acumulada em 15min. neste mês até este instante no horário reservado
+                                    ,    226 ,   2 ,MaxPotReatReservEsteMesAteAgora    ,float ,           ,       ,            ,                 ,Energia Gerada Hoje até este instante no horário de ponta
+                                    ,    228 ,   2 ,EnergGerPontaHojeAteAgora          ,float ,           ,       ,            ,                 ,Energia Gerada Hoje até este instante no horário fora de ponta
+                                    ,    230 ,   2 ,EnergGerForaPontaHojeAteAgora      ,float ,           ,       ,            ,                 ,Energia Gerada Hoje até este instante no horário reservado
+                                    ,    232 ,   2 ,EnergGerReservHojeAteAgora         ,float ,           ,       ,            ,                 ,Consumo Hoje até este instante no horário de ponta
+                                    ,    234 ,   2 ,ConsumoPontaHojeAteAgora           ,float ,           ,       ,            ,                 ,Consumo Hoje até este instante no horário fora de ponta
+                                    ,    236 ,   2 ,ConsumoForaPontaHojeAteAgora       ,float ,           ,       ,            ,                 ,Consumo Hoje até este instante no horário reservado
+                                    ,    238 ,   2 ,ConsumoReservHojeAteAgora          ,float ,           ,       ,            ,                 ,Energia Indutiva Hoje até este instante no horário de ponta
+                                    ,    240 ,   2 ,EnergIndPontaHojeAteAgora          ,float ,           ,       ,            ,                 ,Energia Indutiva Hoje até este instante no horário fora de ponta
+                                    ,    242 ,   2 ,EnergIndForaPontaHojeAteAgora      ,float ,           ,       ,            ,                 ,Energia Indutiva Hoje até este instante no horário reservado
+                                    ,    244 ,   2 ,EnergIndReservHojeAteAgora         ,float ,           ,       ,            ,                 ,Energia Capacitiva Hoje até este instante no horário de ponta
+                                    ,    246 ,   2 ,EnergCapPontaHojeAteAgora          ,float ,           ,       ,            ,                 ,Energia Capacitiva Hoje até este instante no horário fora de ponta
+                                    ,    248 ,   2 ,EnergCapForaPontaHojeAteAgora      ,float ,           ,       ,            ,                 ,Energia Capacitiva Hoje até este instante no horário reservado
+                                    ,    250 ,   2 ,EnergCapReservHojeAteAgora         ,float ,           ,       ,            ,                 ,Máxima Potência Ativa acumulada em 15min. neste mês até este instante no horário de ponta
+                                    ,    252 ,   2 ,MaxPotAtivPontaHojeAteAgora        ,float ,           ,       ,            ,                 ,Máxima Potência Ativa acumulada em 15min. neste mês até este instante no horário fora de ponta
+                                    ,    254 ,   2 ,MaxPotAtivForaPontaHojeAteAgora    ,float ,           ,       ,            ,                 ,Máxima Potência Ativa acumulada em 15min. neste mês até este instante no horário reservado
+                                    ,    256 ,   2 ,MaxPotAtivReservHojeAteAgora       ,float ,           ,       ,            ,                 ,Máxima Potência Reativa acumulada em 15min. neste mês até este instante no horário de ponta
+                                    ,    258 ,   2 ,MaxPotReatPontaHojeAteAgora        ,float ,           ,       ,            ,                 ,Máxima Potência Reativa acumulada em 15min. neste mês até este instante no horário fora de ponta
+                                    ,    260 ,   2 ,MaxPotReatForaPontaHojeAteAgora    ,float ,           ,       ,            ,                 ,Energia Capacitiva neste mês até este instante no horário reservado
+                                    ,    262 ,   2 ,MaxPotReatReservHojeAteAgora       ,float ,           ,       ,            ,                 ,Máxima Potência Reativa acumulada em 15min. neste mês até este instante no horário reservado
+generated_energy_peak_quartely      ,    264 ,   2 ,EnergGerPonta15min                 ,float ,quartely   ,true   ,            ,                 ,Energia Gerada nos últimos 15 minutos no horário de ponta
+generated_energy_off_peak_quartely  ,    266 ,   2 ,EnergGerForaPonta15min             ,float ,quartely   ,true   ,            ,                 ,Energia Gerada nos últimos 15 minutos no horário fora de ponta
+generated_energy_reserve_quartely   ,    268 ,   2 ,EnergGerReserv15min                ,float ,quartely   ,true   ,            ,                 ,Energia Gerada nos últimos 15 minutos no horário reservado
+consumption_peak_quartely           ,    270 ,   2 ,ConsumoPonta15min                  ,float ,quartely   ,true   ,            ,                 ,Consumo nos últimos 15 minutos no horário de ponta
+consumption_off_peak_quartely       ,    272 ,   2 ,ConsumoForaPonta15min              ,float ,quartely   ,true   ,            ,                 ,Consumo nos últimos 15 minutos no horário fora de ponta
+consumption_reserve_quartely        ,    274 ,   2 ,ConsumoReserv15min                 ,float ,quartely   ,true   ,            ,                 ,Consumo nos últimos 15 minutos no horário reservado
+inductive_power_peak_quartely       ,    276 ,   2 ,EnergIndPonta15min                 ,float ,quartely   ,true   ,            ,                 ,Energia Indutiva nos últimos 15 minutos no horário de ponta
+inductive_power_off_peak_quartely   ,    278 ,   2 ,EnergIndForaPonta15min             ,float ,quartely   ,true   ,            ,                 ,Energia Indutiva nos últimos 15 minutos no horário fora de ponta
+inductive_power_off_peak_quartely   ,    280 ,   2 ,EnergIndReserv15min                ,float ,quartely   ,true   ,            ,                 ,Energia Indutiva nos últimos 15 minutos no horário reservado
+capacitive_power_peak_quartely      ,    282 ,   2 ,EnergCapPonta15min                 ,float ,quartely   ,true   ,            ,                 ,Energia Capacitiva nos últimos 15 minutos no horário de ponta
+capacitive_power_off_peak_quartely  ,    284 ,   2 ,EnergCapForaPonta15min             ,float ,quartely   ,true   ,            ,                 ,Energia Capacitiva nos últimos 15 minutos no horário fora de ponta
+                                    ,    286 ,   2 ,EnergCapReserv15min                ,float ,           ,       ,            ,                 ,Energia Capacitiva nos últimos 15 minutos no horário reservado
+                                    ,    288 ,   2 ,ConstanteDoUsuario1                ,float ,           ,       ,            ,                 ,Constante do Usuário 1 (sugestão de setpoint 1)
+                                    ,    290 ,   2 ,ConstanteDoUsuario2                ,float ,           ,       ,            ,                 ,Constante do Usuário 2 (sugestão de setpoint 2)
+                                    ,    292 ,   2 ,ConstanteDoUsuario3                ,float ,           ,       ,            ,                 ,Constante do Usuário 3 (sugestão de setpoint 3)
+                                    ,    294 ,   2 ,ConstanteDoUsuario4                ,float ,           ,       ,            ,                 ,Constante do Usuário 4 (sugestão de setpoint 4)
+                                    ,    296 ,   2 ,ConstanteDoUsuario5                ,float ,           ,       ,            ,                 ,Constante do Usuário 5 (sugestão de setpoint 5)
+                                    ,    298 ,   2 ,ConstanteDoUsuario6                ,float ,           ,       ,            ,                 ,Constante do Usuário 6 (sugestão de setpoint 6)
+                                    ,    300 ,   2 ,EnergGerPonta                      ,float ,           ,       ,            ,                 ,Energia Gerada desde o último reset no horário de ponta
+                                    ,    302 ,   2 ,EnergGerForaPonta                  ,float ,           ,       ,            ,                 ,Energia Gerada desde o último reset no horário fora de ponta
+                                    ,    304 ,   2 ,EnergGerReserv                     ,float ,           ,       ,            ,                 ,Energia Gerada desde o último reset no horário reservado
+                                    ,    306 ,   2 ,ConsumoPonta                       ,float ,           ,       ,            ,                 ,Consumo desde o último reset no horário de ponta
+                                    ,    308 ,   2 ,ConsumoForaPonta                   ,float ,           ,       ,            ,                 ,Consumo desde o último reset no horário fora de ponta
+                                    ,    308 ,   2 ,ConsumoForaPonta                   ,float ,           ,       ,            ,                 ,Consumo desde o último reset no horário fora de ponta
+                                    ,    310 ,   2 ,ConsumoReserv                      ,float ,           ,       ,            ,                 ,Consumo desde o último reset no horário reservado
+                                    ,    312 ,   2 ,EnergIndPonta                      ,float ,           ,       ,            ,                 ,Energia Indutiva desde o último reset no horário de ponta
+                                    ,    314 ,   2 ,EnergIndForaPonta                  ,float ,           ,       ,            ,                 ,Energia Indutiva desde o último reset no horário fora de ponta
+                                    ,    316 ,   2 ,EnergIndReserv                     ,float ,           ,       ,            ,                 ,Energia Indutiva desde o último reset no horário reservado
+                                    ,    318 ,   2 ,EnergCapPonta                      ,float ,           ,       ,            ,                 ,Energia Capacitiva desde o último reset no horário de ponta
+                                    ,    320 ,   2 ,EnergCapForaPonta                  ,float ,           ,       ,            ,                 ,Energia Capacitiva desde o último reset no horário fora de ponta
+                                    ,    322 ,   2 ,EnergCapReserv                     ,float ,           ,       ,            ,                 ,Energia Capacitiva desde o último reset no horário reservado
+                                    ,    324 ,   2 ,MaxPotAtivPonta                    ,float ,           ,       ,            ,                 ,Máxima Potência Ativa Acumulada (interv. de 15min.) desde o último reset no horário de ponta
+                                    ,    326 ,   2 ,MaxPotAtivForaPonta                ,float ,           ,       ,            ,                 ,Máxima Potência Ativa Acumulada (interv. de 15min.) desde o último reset no horário f. ponta
+                                    ,    328 ,   2 ,MaxPotAtivReserv                   ,float ,           ,       ,            ,                 ,Máxima Potência Ativa Acumulada (interv. de 15min.) desde o último reset no horário reservado
+                                    ,    330 ,   2 ,MaxPotReatPonta                    ,float ,           ,       ,            ,                 ,Máxima Potência Reativa Acumulada (interv. de 15min.) desde o último reset no horário de ponta
+                                    ,    332 ,   2 ,MaxPotReatForaPonta                ,float ,           ,       ,            ,                 ,Máxima Potência Reativa Acumulada (interv. de 15min.) desde o último reset no horário f. ponta
+                                    ,    334 ,   2 ,MaxPotReatReserv                   ,float ,           ,       ,            ,                 ,Máxima Potência Reativa Acumulada (interv. de 15min.) desde o último reset no horário reservado
+                                    ,    336 ,   2 ,EnergGerPonta15minAcc              ,float ,           ,       ,            ,                 ,Energia Gerada nos últimos 15 minutos até este instante no horário de ponta
+                                    ,    338 ,   2 ,EnergGerForaPonta15minAcc          ,float ,           ,       ,            ,                 ,Energia Gerada nos últimos 15 minutos até este instante no horário fora de ponta
+                                    ,    340 ,   2 ,EnergGerReserv15minAcc             ,float ,           ,       ,            ,                 ,Energia Gerada nos últimos 15 minutos até este instante no horário reservado
+                                    ,    342 ,   2 ,ConsumoPonta15minAcc               ,float ,           ,       ,            ,                 ,Consumo nos últimos 15 minutos até este instante no horário de ponta
+                                    ,    344 ,   2 ,ConsumoForaPonta15minAcc           ,float ,           ,       ,            ,                 ,Consumo nos últimos 15 minutos até este instante no horário fora de ponta
+                                    ,    346 ,   2 ,ConsumoReserv15minAcc              ,float ,           ,       ,            ,                 ,Consumo nos últimos 15 minutos até este instante no horário reservado
+                                    ,    348 ,   2 ,EnergIndPonta15minAcc              ,float ,           ,       ,            ,                 ,Energia Indutiva nos últimos 15 minutos até este instante no horário de ponta
+                                    ,    350 ,   2 ,EnergIndForaPonta15minAcc          ,float ,           ,       ,            ,                 ,Energia Indutiva nos últimos 15 minutos até este instante no horário fora de ponta
+                                    ,    352 ,   2 ,EnergIndReserv15minAcc             ,float ,           ,       ,            ,                 ,Energia Indutiva nos últimos 15 minutos até este instante no horário reservado
+                                    ,    354 ,   2 ,EnergCapPonta15minAcc              ,float ,           ,       ,            ,                 ,Energia Capacitiva nos últimos 15 minutos até este instante no horário de ponta
+                                    ,    356 ,   2 ,EnergCapForaPonta15minAcc          ,float ,           ,       ,            ,                 ,Energia Capacitiva nos últimos 15 minutos até este instante no horário fora de ponta
+                                    ,    358 ,   2 ,EnergCapReserv15minAcc             ,float ,           ,       ,            ,                 ,Energia Capacitiva nos últimos 15 minutos até este instante no horário reservado
+                                    ,    360 ,   2 ,PotAtivPonta15minAcc               ,float ,           ,       ,            ,                 ,Potência Ativa acumulada nos últimos 15 minutos até este instante no horário de ponta
+                                    ,    362 ,   2 ,PotAtivForaPonta15minAcc           ,float ,           ,       ,            ,                 ,Potência Ativa acumulada nos últimos 15 minutos até este instante no horário de fora ponta
+                                    ,    364 ,   2 ,PotAtivReserv15minAcc              ,float ,           ,       ,            ,                 ,Potência Ativa acumulada nos últimos 15 minutos até este instante no horário reservado
+                                    ,    366 ,   2 ,PotReatPonta15minAcc               ,float ,           ,       ,            ,                 ,Potência Reativa acumulada nos últimos 15 minutos até este instante no horário de ponta
+                                    ,    368 ,   2 ,PotReatForaPonta15minAcc           ,float ,           ,       ,            ,                 ,Potência Reativa acumulada nos últimos 15 minutos até este instante no horário de fora ponta
+                                    ,    370 ,   2 ,PotReatReserv15minAcc              ,float ,           ,       ,            ,                 ,Potência Reativa acumulada nos últimos 15 minutos até este instante no horário reservado
+                                    ,    372 ,   8 ,Lista1MaxPotAtivPontaMesAtual      ,float ,           ,       ,            ,                 ,Lista # 1: Quatro maiores Pot. Acc. Ativas no mês atual
+                                    ,    380 ,   8 ,Lista2MaxPotAtivForaPontaMesAtual  ,float ,           ,       ,            ,                 ,Lista #2: Quatro maiores Pot. Acc. Ativas no mês atual
+                                    ,    388 ,   8 ,Lista3MaxPotAtivReservMesAtual     ,float ,           ,       ,            ,                 ,Lista # 3: Quatro maiores Pot. Acc. Ativas no mês atual
+                                    ,    396 ,   8 ,Lista4MaxPotReatPontaMesAtual      ,float ,           ,       ,            ,                 ,Lista # 4: Quatro maiores Pot. Acc. Reativas no mês atual
+                                    ,    404 ,   8 ,Lista5MaxPotReatForaPontaMesAtual  ,float ,           ,       ,            ,                 ,Lista #5: Quatro maiores Pot. Acc. Reativas no mês atual
+                                    ,    412 ,   8 ,Lista6MaxPotReatReservMesAtual     ,float ,           ,       ,            ,                 ,Lista # 6: Quatro maiores Pot. Acc. Reativas no mês atual
+Lista7MaxPotAtivPontaMesPassado     ,    420 ,   8 ,Lista7MaxPotAtivPontaMesPassado    ,float ,monthly    ,       ,            ,                 ,Lista # 7: Quatro maiores Pot. Acc. Ativas no mês passado
+Lista8MaxPotAtivForaPonta           ,    428 ,   8 ,Lista8MaxPotAtivForaPonta          ,float ,monthly    ,       ,            ,                 ,Lista # 8: Quatro maiores Pot. Acc. Ativas no mês passado
+Lista9MaxPotAtivReserv              ,    436 ,   8 ,Lista9MaxPotAtivReserv             ,float ,monthly    ,       ,            ,                 ,Lista # 9: Quatro maiores Pot. Acc. Ativas no mês passado
+Lista10MaxPotReatPonta              ,    444 ,   8 ,Lista10MaxPotReatPonta             ,float ,monthly    ,       ,            ,                 ,Lista # 10: Quatro maiores Pot. Acc. Reativas no mês passado
+Lista11MaxPotReatForaPonta          ,    452 ,   8 ,Lista11MaxPotReatForaPonta         ,float ,monthly    ,       ,            ,                 ,Lista # 11: Quatro maiores Pot. Acc. Reativas no mês passado
+Lista12MaxPotReatReserv             ,    460 ,   8 ,Lista12MaxPotReatReserv            ,float ,monthly    ,       ,            ,                 ,Lista # 12: Quatro maiores Pot. Acc. Reativas no mês atual passado
+                                    ,    468 ,   4 ,MesDiaLista1                       ,short ,           ,       ,            ,                 ,Data no formato “MesDia”
+                                    ,    472 ,   4 ,HoraMinLista1                      ,short ,           ,       ,            ,                 ,Hora no formato “HoraMin”
+                                    ,    476 ,   4 ,MesDiaLista2                       ,short ,           ,       ,            ,                 ,Data no formato “MesDia”
+                                    ,    480 ,   4 ,HoraMinLista2                      ,short ,           ,       ,            ,                 ,Hora no formato “HoraMin”
+                                    ,    484 ,   4 ,MesDiaLista3                       ,short ,           ,       ,            ,                 ,Data no formato “MesDia”
+                                    ,    488 ,   4 ,HoraMinLista3                      ,short ,           ,       ,            ,                 ,Hora no formato “HoraMin”
+                                    ,    492 ,   4 ,MesDiaLista4                       ,short ,           ,       ,            ,                 ,Data no formato “MesDia”
+                                    ,    496 ,   4 ,HoraMinLista4                      ,short ,           ,       ,            ,                 ,Hora no formato “HoraMin”
+                                    ,    500 ,   4 ,MesDiaLista5                       ,short ,           ,       ,            ,                 ,Data no formato “MesDia”
+                                    ,    504 ,   4 ,HoraMinLista5                      ,short ,           ,       ,            ,                 ,Hora no formato “HoraMin”
+                                    ,    508 ,   4 ,MesDiaLista6                       ,short ,           ,       ,            ,                 ,Data no formato “MesDia”
+                                    ,    512 ,   4 ,HoraMinLista6                      ,short ,           ,       ,            ,                 ,Hora no formato “HoraMin”
+MesDiaLista7                        ,    516 ,   4 ,MesDiaLista7                       ,short ,monthly    ,       ,            ,                 ,Data no formato “MesDia”
+HoraMinLista7                       ,    520 ,   4 ,HoraMinLista7                      ,short ,monthly    ,       ,            ,                 ,Hora no formato “HoraMin”
+MesDiaLista8                        ,    524 ,   4 ,MesDiaLista8                       ,short ,monthly    ,       ,            ,                 ,Data no formato “MesDia”
+HoraMinLista8                       ,    528 ,   4 ,HoraMinLista8                      ,short ,monthly    ,       ,            ,                 ,Hora no formato “HoraMin”
+MesDiaLista9                        ,    532 ,   4 ,MesDiaLista9                       ,short ,monthly    ,       ,            ,                 ,Data no formato “MesDia”
+HoraMinLista9                       ,    536 ,   4 ,HoraMinLista9                      ,short ,monthly    ,       ,            ,                 ,Hora no formato “HoraMin”
+MesDiaLista10                       ,    540 ,   4 ,MesDiaLista10                      ,short ,monthly    ,       ,            ,                 ,Data no formato “MesDia”
+HoraMinLista10                      ,    544 ,   4 ,HoraMinLista10                     ,short ,monthly    ,       ,            ,                 ,Hora no formato “HoraMin”
+MesDiaLista11                       ,    548 ,   4 ,MesDiaLista11                      ,short ,monthly    ,       ,            ,                 ,Data no formato “MesDia”
+HoraMinLista11                      ,    552 ,   4 ,HoraMinLista11                     ,short ,monthly    ,       ,            ,                 ,Hora no formato “HoraMin”
+                                    ,    556 ,   4 ,MesDiaLista12                      ,short ,           ,       ,            ,                 ,Data no formato “MesDia”
+                                    ,    560 ,   4 ,HoraMinLista12                     ,short ,           ,       ,            ,                 ,Hora no formato “HoraMin”
+                                    ,    564 ,   1 ,FechamentoDoMes                    ,short ,           ,       ,            ,                 ,Dia e Hora do Fechamento do Mês (medição da concessionária) no formato “DiaHora”
+                                    ,    565 ,   1 ,Status Dos Reles                   ,short ,           ,       ,            ,                 ,Status dos Relés 1
+                                    ,    566 ,   1 ,EnderecoGrandeza1_R1               ,short ,           ,       ,            ,                 ,Endereço Modbus da Primeira Grandeza que aciona o Relé 1
+                                    ,    567 ,   1 ,EnderecoGrandeza2_R1               ,short ,           ,       ,            ,                 ,Endereço Modbus da Segunda Grandeza que aciona o Relé 1
+                                    ,    568 ,   1 ,EnderecoGrandeza3_R1               ,short ,           ,       ,            ,                 ,Endereço Modbus da Terceira Grandeza que aciona o Relé 1
+                                    ,    569 ,   1 ,EnderecoSetPoint1_R1               ,short ,           ,       ,            ,                 ,Endereço Modbus do Primeiro SetPoint de comparação para ativação do Relé 1
+                                    ,    570 ,   1 ,EnderecoSetPoint2_R1               ,short ,           ,       ,            ,                 ,Endereço Modbus do Segundo SetPoint de comparação para ativação do Relé 1
+                                    ,    571 ,   1 ,EnderecoSetPoint3_R1               ,short ,           ,       ,            ,                 ,Endereço Modbus do Terceiro SetPoint de comparação para ativação do Relé 1
+                                    ,    572 ,   1 ,TempoObservacaoR1                  ,short ,           ,       ,            ,                 ,Tempo de Observação para ativação do Relé 1
+                                    ,    573 ,   1 ,TipoDeComparacaoR1                 ,short ,           ,       ,            ,                 ,Tipo de comparação que é feita para ligar o Relé 1
+                                    ,    574 ,   1 ,EnderecoGrandeza1_R3               ,short ,           ,       ,            ,                 ,Endereço Modbus da Primeira Grandeza que aciona o Relé 3
+                                    ,    575 ,   1 ,EnderecoGrandeza2_R3               ,short ,           ,       ,            ,                 ,Endereço Modbus da Segunda Grandeza que aciona o Relé 3
+                                    ,    576 ,   1 ,EnderecoGrandeza3_R3               ,short ,           ,       ,            ,                 ,Endereço Modbus da Terceira Grandeza que aciona o Relé 3
+                                    ,    577 ,   1 ,EnderecoSetPoint1_R3               ,short ,           ,       ,            ,                 ,Endereço Modbus do Primeiro SetPoint de comparação para ativação do Relé 3
+                                    ,    578 ,   1 ,EnderecoSetPoint2_R3               ,short ,           ,       ,            ,                 ,Endereço Modbus do Segundo SetPoint de comparação para ativação do Relé 3
+                                    ,    579 ,   1 ,EnderecoSetPoint3_R3               ,short ,           ,       ,            ,                 ,Endereço Modbus do Terceiro SetPoint de comparação para ativação do Relé 3
+                                    ,    580 ,   1 ,TempoObservacaoR3                  ,short ,           ,       ,            ,                 ,Tempo de Observação para ativação do Relé 3
+                                    ,    581 ,   1 ,TipoDeComparacaoR3                 ,short ,           ,       ,            ,                 ,Tipo de comparação que é feita para ligar o Relé 3
+                                    ,    582 ,   1 ,EnderecoGrandeza1_R2               ,short ,           ,       ,            ,                 ,Endereço Modbus da Primeira Grandeza que aciona o Relé 2
+                                    ,    583 ,   1 ,EnderecoGrandeza2_R2               ,short ,           ,       ,            ,                 ,Endereço Modbus da Segunda Grandeza que aciona o Relé 2
+                                    ,    584 ,   1 ,EnderecoGrandeza3_R2               ,short ,           ,       ,            ,                 ,Endereço Modbus da Terceira Grandeza que aciona o Relé 2
+                                    ,    585 ,   1 ,EnderecoSetPoint1_R2               ,short ,           ,       ,            ,                 ,Endereço Modbus do Primeiro SetPoint de comparação para ativação do Relé 2
+                                    ,    586 ,   1 ,EnderecoSetPoint2_R2               ,short ,           ,       ,            ,                 ,Endereço Modbus do Segundo SetPoint de comparação para ativação do Relé 2
+                                    ,    587 ,   1 ,EnderecoSetPoint3_R2               ,short ,           ,       ,            ,                 ,Endereço Modbus do Terceiro SetPoint de comparação para ativação do Relé 2
+                                    ,    588 ,   1 ,TempoObservacaoR2                  ,short ,           ,       ,            ,                 ,Tempo de Observação para ativação do Relé 2
+                                    ,    589 ,   1 ,TipoDeComparacaoR2                 ,short ,           ,       ,            ,                 ,Tipo de comparação que é feita para ligar o Relé 2
+                                    ,    590 ,   2 ,MMUa                               ,float ,           ,       ,            ,                 ,Tensão Integrada Fase A
+                                    ,    592 ,   2 ,MMUb                               ,float ,           ,       ,            ,                 ,Tensão Integrada Fase B
+                                    ,    594 ,   2 ,MMUc                               ,float ,           ,       ,            ,                 ,Tensão Integrada Fase C
+                                    ,    596 ,   2 ,MMIa                               ,float ,           ,       ,            ,                 ,Corrente Integrada Fase A
+                                    ,    598 ,   2 ,MMIb                               ,float ,           ,       ,            ,                 ,Corrente Integrada Fase B
+                                    ,    600 ,   2 ,MMIc                               ,float ,           ,       ,            ,                 ,Corrente Integrada Fase C
+                                    ,    602 ,   2 ,MMDemP                             ,float ,           ,       ,            ,                 ,Demanda Ativa Integrada Total
+                                    ,    604 ,   2 ,MMDemQ                             ,float ,           ,       ,            ,                 ,Demanda Reativa Integrada Total
+                                    ,    606 ,   2 ,MMFPt                              ,float ,           ,       ,            ,                 ,Fator de Potência Integrado Total
+                                    ,    608 ,   2 ,tMMgrandezas                       ,short ,           ,       ,            ,                 ,Tempo de integração de Grandezas

@@ -13,62 +13,65 @@ stages:
 variables:
   SERVICE_NAME: master-api
   IMAGE_DB: postgres:15.2-bullseye
-  IMAGE_STG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
-  RELEASE_IMAGE: $CI_REGISTRY_IMAGE:latest
+  BRANCH_IMAGE: branch-$CI_COMMIT_SHORT_SHA
+  DEVELOP_IMAGE: develop-$CI_COMMIT_SHORT_SHA
+  RELEASE_IMAGE: release-$CI_COMMIT_SHORT_SHA
+  BI_PATH: $CI_REGISTRY_IMAGE:$BRANCH_IMAGE
 
 before_script:
   - docker --version
   - docker compose version
-  - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  - echo "$CI_REGISTRY"
+  - echo "$CI_REGISTRY_IMAGE"
+  - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
 
 build:
   stage: build
   script:
-    - docker build --pull -t $IMAGE_STG .
-    - docker push $IMAGE_STG
+    - docker compose build --no-cache
+    - docker images
+    - docker push $CI_REGISTRY_IMAGE:$BRANCH_IMAGE
 
 style:
   stage: lint
-  before_script:
-    - docker compose pull
   script:
-    - docker compose run ${SERVICE_NAME} pycodestyle .
-  allow_failure: true
+    - docker run --rm -v $(pwd):/data cytopia/pycodestyle .
 
 test:
   stage: test
   before_script:
-    - docker compose pull
-    - docker compose up -d
+    - docker pull $CI_REGISTRY_IMAGE:$BRANCH_IMAGE
+    - docker-compose up -d --no-build
+    - docker compose exec ${SERVICE_NAME} sh -c "mkdir -p /sige-master/logs/apps /sige-master/logs/tasks"
   script:
-    - docker compose run --rm ${SERVICE_NAME} python manage.py test --verbosity=3
-    - docker compose run --rm ${SERVICE_NAME} coverage run manage.py test
-    - docker compose run --rm ${SERVICE_NAME} coverage report
-    - docker compose run --rm ${SERVICE_NAME} coverage xml -o coverage.xml
-    - docker run -it --rm -v "$(pwd):/code" python:3.8-slim bash -c "pip install coverage-badge && coverage-badge -o coverage.svg -f"
-    - docker compose run --rm ${SERVICE_NAME} coverage erase
-  allow_failure: true # temporary until refactoring the tests
+    - docker compose exec ${SERVICE_NAME} python manage.py test --verbosity=3
+    - docker compose exec ${SERVICE_NAME} coverage run manage.py test
+    - docker compose exec ${SERVICE_NAME} coverage report
+    - docker compose exec ${SERVICE_NAME} coverage xml -o coverage.xml
+  after_script:
+    - docker compose down
+  dependencies:
+    - build
 
 release-image:
   stage: release
   script:
-    - docker pull $IMAGE_STG
-    - docker tag $IMAGE_STG $RELEASE_IMAGE
-    - docker push $RELEASE_IMAGE
-  dependencies:
-    - build
-  only:
-    changes:
-      - Dockerfile
-
-deploy:
-  stage: deploy
-  script:
-    # - ./scrips/deploy.sh
-    echo "Falta fazer o script de deployment!"
-    echo "SSH ou Local Gitlab Runner?"
+    - docker pull $CI_REGISTRY_IMAGE:$BRANCH_IMAGE
+    - docker tag $CI_REGISTRY_IMAGE:$BRANCH_IMAGE $CI_REGISTRY_IMAGE:$RELEASE_IMAGE
+    - docker push $CI_REGISTRY_IMAGE:$RELEASE_IMAGE
   dependencies:
     - build
   only:
     - main
-  environment: production
+  when: manual
+
+deploy:
+  stage: deploy
+  script:
+    - echo "Deployment script not implemented yet!"
+    - echo "SSH or Local Gitlab Runner?"
+  dependencies:
+    - build
+  only:
+    - main
+  when: manual

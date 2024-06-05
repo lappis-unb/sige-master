@@ -1,0 +1,145 @@
+================================================================================================================================
+Número de Série
+================================================================================================================================
+register ,address ,size ,type  ,group    ,active ,byteorder    ,datamodel           ,description
+NS       ,  30001 ,2    ,u32   ,         ,false  ,F2_F1_F0_EXP ,read_input_register ,Número de Série
+
+================================================================================================================================
+Grandezas elétricas instantâneas - 30.003 a 30.082
+================================================================================================================================
+register ,address ,min_value ,max_value ,size ,type  ,group    ,active ,byteorder    ,datamodel           ,description
+U0       ,  30003 ,31003     ,32003     ,2    ,f32   ,         ,false  ,F2_F1_F0_EXP ,read_input_register ,Tensão Trifásica (V)
+U12      ,  30005 ,31005     ,32005     ,2    ,f32   ,         ,false  ,F2_F1_F0_EXP ,read_input_register ,Tensão Fase/Fase (A-B)
+U23      ,  30007 ,31007     ,32007     ,2    ,f32   ,         ,false  ,F2_F1_F0_EXP ,read_input_register ,Tensão Fase/Fase (B-C)
+U31      ,  30009 ,31009     ,32009     ,2    ,f32   ,         ,false  ,F2_F1_F0_EXP ,read_input_register ,Tensão Fase/Fase (C-A)
+U1       ,  30011 ,31011     ,32011     ,2    ,f32   ,minutely ,true   ,F2_F1_F0_EXP ,read_input_register ,Tensão Linha 1 (V)
+U2       ,  30013 ,31013     ,32013     ,2    ,f32   ,minutely ,true   ,F2_F1_F0_EXP ,read_input_register ,Tensão Linha 2 (V)
+U3       ,  30015 ,31015     ,32015     ,2    ,f32   ,minutely ,true   ,F2_F1_F0_EXP ,read_input_register ,Tensão Linha 3 (V)
+I0       ,  30017 ,31017     ,32017     ,2    ,f32   ,         ,false  ,F2_F1_F0_EXP ,read_input_register ,Corrente Trifásica (A)
+IN       ,  30019 ,31019     ,32019     ,2    ,f32   ,         ,false  ,F2_F1_F0_EXP ,read_input_register ,Corrente de Neutro
+I1       ,  30021 ,31021     ,32021     ,2    ,f32   ,minutely ,true   ,F2_F1_F0_EXP ,read_input_register ,Corrente Linha 1 (A)
+I2       ,  30023 ,31023     ,32023     ,2    ,f32   ,minutely ,true   ,F2_F1_F0_EXP ,read_input_register ,Corrente Linha 2 (A)
+I3       ,  30025 ,31025     ,32025     ,2    ,f32   ,minutely ,true   ,F2_F1_F0_EXP ,read_input_register ,Corrente Linha 3 (A)
+Freq-FA  ,  30027 ,31027     ,32027     ,2    ,f32   ,         ,false  ,F2_F1_F0_EXP ,read_input_register ,Frequência Linha 1
+Freq-FB  ,  30029 ,31029     ,32029     ,2    ,f32   ,         ,false  ,F2_F1_F0_EXP ,read_input_register ,Frequência Linha 2
+Freq-FC  ,  30031 ,31031     ,32031     ,2    ,f32   ,         ,false  ,F2_F1_F0_EXP ,read_input_register ,Frequência Linha 3
+Freq-IEC ,  30033 ,31033     ,32033     ,2    ,f32   ,minutely ,true   ,F2_F1_F0_EXP ,read_input_register ,Frequência Linha 1 (IEC – 10s)
+P0       ,  30035 ,31035     ,32035     ,2    ,f32   ,minutely ,true   ,F2_F1_F0_EXP ,read_input_register ,Potência Ativa Trifásica (W)
+P1       ,  30037 ,31037     ,32037     ,2    ,f32   ,minutely ,true   ,F2_F1_F0_EXP ,read_input_register ,Potência Ativa Linha 1 (W)
+P2       ,  30039 ,31039     ,32039     ,2    ,f32   ,minutely ,true   ,F2_F1_F0_EXP ,read_input_register ,Potência Ativa Linha 2 (W)
+P3       ,  30041 ,31041     ,32041     ,2    ,f32   ,minutely ,true   ,F2_F1_F0_EXP ,read_input_register ,Potência Ativa Linha 3 (W)
+Q0       ,  30043 ,31043     ,32043     ,2    ,f32   ,minutely ,true   ,F2_F1_F0_EXP ,read_input_register ,Potência Reativa Trifásica (VAr)
+Q1       ,  30045 ,31045     ,32045     ,2    ,f32   ,minutely ,true   ,F2_F1_F0_EXP ,read_input_register ,Potência Reativa Linha 1 (VAr)
+Q2       ,  30047 ,31047     ,32047     ,2    ,f32   ,minutely ,true   ,F2_F1_F0_EXP ,read_input_register ,Potência Reativa Linha 2 (VAr)
+Q3       ,  30049 ,31049     ,32049     ,2    ,f32   ,minutely ,true   ,F2_F1_F0_EXP ,read_input_register ,Potência Reativa Linha 3 (VAr)
+S0       ,  30051 ,31051     ,32051     ,2    ,f32   ,minutely ,true   ,F2_F1_F0_EXP ,read_input_register ,Potência Aparente Trifásica (VA)
+S1       ,  30053 ,31053     ,32053     ,2    ,f32   ,minutely ,true   ,F2_F1_F0_EXP ,read_input_register ,Potência Aparente Linha 1 (VA)
+S2       ,  30055 ,31055     ,32055     ,2    ,f32   ,minutely ,true   ,F2_F1_F0_EXP ,read_input_register ,Potência Aparente Linha 2 (VA)
+S3       ,  30057 ,31057     ,32057     ,2    ,f32   ,minutely ,true   ,F2_F1_F0_EXP ,read_input_register ,Potência Aparente Linha 3 (VA)
+FP0      ,  30059 ,31059     ,32059     ,2    ,f32   ,minutely ,true   ,F2_F1_F0_EXP ,read_input_register ,Fator de Potência Trifásico
+FP1      ,  30061 ,31061     ,32061     ,2    ,f32   ,minutely ,true   ,F2_F1_F0_EXP ,read_input_register ,Fator de Potência Linha 1
+FP2      ,  30063 ,31063     ,32063     ,2    ,f32   ,minutely ,true   ,F2_F1_F0_EXP ,read_input_register ,Fator de Potência Linha 2
+FP3      ,  30065 ,31065     ,32065     ,2    ,f32   ,minutely ,true   ,F2_F1_F0_EXP ,read_input_register ,Fator de Potência Linha 3
+FP0-D    ,  30067 ,31067     ,32067     ,2    ,f32   ,         ,false  ,F2_F1_F0_EXP ,read_input_register ,Fator de Pot. Trifásico – Desloc.
+FP1-D    ,  30069 ,31069     ,32069     ,2    ,f32   ,         ,false  ,F2_F1_F0_EXP ,read_input_register ,Fator de Pot. Linha 1 – Desloc.
+FP2-D    ,  30071 ,31071     ,32071     ,2    ,f32   ,         ,false  ,F2_F1_F0_EXP ,read_input_register ,Fator de Pot. Linha 1 – Desloc.
+FP3-D    ,  30073 ,31073     ,32073     ,2    ,f32   ,         ,false  ,F2_F1_F0_EXP ,read_input_register ,Fator de Pot. Linha 1 – Desloc.
+FD       ,  30075 ,31075     ,32075     ,2    ,f32   ,         ,false  ,F2_F1_F0_EXP ,read_input_register ,Desequilíbrio de Tensão
+FK1      ,  30077 ,31077     ,32077     ,2    ,f32   ,         ,false  ,F2_F1_F0_EXP ,read_input_register ,Fator K – Fase 1
+FK2      ,  30079 ,31079     ,32079     ,2    ,f32   ,         ,false  ,F2_F1_F0_EXP ,read_input_register ,Fator K – Fase 2
+FK3      ,  30081 ,31081     ,32081     ,2    ,f32   ,         ,false  ,F2_F1_F0_EXP ,read_input_register ,Fator K – Fase 3
+
+
+================================================================================================================================
+Contadores das entradas digitais - 30.095 a 30.100
+================================================================================================================================
+register ,address ,size ,type   ,group    ,active ,byteorder    ,datamodel           ,description
+EDP-1    ,  30095 ,   2 ,f32    ,         ,false  ,F2_F1_F0_EXP ,read_input_register ,Contador da EDP-1*
+EDP-2    ,  30097 ,   2 ,f32    ,         ,false  ,F2_F1_F0_EXP ,read_input_register ,Contador da EDP-2*
+EDP-3    ,  30099 ,   2 ,f32    ,         ,false  ,F2_F1_F0_EXP ,read_input_register ,Contador da EDP-3*
+
+
+================================================================================================================================
+Status das entradas e saídas digitais - 30.111 a 30.115
+================================================================================================================================
+register ,address ,size ,type   ,group    ,active ,byteorder    ,datamodel           ,description
+EDP1S    ,  30111 ,   1 ,uint16 ,         ,false  ,LSB_MSB      ,read_input_register ,Status da EDP-1
+EDP2S    ,  30112 ,   1 ,uint16 ,         ,false  ,LSB_MSB      ,read_input_register ,Status da EDP-2
+EDP3S    ,  30113 ,   1 ,uint16 ,         ,false  ,LSB_MSB      ,read_input_register ,Status da EDP-3
+OUT1S    ,  30114 ,   1 ,uint16 ,         ,false  ,LSB_MSB      ,read_input_register ,Status da SD-1
+OUT2S    ,  30115 ,   1 ,uint16 ,         ,false  ,LSB_MSB      ,read_input_register ,Status da SD-2
+
+
+================================================================================================================================
+= Largura de pulsos recebidos pelas entradas digitais 30.131 a 30.133
+================================================================================================================================
+register ,address ,size ,type   ,group    ,active ,byteorder    ,datamodel           ,description
+EDP-1    ,  30131 ,   1 ,uint16 ,         ,false  ,LSB_MSB      ,read_input_register ,Largura do pulso EDP-1**
+EDP-2    ,  30132 ,   1 ,uint16 ,         ,false  ,LSB_MSB      ,read_input_register ,Largura do pulso EDP-2**
+EDP-3    ,  30133 ,   1 ,uint16 ,         ,false  ,LSB_MSB      ,read_input_register ,Largura do pulso EDP-3**
+
+
+================================================================================================================================
+= Status da carga - 30151
+================================================================================================================================
+register ,address ,size ,type   ,group    ,active ,byteorder    ,datamodel           ,description
+LSTS     ,  30151 ,   1 ,uint16 ,         ,false  ,LSB_MSB      ,read_input_register ,Status da carga
+
+================================================================================================================================
+= Horímetro - 30161 e 30162
+================================================================================================================================
+register ,address ,size ,type   ,group    ,active ,byteorder    ,datamodel           ,description
+A0-HORIM ,  30161 ,   2 ,f32    ,         ,false  ,F2_F1_F0_EXP ,read_input_register ,Horímetro
+
+
+================================================================================================================================
+= Energias e Demandas - 30.201 a 30.216
+================================================================================================================================
+register ,address ,size ,type   ,group    ,active ,byteorder    ,datamodel           ,description
+C8-EA+   ,  30201 ,   2 ,f32    ,         ,false  ,F2_F1_F0_EXP ,read_input_register ,Energia Ativa Positiva (KWh)
+CA-ER+   ,  30203 ,   2 ,f32    ,         ,false  ,F2_F1_F0_EXP ,read_input_register ,Energia Reativa Positiva(KVArh)
+CC-EA-   ,  30205 ,   2 ,f32    ,         ,false  ,F2_F1_F0_EXP ,read_input_register ,Energia Ativa Negativa (KWh)
+CE-ER-   ,  30207 ,   2 ,f32    ,         ,false  ,F2_F1_F0_EXP ,read_input_register ,Energia Reativa Negativa (KQh)
+D0-MDA   ,  30209 ,   2 ,f32    ,         ,false  ,F2_F1_F0_EXP ,read_input_register ,Máx. Demanda Ativa (KW)
+D2-DA    ,  30211 ,   2 ,f32    ,         ,false  ,F2_F1_F0_EXP ,read_input_register ,Demanda Ativa (KW)
+D4-MDS   ,  30213 ,   2 ,f32    ,         ,false  ,F2_F1_F0_EXP ,read_input_register ,Máx. Demanda Aparente (KVA)
+D6-DS    ,  30215 ,   2 ,f32    ,         ,false  ,F2_F1_F0_EXP ,read_input_register ,Demanda Aparente (KVA)
+
+================================================================================================================================
+= Energias e Demandas - Modulo Solar
+================================================================================================================================
+register ,address ,size ,type   ,group    ,active ,byteorder    ,datamodel           ,description
+EA+      ,  30201 ,   2 ,f32    ,         ,false  ,F2_F1_F0_EXP ,read_input_register ,Energia Ativa Positiva (KWh)
+EA-      ,  30203 ,   2 ,f32    ,         ,false  ,F2_F1_F0_EXP ,read_input_register ,Energia Ativa Negativa(KVArh)
+EA+RE    ,  30205 ,   2 ,f32    ,         ,false  ,F2_F1_F0_EXP ,read_input_register ,Energia Ativa Positiva restante (KWh)
+EA+DA    ,  30205 ,   2 ,f32    ,         ,false  ,F2_F1_F0_EXP ,read_input_register ,Energia Ativa Positiva média diária (KWh)
+EA+HA    ,  30205 ,   2 ,f32    ,         ,false  ,F2_F1_F0_EXP ,read_input_register ,Energia Ativa Positiva média do histórico (KWh)
+EA+C1    ,  30205 ,   2 ,f32    ,         ,false  ,F2_F1_F0_EXP ,read_input_register ,Energia Ativa Positiva do ciclo 1 (KWh)
+EA+C2    ,  30205 ,   2 ,f32    ,         ,false  ,F2_F1_F0_EXP ,read_input_register ,Energia Ativa Positiva do ciclo 2 (KWh)
+EA+C3    ,  30205 ,   2 ,f32    ,         ,false  ,F2_F1_F0_EXP ,read_input_register ,Energia Ativa Positiva do ciclo 3 (KWh)
+
+
+
+================================================================================================================================
+= THDs e THDs de agrupamento - 33.001 a 33.012
+================================================================================================================================
+register ,address ,min_value ,max_value ,size ,type   ,group    ,active ,byteorder    ,datamodel           ,description
+UAN-THD  ,33001   ,33201     ,33401     ,1    ,int16  ,minutely ,false  ,MSB_LSB      ,read_input_register ,THD da Tensão da fase 1
+UBN-THD  ,33002   ,33202     ,33402     ,1    ,int16  ,minutely ,false  ,MSB_LSB      ,read_input_register ,THD da Tensão da fase 2
+UCN-THD  ,33003   ,33203     ,33403     ,1    ,int16  ,minutely ,false  ,MSB_LSB      ,read_input_register ,THD da Tensão da fase 3
+IA-THD   ,33004   ,33204     ,33404     ,1    ,int16  ,minutely ,false  ,MSB_LSB      ,read_input_register ,THD da Corrente da fase 1
+IB-THD   ,33005   ,33205     ,33405     ,1    ,int16  ,minutely ,false  ,MSB_LSB      ,read_input_register ,THD da Corrente da fase 2
+IC-THD   ,33006   ,33206     ,33406     ,1    ,int16  ,minutely ,false  ,MSB_LSB      ,read_input_register ,THD da Corrente da fase 3
+U1-THD   ,33007   ,33207     ,33407     ,1    ,int16  ,         ,false  ,MSB_LSB      ,read_input_register ,THD de agrupamento da Tensão da fase 1
+U2-THD   ,33008   ,33208     ,33408     ,1    ,int16  ,         ,false  ,MSB_LSB      ,read_input_register ,THD de agrupamento da Tensão da fase 2
+U3-THD   ,33009   ,33209     ,33409     ,1    ,int16  ,         ,false  ,MSB_LSB      ,read_input_register ,THD de agrupamento da Tensão da fase 3
+I1-THD   ,33010   ,33210     ,33410     ,1    ,int16  ,         ,false  ,MSB_LSB      ,read_input_register ,THD de agrupamento da Corrente da fase 1
+I2-THD   ,33011   ,33211     ,33411     ,1    ,int16  ,         ,false  ,MSB_LSB      ,read_input_register ,THD de agrupamento da Corrente da fase 2
+I3-THD   ,33012   ,33212     ,33412     ,1    ,int16  ,         ,false  ,MSB_LSB      ,read_input_register ,THD de agrupamento da Corrente da fase 3
+
+================================================================================================================================
+Temperatura
+================================================================================================================================
+register  ,address ,size ,type   ,group    ,active ,byteorder    ,datamodel          ,description
+Temp-Graus, 39001  , 2   ,f32    ,         ,false  ,F2_F1_F0_EXP ,                   ,Temperatura em graus Celsius
+Temp-ADC  , 39003  , 2   ,f32    ,         ,false  ,F2_F1_F0_EXP ,                   ,Temperatura valor lido do ADC
