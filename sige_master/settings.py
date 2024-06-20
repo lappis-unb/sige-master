@@ -18,14 +18,18 @@ ENVFILE_PATH = BASE_DIR / "dev-env"
 APP_DIR = BASE_DIR / "apps"
 CSV_DIR_PATH = APP_DIR / "memory_maps" / "csv_maps"
 
-
 env = environ.Env(DEBUG=(bool, False))
 env.read_env(ENVFILE_PATH)
 
-# SECRET_KEY = env("MASTER_SECRET_KEY", get_random_secret_key())
 SECRET_KEY = env("MASTER_SECRET_KEY")
 DEBUG = env("ENVIRONMENT") != "production"
 ALLOWED_HOSTS = ["*"] if DEBUG else [env("ALLOWED_HOSTS")]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://*.lappis.rocks", 
+    "https://*.lappis.me", 
+    "https://*.lappis.tech", 
+]
 
 
 # APPS
@@ -143,7 +147,6 @@ AUTH_PASSWORD_VALIDATORS = [
 # AUTHENTICATION
 # ------------------------------------------------------------------------------------------------
 AUTHENTICATION_BACKENDS = [
-    # "apps.users.backend.EmailOrUsernameModelBackend",
     "django.contrib.auth.backends.ModelBackend",
 ]
 
@@ -170,22 +173,13 @@ LIMIT_FILTER = env("LIMIT_FILTER", default=500)
 ROOT_URLCONF = "sige_master.urls"
 WSGI_APPLICATION = "sige_master.wsgi.application"
 
+CORS_ALLOW_ALL_ORIGINS = True
 AUTH_USER_MODEL = "accounts.Account"
 SESSION_LOGIN = True
 USE_JWT = True
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-CORS_ALLOW_ALL_ORIGINS = True
-# CORS_ALLOWED_ORIGINS: Sequence[str]
-# CORS_ALLOW_HEADERS = (
-#     "accept",
-#     "authorization",
-#     "content-type",
-#     "user-agent",
-#     "x-csrftoken",
-#     "x-requested-with",
-# )
 
 APPEND_SLASH = True
 LOGIN_REDIRECT_URL = "/"
