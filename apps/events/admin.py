@@ -4,7 +4,6 @@ from django.utils.translation import gettext_lazy as _
 from apps.events.models import (
     CumulativeMeasurementTrigger,
     Event,
-    EventType,
     InstantMeasurementTrigger,
     Trigger,
 )
@@ -12,25 +11,30 @@ from apps.events.models import (
 
 @admin.register(Trigger)
 class TriggerAdmin(admin.ModelAdmin):
-    list_display = ("name", "event_type", "is_active", "created_at", "updated_at")
-    list_filter = ("event_type", "is_active")
-    search_fields = ("name", "event_type__name")
+    list_display = (
+        "name",
+        "severity",
+        "category",
+        "is_active",
+        "created_at",
+        "updated_at",
+    )
+    list_filter = ("category", "is_active", "severity")
+    search_fields = ("name", "notification_message")
     readonly_fields = ("created_at", "updated_at")
 
 
 @admin.register(InstantMeasurementTrigger)
-class InstantMeasurementTriggerAdmin(admin.ModelAdmin):
-    list_display = (
-        "name",
-        "is_active",
-        "event_type",
+class InstantMeasurementTriggerAdmin(TriggerAdmin):
+    list_display = TriggerAdmin.list_display + (
         "field_name",
         "operator",
         "active_threshold",
         "deactivate_threshold",
+        "notification_message",
     )
-    list_filter = ("is_active", "event_type", "operator")
-    search_fields = ("name", "field_name")
+    list_filter = TriggerAdmin.list_filter + ("operator", "field_name")
+    search_fields = TriggerAdmin.search_fields + ("field_name",)
 
     fieldsets = (
         (
@@ -38,12 +42,13 @@ class InstantMeasurementTriggerAdmin(admin.ModelAdmin):
             {
                 "fields": (
                     "name",
-                    "event_type",
+                    "severity",
+                    "category",
                     "field_name",
                     "operator",
                     "active_threshold",
                     "deactivate_threshold",
-                    "notes",
+                    "notification_message",
                     "is_active",
                 )
             },
@@ -52,18 +57,16 @@ class InstantMeasurementTriggerAdmin(admin.ModelAdmin):
 
 
 @admin.register(CumulativeMeasurementTrigger)
-class CumulativeMeasurementTriggerAdmin(admin.ModelAdmin):
-    list_display = (
-        "name",
-        "is_active",
-        "event_type",
+class CumulativeMeasurementTriggerAdmin(TriggerAdmin):
+    list_display = TriggerAdmin.list_display + (
         "field_name",
         "dynamic_metric",
         "adjustment_factor",
         "period_days",
+        "notification_message",
     )
-    list_filter = ("is_active", "event_type", "dynamic_metric")
-    search_fields = ("name", "field_name")
+    list_filter = TriggerAdmin.list_filter + ("dynamic_metric", "field_name")
+    search_fields = TriggerAdmin.search_fields + ("field_name",)
 
     fieldsets = (
         (
@@ -71,12 +74,14 @@ class CumulativeMeasurementTriggerAdmin(admin.ModelAdmin):
             {
                 "fields": (
                     "name",
-                    "event_type",
+                    "severity",
+                    "category",
                     "field_name",
+                    "operator",
                     "dynamic_metric",
                     "adjustment_factor",
                     "period_days",
-                    "notes",
+                    "notification_message",
                     "is_active",
                 ),
             },
@@ -84,34 +89,43 @@ class CumulativeMeasurementTriggerAdmin(admin.ModelAdmin):
     )
 
 
-# ---------------------------------------------------------------------------------------------------------------------
-
-
-@admin.register(EventType)
-class EventTypeAdmin(admin.ModelAdmin):
-    list_display = ("name", "code", "get_severity_display", "get_category_display")
-    list_filter = ("severity", "category")
-    search_fields = ("name", "code")
-
-    def get_severity_display(self, obj):
-        return obj.get_severity_display()
-
-    get_severity_display.short_description = _("Severity")
-
-    def get_category_display(self, obj):
-        return obj.get_category_display()
-
-    get_category_display.short_description = _("Category")
-
-
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
-    list_display = ("event_type", "transductor", "created_at", "ended_at", "is_active")
-    list_filter = ("is_active", "event_type__category", "event_type__severity")
-    search_fields = ("event_type__name", "transductor__name")
-    readonly_fields = ("created_at", "ended_at")
+    list_display = (
+        "display_name",
+        "display_severity",
+        "display_category",
+        "transductor",
+        "created_at",
+        "ended_at",
+        "is_active",
+    )
+    readonly_fields = (
+        "created_at",
+        "ended_at",
+        "display_name",
+        "display_severity",
+        "display_category",
+    )
+    list_filter = ("is_active", "transductor")
+    search_fields = ("name", "transductor__name")
     date_hierarchy = "created_at"
     actions = ["close_events"]
+
+    def display_name(self, obj):
+        return obj.name
+
+    display_name.short_description = _("Name")
+
+    def display_severity(self, obj):
+        return obj.severity
+
+    display_severity.short_description = _("Severity")
+
+    def display_category(self, obj):
+        return obj.category
+
+    display_category.short_description = _("Category")
 
     def close_events(self, request, queryset):
         for event in queryset:
