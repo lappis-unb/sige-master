@@ -10,16 +10,10 @@ from apps.events.models import (
 from apps.events.serializers import (
     CumulativeMeasurementTriggerSerializer,
     EventSerializer,
-    EventTypeSerializer,
     InstantMeasurementTriggerSerializer,
 )
 
 logger = logging.getLogger("apps.events.views")
-
-
-class EventTypeViewSet(viewsets.ModelViewSet):
-    queryset = Event.objects.all()
-    serializer_class = EventTypeSerializer
 
 
 class EventViewSet(viewsets.ReadOnlyModelViewSet):

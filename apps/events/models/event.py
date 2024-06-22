@@ -11,36 +11,6 @@ from apps.transductors.models import Transductor
 logger = logging.getLogger("apps")
 
 
-class CategoryEvent(models.IntegerChoices):
-    VOLTAGE = 1, _("Voltage")
-    CONNECTION = 2, _("Connection")
-    CONSUMPTION = 3, _("Consumption")
-    GENERATION = 4, _("Generation")
-    MEASUREMENT = 5, _("Measurement")
-    OTHER = 6, _("Other")
-
-
-class SeverityEvent(models.IntegerChoices):
-    LOW = 1, _("Low")
-    MEDIUM = 2, _("Medium")
-    HIGH = 3, _("High")
-    CRITICAL = 4, _("Critical")
-
-
-class EventType(models.Model):
-    name = models.CharField(max_length=255)
-    code = models.CharField(max_length=3)
-    severity = models.IntegerField(choices=SeverityEvent.choices)
-    category = models.IntegerField(choices=CategoryEvent.choices)
-
-    class Meta:
-        verbose_name = _("Event Type")
-        verbose_name_plural = _("Event Types")
-
-    def __str__(self):
-        return f"{self.name} ({self.code})"
-
-
 class Event(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     ended_at = models.DateTimeField(null=True, blank=True)
@@ -50,12 +20,7 @@ class Event(models.Model):
         on_delete=models.CASCADE,
         related_name="events_transductor",
     )
-    event_type = models.ForeignKey(
-        EventType,
-        on_delete=models.CASCADE,
-        related_name="events_type",
-    )
-    measurement_trigger = models.ForeignKey(
+    trigger = models.ForeignKey(
         "events.Trigger",
         on_delete=models.CASCADE,
         null=True,
@@ -69,6 +34,18 @@ class Event(models.Model):
 
     def __str__(self):
         return f"{self.event_type} - {self.created_at}"
+
+    @property
+    def name(self):
+        return self.trigger.name
+
+    @property
+    def severity(self):
+        return self.trigger.severity
+
+    @property
+    def category(self):
+        return self.trigger.category
 
     def close_event(self):
         if not self.is_active:

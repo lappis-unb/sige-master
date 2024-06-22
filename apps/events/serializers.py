@@ -1,30 +1,12 @@
 from rest_framework import serializers
 
 from apps.events.models import (
-    CategoryEvent,
     CompareOperator,
     CumulativeMeasurementTrigger,
     Event,
-    EventType,
     InstantMeasurementTrigger,
-    SeverityEvent,
     Trigger,
 )
-
-
-class EventTypeSerializer(serializers.ModelSerializer):
-    severity = serializers.ChoiceField(choices=SeverityEvent.choices)
-    category = serializers.ChoiceField(choices=CategoryEvent.choices)
-
-    class Meta:
-        model = EventType
-        fields = (
-            "id",
-            "name",
-            "code",
-            "severity",
-            "category",
-        )
 
 
 class TriggerSerializer(serializers.ModelSerializer):
@@ -33,9 +15,10 @@ class TriggerSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "name",
-            "event_type",
+            "severity",
+            "category",
             "is_active",
-            "notes",
+            "notification_message",
             "created_at",
             "updated_at",
         )
