@@ -7,18 +7,34 @@ from django.utils import timezone
 from django.utils.functional import lazy
 from django.utils.translation import gettext_lazy as _
 
-from apps.events.models import EventType
 from apps.measurements.models import CumulativeMeasurement
 from apps.utils.helpers import get_dynamic_fields
 
 logger = logging.getLogger("apps")
 
 
+class CategoryTrigger(models.IntegerChoices):
+    VOLTAGE = 1, _("Voltage")
+    CONNECTION = 2, _("Connection")
+    CONSUMPTION = 3, _("Consumption")
+    GENERATION = 4, _("Generation")
+    MEASUREMENT = 5, _("Measurement")
+    OTHER = 6, _("Other")
+
+
+class SeverityTrigger(models.IntegerChoices):
+    LOW = 1, _("Low")
+    MEDIUM = 2, _("Medium")
+    HIGH = 3, _("High")
+    CRITICAL = 4, _("Critical")
+
+
 class Trigger(models.Model):
     name = models.CharField(max_length=255)
     is_active = models.BooleanField(default=True)
-    event_type = models.ForeignKey(EventType, on_delete=models.CASCADE)
-    notes = models.TextField(blank=True)
+    severity = models.IntegerField(choices=SeverityTrigger.choices)
+    category = models.IntegerField(choices=CategoryTrigger.choices)
+    notification_message = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -37,7 +53,7 @@ class CompareOperator(models.TextChoices):
 
 class InstantMeasurementTrigger(Trigger):
     operator = models.CharField(max_length=5, choices=CompareOperator.choices)
-    active_threshold = models.FloatField(blank=True, null=True)
+    active_threshold = models.FloatField()
     deactivate_threshold = models.FloatField(blank=True, null=True)
     field_name = models.CharField(
         max_length=64,
@@ -61,6 +77,7 @@ class DynamicMetric(models.TextChoices):
 
 
 class CumulativeMeasurementTrigger(Trigger):
+    operator = models.CharField(max_length=5, choices=CompareOperator.choices)
     dynamic_metric = models.CharField(max_length=32, choices=DynamicMetric.choices)
     adjustment_factor = models.FloatField(default=0)
     period_days = models.PositiveIntegerField(default=7)
