@@ -60,6 +60,30 @@ class InstantMeasurementTrigger(Trigger):
     def __str__(self):
         return f"{self.name} - {self.field_name}"
 
+    def clean(self) -> None:
+        lower_threshold = self.lower_threshold if self.lower_threshold is not None else float("-inf")
+        upper_threshold = self.upper_threshold if self.upper_threshold is not None else float("inf")
+
+        if lower_threshold >= upper_threshold:
+            logger.error("lower_threshold must be less than upper_threshold")
+            raise ValidationError("lower_threshold must be less than upper_threshold")
+
+        overlapping = InstantMeasurementTrigger.objects.filter(
+            field_name=self.field_name,
+            lower_threshold__lte=self.upper_threshold,
+            upper_threshold__gte=self.lower_threshold,
+        ).exclude(pk=self.pk)
+
+        list_overlapping = overlapping.values_list("lower_threshold", "upper_threshold")
+        dict_overlapping = {f"{lower} <= value < {upper}" for lower, upper in list_overlapping}
+        if overlapping.exists():
+            logger.error(f"Overlapping triggers found: {dict_overlapping}")
+            raise ValidationError(f"Overlapping triggers found: {dict_overlapping}")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
 
 class DynamicMetric(models.TextChoices):
     HOURLY_AVG = "hourly_avg", _("Hourly Average")
@@ -100,7 +124,6 @@ class CumulativeMeasurementTrigger(Trigger):
     def calculate_metric(self, transductor, collection_date):
         local_collection_date = collection_date.astimezone(timezone.get_current_timezone())
         target_hour = local_collection_date.hour
-        target_hour = 12
         measurement_queryset = self.fetch_measurement_data(transductor, target_hour)
 
         if not measurement_queryset.exists():
@@ -120,28 +143,25 @@ class CumulativeMeasurementTrigger(Trigger):
         return CumulativeMeasurement.objects.filter(
             transductor=transductor,
             collection_date__gte=timezone.now() - timedelta(days=self.period_days),
-            collection_date__hour=target_hour,  # validar se esta em UTC
+            collection_date__hour=target_hour,
         ).only(self.field_name)
 
     def clean(self):
-        errors = []
         if not (0 <= self.lower_threshold_percent <= 1):
-            error_msg = "lower_threshold_percent must be between 0 and 1"
-            logger.warning(error_msg)
-            errors.append(ValidationError(error_msg))
+            logger.error("lower_threshold_percent must be between 0 and 1")
+            raise ValidationError("lower_threshold_percent must be between 0 and 1")
 
         if not (0 <= self.upper_threshold_percent <= 1):
-            error_msg = "upper_threshold_percent must be between 0 and 1"
-            logger.warning(error_msg)
-            errors.append(ValidationError(error_msg))
+            logger.error("upper_threshold_percent must be between 0 and 1")
+            raise ValidationError("upper_threshold_percent must be between 0 and 1")
 
         if self.period_days < 1:
-            error_msg = "Period days must be at least 1"
-            logger.warning(error_msg)
-            errors.append(ValidationError(error_msg))
+            logger.error("Period days must be at least 1")
+            raise ValidationError("Period days must be at least 1")
 
-        if errors:
-            raise ValidationError(errors)
+        if self.lower_threshold_percent >= self.upper_threshold_percent:
+            logger.error("lower_threshold_percent must be less than upper_threshold_percent")
+            raise ValidationError("lower_threshold_percent must be less than upper_threshold_percent")
 
     def save(self, *args, **kwargs):
         self.full_clean()
