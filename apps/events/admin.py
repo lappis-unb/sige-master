@@ -2,9 +2,11 @@ from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 
 from apps.events.models import (
+    CategoryTrigger,
     CumulativeMeasurementTrigger,
     Event,
     InstantMeasurementTrigger,
+    SeverityTrigger,
     Trigger,
 )
 
@@ -27,13 +29,13 @@ class TriggerAdmin(admin.ModelAdmin):
 @admin.register(InstantMeasurementTrigger)
 class InstantMeasurementTriggerAdmin(TriggerAdmin):
     list_display = TriggerAdmin.list_display + (
+        "id",
         "field_name",
-        "operator",
-        "active_threshold",
-        "deactivate_threshold",
+        "lower_threshold",
+        "upper_threshold",
         "notification_message",
     )
-    list_filter = TriggerAdmin.list_filter + ("operator", "field_name")
+    list_filter = TriggerAdmin.list_filter + ("field_name",)
     search_fields = TriggerAdmin.search_fields + ("field_name",)
 
     fieldsets = (
@@ -45,9 +47,8 @@ class InstantMeasurementTriggerAdmin(TriggerAdmin):
                     "severity",
                     "category",
                     "field_name",
-                    "operator",
-                    "active_threshold",
-                    "deactivate_threshold",
+                    "lower_threshold",
+                    "upper_threshold",
                     "notification_message",
                     "is_active",
                 )
@@ -61,7 +62,8 @@ class CumulativeMeasurementTriggerAdmin(TriggerAdmin):
     list_display = TriggerAdmin.list_display + (
         "field_name",
         "dynamic_metric",
-        "adjustment_factor",
+        "upper_threshold_percent",
+        "lower_threshold_percent",
         "period_days",
         "notification_message",
     )
@@ -77,9 +79,9 @@ class CumulativeMeasurementTriggerAdmin(TriggerAdmin):
                     "severity",
                     "category",
                     "field_name",
-                    "operator",
                     "dynamic_metric",
-                    "adjustment_factor",
+                    "upper_threshold_percent",
+                    "lower_threshold_percent",
                     "period_days",
                     "notification_message",
                     "is_active",
@@ -92,7 +94,10 @@ class CumulativeMeasurementTriggerAdmin(TriggerAdmin):
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
     list_display = (
+        "trigger__pk",
+        "transductor",
         "display_name",
+        "trigger__field_name",
         "display_severity",
         "display_category",
         "transductor",
@@ -118,12 +123,14 @@ class EventAdmin(admin.ModelAdmin):
     display_name.short_description = _("Name")
 
     def display_severity(self, obj):
-        return obj.severity
+        severity = obj.severity
+        return SeverityTrigger(severity).label
 
     display_severity.short_description = _("Severity")
 
     def display_category(self, obj):
-        return obj.category
+        category = obj.category
+        return CategoryTrigger(category).label
 
     display_category.short_description = _("Category")
 
@@ -134,3 +141,17 @@ class EventAdmin(admin.ModelAdmin):
         self.message_user(request, _("Selected events have been closed."))
 
     close_events.short_description = _("Close selected events")
+
+    def trigger__pk(self, obj):
+        return obj.trigger.pk
+
+    trigger__pk.short_description = _("Trigger ID")
+
+    def trigger__field_name(self, obj):
+        if obj.trigger.instantmeasurementtrigger:
+            return obj.trigger.instantmeasurementtrigger.field_name
+        elif obj.trigger.cumulativemeasurementtrigger:
+            return obj.trigger.cumulativemeasurementtrigger.field_name
+        return None
+
+    trigger__field_name.short_description = _("Field Name")
