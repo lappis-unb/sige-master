@@ -5,7 +5,6 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-# from apps.events.models import Trigger
 from apps.transductors.models import Transductor
 
 logger = logging.getLogger("apps")
@@ -33,7 +32,7 @@ class Event(models.Model):
         verbose_name_plural = _("Events")
 
     def __str__(self):
-        return f"{self.event_type} - {self.created_at}"
+        return f"{self.name} - {self.created_at}"
 
     @property
     def name(self):
@@ -57,7 +56,7 @@ class Event(models.Model):
     def has_active_event(self):
         return Event.objects.filter(
             transductor=self.transductor,
-            measurement_trigger=self.measurement_trigger,
+            trigger=self.trigger,
             is_active=True,
         ).exists()
 

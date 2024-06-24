@@ -12,11 +12,6 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterField(
             model_name='cumulativemeasurementtrigger',
-            name='field_name',
-            field=models.CharField(choices="[('active_consumption', 'active consumption'), ('active_generated', 'active generated'), ('reactive_inductive', 'reactive inductive'), ('reactive_capacitive', 'reactive capacitive')]", max_length=64),
-        ),
-        migrations.AlterField(
-            model_name='cumulativemeasurementtrigger',
             name='operator',
             field=models.CharField(choices=[('gt', '> (Greater Than)'), ('gte', '>= (Greater Than or Equal)'), ('lt', '< (Less Than)'), ('lte', '<= (Less Than or Equal)'), ('exact', '== (Equal)'), ('ne', '!= (Not Equal)')], max_length=5),
         ),
@@ -24,11 +19,6 @@ class Migration(migrations.Migration):
             model_name='instantmeasurementtrigger',
             name='active_threshold',
             field=models.FloatField(),
-        ),
-        migrations.AlterField(
-            model_name='instantmeasurementtrigger',
-            name='field_name',
-            field=models.CharField(choices="[('frequency_a', 'frequency a'), ('frequency_b', 'frequency b'), ('frequency_c', 'frequency c'), ('frequency_iec', 'frequency iec'), ('voltage_a', 'voltage a'), ('voltage_b', 'voltage b'), ('voltage_c', 'voltage c'), ('current_a', 'current a'), ('current_b', 'current b'), ('current_c', 'current c'), ('active_power_a', 'active power a'), ('active_power_b', 'active power b'), ('active_power_c', 'active power c'), ('total_active_power', 'total active power'), ('reactive_power_a', 'reactive power a'), ('reactive_power_b', 'reactive power b'), ('reactive_power_c', 'reactive power c'), ('total_reactive_power', 'total reactive power'), ('apparent_power_a', 'apparent power a'), ('apparent_power_b', 'apparent power b'), ('apparent_power_c', 'apparent power c'), ('total_apparent_power', 'total apparent power'), ('power_factor_a', 'power factor a'), ('power_factor_b', 'power factor b'), ('power_factor_c', 'power factor c'), ('total_power_factor', 'total power factor'), ('dht_voltage_a', 'dht voltage a'), ('dht_voltage_b', 'dht voltage b'), ('dht_voltage_c', 'dht voltage c'), ('dht_current_a', 'dht current a'), ('dht_current_b', 'dht current b'), ('dht_current_c', 'dht current c')]", max_length=64),
         ),
         migrations.AlterField(
             model_name='trigger',
