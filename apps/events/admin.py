@@ -1,4 +1,6 @@
+from django import forms
 from django.contrib import admin
+from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.utils.translation import gettext_lazy as _
 
 from apps.events.models import (
@@ -7,8 +9,10 @@ from apps.events.models import (
     Event,
     InstantMeasurementTrigger,
     SeverityTrigger,
+    TransductorStatusTrigger,
     Trigger,
 )
+from apps.transductors.models import Transductor
 
 
 @admin.register(Trigger)
@@ -98,6 +102,7 @@ class EventAdmin(admin.ModelAdmin):
         "transductor",
         "display_name",
         "trigger__field_name",
+        "trigger__target_status",
         "display_severity",
         "display_category",
         "transductor",
@@ -152,6 +157,74 @@ class EventAdmin(admin.ModelAdmin):
             return obj.trigger.instantmeasurementtrigger.field_name
         elif obj.trigger.cumulativemeasurementtrigger:
             return obj.trigger.cumulativemeasurementtrigger.field_name
-        return None
+        return "N/A"
 
     trigger__field_name.short_description = _("Field Name")
+
+    def trigger__target_status(self, obj):
+        if obj.trigger.transductorstatustrigger:
+            return obj.trigger.transductorstatustrigger.get_target_status_display()
+        return "N/A"
+
+    trigger__target_status.short_description = _("Target Status")
+
+
+# ______________________________________________________________________________
+
+
+class TransductorStatusTriggerForm(forms.ModelForm):
+    transductors = forms.ModelMultipleChoiceField(
+        queryset=Transductor.objects.all(),
+        required=False,
+        blank=True,
+        widget=FilteredSelectMultiple(_("Transductors"), is_stacked=False),
+    )
+
+    class Meta:
+        model = TransductorStatusTrigger
+        fields = "__all__"
+
+
+@admin.register(TransductorStatusTrigger)
+class TransductorStatusTriggerAdmin(admin.ModelAdmin):
+    form = TransductorStatusTriggerForm
+    list_display = (
+        "name",
+        "target_status",
+        "severity",
+        "category",
+        "threshold_time",
+        # "display_transductors",
+        "is_active",
+        "created_at",
+    )
+    list_filter = ("category", "is_active", "severity", "category")
+    search_fields = ("name",)
+    readonly_fields = ("created_at", "updated_at")
+    fieldsets = (
+        (
+            None,
+            {
+                "fields": (
+                    "name",
+                    "severity",
+                    "category",
+                    "target_status",
+                    "transductors",
+                    "threshold_time",
+                    "is_active",
+                    "notification_message",
+                )
+            },
+        ),
+    )
+
+    def display_transductors(self, obj):
+        return ", ".join([transductor.ip_address for transductor in obj.transductors.all()])
+
+    display_transductors.short_description = _("Transductors")
+
+    def target_state(self, obj):
+        return obj.get_target_status_display()
+
+    target_state.short_description = _("Target State")
