@@ -5,10 +5,10 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Avg, Max, Min
 from django.utils import timezone
-from django.utils.functional import lazy
 from django.utils.translation import gettext_lazy as _
 
 from apps.measurements.models import CumulativeMeasurement
+from apps.transductors.models import Status, Transductor
 from apps.utils.helpers import get_dynamic_fields
 
 logger = logging.getLogger("apps")
@@ -43,15 +43,27 @@ class Trigger(models.Model):
         return f"{self.name}"
 
 
+class TransductorStatusTrigger(Trigger):
+    transductors = models.ManyToManyField(Transductor, related_name="status_triggers")
+    target_status = models.IntegerField(choices=Status.choices)
+    threshold_time = models.DurationField(default=timedelta(hours=1))
+
+    class Meta:
+        verbose_name = _("Transductor Status Trigger")
+        verbose_name_plural = _("Transductor Status Triggers")
+
+    def __str__(self):
+        return f"{self.name} - {self.target_status}"
+
+
 class InstantMeasurementTrigger(Trigger):
     lower_threshold = models.FloatField(blank=True, null=True)
     upper_threshold = models.FloatField(blank=True, null=True)
-    field_name = models.CharField(
-        max_length=64,
-        blank=False,
-        null=False,
-        choices=lazy(get_dynamic_fields, list)("measurements", "InstantMeasurement"),
-    )
+    field_name = models.CharField(max_length=64, blank=False, null=False)
+
+    @classmethod
+    def init_choices(cls):
+        cls._meta.get_field("field_name").choices = get_dynamic_fields("measurements", "InstantMeasurement")
 
     class Meta:
         verbose_name = _("Instant Measurement Trigger")
@@ -96,12 +108,11 @@ class CumulativeMeasurementTrigger(Trigger):
     lower_threshold_percent = models.FloatField(default=0)
     upper_threshold_percent = models.FloatField(default=0)
     period_days = models.PositiveIntegerField(default=7)
-    field_name = models.CharField(
-        max_length=64,
-        blank=False,
-        null=False,
-        choices=lazy(get_dynamic_fields, list)("measurements", "CumulativeMeasurement"),
-    )
+    field_name = models.CharField(max_length=64, blank=False, null=False)
+
+    @classmethod
+    def init_choices(cls):
+        cls._meta.get_field("field_name").choices = get_dynamic_fields("measurements", "CumulativeMeasurement")
 
     class Meta:
         verbose_name = _("Cumulative Measurement Trigger")
