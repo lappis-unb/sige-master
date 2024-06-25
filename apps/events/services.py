@@ -1,6 +1,9 @@
 import logging
 
+from django.utils import timezone
+
 from apps.events.models import Event
+from apps.transductors.models import StatusHistory
 from apps.utils.helpers import log_service
 
 logger = logging.getLogger("apps")
@@ -97,3 +100,93 @@ class MeasurementEventManager:
         logger.debug(f"   Field name:  {self.field_name}")
         logger.debug(f"   Field value: {self.field_value}")
         logger.info("-" * 65)
+
+
+# TODO - Refatorar para simplificar e evitar duplicações com MeasurementEventManager:
+# - Implementar uma classe base comum.
+# - Refinar a lógica de criação de eventos.
+# - Limpar logs de debug desnecessários.
+class TransductorEventManager:
+    def perform_close_status(self, status):
+        status.close_status()
+        logger.info(f"Status {status.id} closed: conditions no longer met!")
+
+    @log_service()
+    def perform_triggers(self, triggers):
+        proc_status_ids = set()
+
+        for trigger in triggers:
+            logger.info(f"Processing trigger: {trigger.id}")
+            self.log_triggers(trigger)
+            broken_status_history = self.get_broken_status_history(trigger, proc_status_ids)
+
+            for status in broken_status_history:
+                self.log_status_history(status)
+                if self.has_active_event(status, trigger):
+                    logger.info(f"Event already exists for {status.transductor} - skipping\n")
+                else:
+                    self.close_other_events(status, triggers)
+                    self.create_event(trigger, status)
+                proc_status_ids.add(status.id)
+
+    def get_broken_status_history(self, trigger, proc_status_ids):
+        current_time = timezone.now()
+
+        broken_status_history = StatusHistory.objects.filter(
+            status=trigger.target_status,
+            start_time__lte=current_time - trigger.threshold_time,
+            end_time__isnull=True,
+        ).exclude(id__in=proc_status_ids)
+
+        logger.info(f"Broken status history meet the trigger: {broken_status_history.count()}")
+        return broken_status_history
+
+    def has_active_event(self, status, trigger):
+        return Event.objects.filter(
+            transductor=status.transductor,
+            trigger=trigger,
+            is_active=True,
+        ).exists()
+
+    def create_event(self, trigger, status):
+        new_event = Event.objects.create(
+            trigger=trigger,
+            transductor=status.transductor,
+            is_active=True,
+        )
+        logger.info(f"New event created: {new_event.id} for trigger: {trigger.id}.")
+
+    def close_other_events(self, status, triggers):
+        for trigger in triggers:
+            event = Event.objects.filter(
+                transductor=status.transductor,
+                trigger=trigger,
+                is_active=True,
+            ).first()
+
+            if event:
+                self.close_event(event)
+
+    def close_event(self, event):
+        event.close_event()
+        logger.info(f"Event {event.id} closed: conditions no longer met!")
+
+    def log_triggers(self, trigger):
+        logger.info("_" * 70)
+        logger.info(f"Trigger ID: {trigger.id}")
+        logger.info(f"Trigger Name: {trigger.name}")
+        logger.info(f"Target Status: {trigger.get_target_status_display()}")
+        logger.info(f"Category: {trigger.get_category_display()}")
+        logger.info(f"Severity: {trigger.get_severity_display()}")
+        logger.info(f"Threshold Time: {trigger.threshold_time}")
+        logger.info("_" * 70)
+
+    def log_status_history(self, status):
+        logger.info("_" * 70)
+        logger.info(f"Transductor: {status.transductor}")
+        logger.info(f"Status: {status.get_status_display()}")
+        logger.info(f"Start Time: {status.start_time}")
+        logger.info(f"End Time: {status.end_time}")
+        logger.info(f"Duration: {status.duration}")
+        logger.info(f"Elapsed Time: {timezone.now() - status.start_time}")
+        logger.info("_" * 70)
