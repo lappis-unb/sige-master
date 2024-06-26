@@ -60,6 +60,44 @@ class TransductorViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
 
+    @action(methods=["get"], detail=True, url_path="status-history")
+    def status_history(self, request, pk=None):
+        transductor = self.get_object()
+        queryset = StatusHistory.objects.filter(transductor=transductor)
+
+        start_date = request.query_params.get("start_date", None)
+        end_date = request.query_params.get("end_date", None)
+        is_active = get_boolean(request.query_params.get("is_active", "false"))
+        if start_date and end_date:
+            queryset = queryset.filter(start_time__gte=start_date, start_time__lte=end_date)
+        if is_active:
+            queryset = queryset.filter(end_time__isnull=True)
+
+        serializer = TransductorStatusDetailSerializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(methods=["get"], detail=True, url_path="event-history")
+    def event_history(self, request, pk=None):
+        transductor = self.get_object()
+        queryset = Event.objects.filter(transductor=transductor)
+
+        start_date = request.query_params.get("start_date", None)
+        end_date = request.query_params.get("end_date", None)
+        is_active = get_boolean(request.query_params.get("is_active", "false"))
+
+        if start_date and end_date:
+            queryset = queryset.filter(start_time__gte=start_date, start_time__lte=end_date)
+        if is_active:
+            queryset = queryset.filter(is_active=True)
+
+        self.pagination_class = EventPagination
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = EventSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = EventSerializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class TransductorStatusViewSet(viewsets.ModelViewSet):
     queryset = StatusHistory.objects.all()
