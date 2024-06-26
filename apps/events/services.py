@@ -1,8 +1,9 @@
 import logging
 
+from django.db.models import Count, Q
 from django.utils import timezone
 
-from apps.events.models import Event
+from apps.events.models import CategoryTrigger, Event, SeverityTrigger
 from apps.transductors.models import StatusHistory
 from apps.utils.helpers import log_service
 
@@ -190,3 +191,36 @@ class TransductorEventManager:
         logger.info(f"Duration: {status.duration}")
         logger.info(f"Elapsed Time: {timezone.now() - status.start_time}")
         logger.info("_" * 70)
+
+
+def calculate_aggregation_events(queryset, transductor):
+    aggregations = {"total_events": Count("id"), "open_events": Count("id", filter=Q(is_active=False))}
+
+    for severity in SeverityTrigger:
+        severity_key = f"total_{severity.label.lower()}"
+        aggregations[severity_key] = Count("id", filter=Q(trigger__severity=severity.value))
+
+    for category in CategoryTrigger:
+        category_key = f"total_{category.label.lower()}"
+        aggregations[category_key] = Count("id", filter=Q(trigger__category=category.value))
+
+    aggregation = queryset.aggregate(**aggregations)
+
+    category_summary = {
+        category.label.lower(): aggregation[f"total_{category.label.lower()}"] for category in CategoryTrigger
+    }
+    severity_summary = {
+        severity.label.lower(): aggregation[f"total_{severity.label.lower()}"] for severity in SeverityTrigger
+    }
+
+    return {
+        "transductor": transductor.id,
+        "ip_address": transductor.ip_address,
+        "total_events": aggregation["total_events"],
+        "open_events": aggregation["open_events"],
+        "category_summary": category_summary,
+        "severity_summary": severity_summary,
+        "instant_measurements_summary": {},
+        "cumulative_measurements_summary": {},
+        "transductor_summary": {},
+    }
