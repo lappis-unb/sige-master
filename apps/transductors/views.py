@@ -99,9 +99,35 @@ class TransductorViewSet(viewsets.ModelViewSet):
         serializer = EventSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @action(methods=["get"], detail=True, url_path="status-summary")
+    def status_summary(self, request, pk=None):
+        transductor = self.get_object()
+        queryset = StatusHistory.objects.filter(transductor=transductor)
+
+        start_date = request.query_params.get("start_date", None)
+        end_date = request.query_params.get("end_date", None)
+        if start_date and end_date:
+            queryset = queryset.filter(start_time__gte=start_date, start_time__lte=end_date)
+
+        response_data = calculate_aggregation_status(queryset, transductor)
+        return Response(response_data, status=status.HTTP_200_OK)
+
+    @action(methods=["get"], detail=True, url_path="event-summary")
+    def event_summary(self, request, pk=None):
+        transductor = self.get_object()
+        queryset = Event.objects.filter(transductor=transductor)
+
+        start_date = request.query_params.get("start_date", None)
+        end_date = request.query_params.get("end_date", None)
+        if start_date and end_date:
+            queryset = queryset.filter(created_at__gte=start_date, created_at__lte=end_date)
+
+        response_data = calculate_aggregation_events(queryset, transductor)
+        return Response(response_data, status=status.HTTP_200_OK)
+
+
 class TransductorStatusViewSet(viewsets.ModelViewSet):
     queryset = StatusHistory.objects.all()
-    serializer_class = TransductorStatusSerializer
     # permission_classes = [CurrentADMINUserOnly]
 
     def get_serializer_class(self):
