@@ -94,7 +94,7 @@ class Transductor(models.Model):
         if self.current_status.status == Status.ACTIVE:
             uptime = timezone.now() - self.current_status.start_time
             return uptime.total_seconds() / 60
-        return None
+        return 0
 
     class Meta:
         ordering = ("model", "ip_address")

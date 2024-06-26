@@ -8,6 +8,7 @@ from rest_framework.serializers import ValidationError
 from apps.locations.models import GeographicLocation
 from apps.locations.serializers import BasicGeographicLocationSerializer
 from apps.memory_maps.models import MemoryMap
+from apps.organizations.serializers import EntityListSerializer
 from apps.transductors.models import (
     Status,
     StatusHistory,
@@ -120,12 +121,48 @@ class TransductorCreateSerializer(serializers.ModelSerializer):
             raise ValidationError(f"An exception of type {type(e).__name__} occurred: {e}")
 
 
+class TransductorListSerializer(serializers.ModelSerializer):
+    status = serializers.CharField(source="current_status")
+    located = serializers.SerializerMethodField()
+    model = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Transductor
+        fields = [
+            "id",
+            "model",
+            "ip_address",
+            "port",
+            "status",
+            "located",
+            "is_generator",
+        ]
+
+    def get_located(self, instance):
+        return f"{instance.located.parent.acronym} - {instance.located.name} ({instance.located.acronym})"
+
+    def get_model(self, instance):
+        return f"{instance.model.manufacturer} {instance.model.name}"
+
+
+class TransductorStatusSerializer(serializers.ModelSerializer):
+    status = serializers.CharField(source="get_status_display")
+
+    class Meta:
+        model = StatusHistory
+        fields = [
+            "id",
+            "status",
+            "start_time",
+            "notes",
+        ]
+
+
 class TransductorDetailSerializer(serializers.ModelSerializer):
     model = serializers.CharField(source="model.name")
-    located = serializers.SerializerMethodField()
-    status = serializers.SerializerMethodField()
-    uptime = serializers.DecimalField(max_digits=10, decimal_places=2)
-    # organization = serializers.CharField(source="located.parent.name")
+    current_status = TransductorStatusSerializer()
+    located = EntityListSerializer()
+    geo_location = BasicGeographicLocationSerializer()
 
     class Meta:
         model = Transductor
@@ -135,24 +172,22 @@ class TransductorDetailSerializer(serializers.ModelSerializer):
             "serial_number",
             "ip_address",
             "port",
-            # "organization",
+            "uptime",
+            "is_generator",
             "located",
+            "geo_location",
+            "current_status",
             "installation_date",
             "firmware_version",
-            "status",
-            "uptime",
             "description",
         ]
 
-    def get_status(self, instance):
-        return instance.current_status.get_status_display()
-
-    def get_located(self, instance):
-        return f"{instance.located.acronym} {instance.located.name}"
+    def get_current_status(self, instance):
+        return instance.current_status.status
 
 
 class TransductorStatusDetailSerializer(serializers.ModelSerializer):
-    status = serializers.SerializerMethodField()
+    status = serializers.CharField(source="get_status_display")
     transductor = serializers.SerializerMethodField()
     model = serializers.SerializerMethodField()
 
@@ -165,30 +200,12 @@ class TransductorStatusDetailSerializer(serializers.ModelSerializer):
             "status",
             "start_time",
             "end_time",
-            # "duration",
+            "duration",
             "notes",
         ]
 
     def get_transductor(self, instance):
         return instance.transductor.ip_address
 
-    def get_status(self, instance):
-        return instance.get_status_display()
-
     def get_model(self, instance):
         return f"{instance.transductor.model.manufacturer} {instance.transductor.model.name}"
-
-
-class TransductorStatusSerializer(serializers.ModelSerializer):
-    status = serializers.ChoiceField(choices=Status.choices, write_only=True, required=True)
-    notes = serializers.CharField(required=False)
-
-    class Meta:
-        model = StatusHistory
-        fields = [
-            "id",
-            "transductor",
-            "start_time",
-            "status",
-            "notes",
-        ]
