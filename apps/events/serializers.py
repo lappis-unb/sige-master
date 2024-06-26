@@ -65,11 +65,11 @@ class EventSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "trigger",
-            "transductor",
             "name",
-            "field_name",
             "severity",
             "category",
+            "transductor",
+            "field_name",
             "lower_threshold",
             "upper_threshold",
             "created_at",
