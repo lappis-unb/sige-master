@@ -13,7 +13,6 @@ logger = logging.getLogger("apps.measurements.serializers.query_params")
 class BaseQuerySerializer(serializers.Serializer):
     start_date = serializers.DateTimeField(**field_params("date"))
     end_date = serializers.DateTimeField(**field_params("date"))
-    period = serializers.CharField(**field_params("period"))
     fields = serializers.CharField(**field_params("fields"))
 
     class Meta:
@@ -26,34 +25,25 @@ class BaseQuerySerializer(serializers.Serializer):
             if field not in self.Meta.required_parameters:
                 self.fields[field].required = False
 
-    def validate_period(self, value):
-        try:
-            value = pd.to_timedelta(value)
-        except ValueError as e:
-            raise serializers.ValidationError(f"Invalid period format. {e}")
-        return value
-
     def validate_fields(self, value: str):
         fields = value.split(",")
         invalid_fields = set(fields) - set(self.Meta.model_allowed_fields)
 
         if invalid_fields:
             raise serializers.ValidationError(
-                f"Cannot resolve fields: {', '.join(invalid_fields)}, "
-                f"Choices are: {', '.join(self.Meta.model_allowed_fields)}."
+                {
+                    "fields": f"Invalid fields: {', '.join(invalid_fields)}. "
+                    f"Choices are: {', '.join(self.Meta.model_allowed_fields)}."
+                }
             )
         return fields
 
     def validate(self, attrs):
         start_date = attrs.get("start_date")
         end_date = attrs.get("end_date", timezone.now())
-        period = attrs.get("period")
 
         if start_date and start_date > end_date:
-            raise serializers.ValidationError("Start date must be earlier than end date.")
-
-        if period and start_date:
-            raise serializers.ValidationError("You can't use 'start_date' and 'period' parameters together.")
+            raise serializers.ValidationError({"start_date": "Start must be before end date (current time if unset)."})
 
         return attrs
 
@@ -123,15 +113,17 @@ class CumulativeGraphQuerySerializer(CumulativeMeasurementQuerySerializer):
         try:
             time_delta = pd.to_timedelta(value)
         except ValueError:
-            raise serializers.ValidationError("Invalid frequency format. Use ISO 8601 duration format.")
+            raise serializers.ValidationError({"freq": "Invalid frequency format. Use ISO 8601 duration format."})
 
         if time_delta.total_seconds() < 900:
-            raise serializers.ValidationError("Invalid frequency. Use a minimum of 15 minutes.")
+            raise serializers.ValidationError({"freq": "Invalid frequency. Use a minimum of 15 minutes."})
         return time_delta
 
     def validate_agg(self, value):
         if value not in ["sum", "mean", "max", "min"]:
-            raise serializers.ValidationError("Invalid aggregation function. Use 'sum', 'mean', 'max' or 'min'.")
+            raise serializers.ValidationError(
+                {"agg": "Invalid aggregation function. Use 'sum', 'mean', 'max' or 'min'."}
+            )
         return value
 
     def validate(self, attrs):
@@ -163,17 +155,10 @@ class UferQuerySerializer(BaseQuerySerializer):
         if not attrs.get("fields"):
             attrs["fields"] = self.Meta.model_allowed_fields
 
-        if attrs.get("start_date") and (attrs.get("end_date") - attrs.get("start_date")).days > 30:
-            raise serializers.ValidationError("The maximum period allowed is 30 days.")
+        if attrs.get("start_date") and (attrs.get("end_date") - attrs.get("start_date")).days > 31:
+            raise serializers.ValidationError("The maximum period allowed is 31 days.")
 
         return attrs
-
-    def validate_period(self, value):
-        value = super().validate_period(value)
-
-        if value > pd.Timedelta("30 days"):
-            raise serializers.ValidationError("The maximum period allowed is 30 days.")
-        return value
 
 
 class ReportQuerySerializer(BaseQuerySerializer):
