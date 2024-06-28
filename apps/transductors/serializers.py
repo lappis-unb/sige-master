@@ -8,7 +8,7 @@ from rest_framework.serializers import ValidationError
 from apps.locations.models import GeographicLocation
 from apps.locations.serializers import BasicGeographicLocationSerializer
 from apps.memory_maps.models import MemoryMap
-from apps.organizations.serializers import EntityListSerializer
+from apps.organizations.serializers import EntityDetailSerializer
 from apps.transductors.models import (
     Status,
     StatusHistory,
@@ -161,7 +161,7 @@ class TransductorStatusSerializer(serializers.ModelSerializer):
 class TransductorDetailSerializer(serializers.ModelSerializer):
     model = serializers.CharField(source="model.name")
     current_status = TransductorStatusSerializer()
-    located = EntityListSerializer()
+    located = EntityDetailSerializer()
     geo_location = BasicGeographicLocationSerializer()
 
     class Meta:
