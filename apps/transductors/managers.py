@@ -4,24 +4,18 @@ from django.db import models
 from django.db.models import Count, Q
 from django.utils import timezone
 
-from apps.organizations.models import Entity
-
 
 class TransductorQuerySet(models.QuerySet):
     def entity(self, *args, **kwargs):
-        entity_id = kwargs.get("id", None)
+        root_entity = kwargs.get("entity", None)
         include_descendants = kwargs.get("inc_desc", True)
         max_depth = kwargs.get("depth", None)
 
         if not include_descendants:
-            return self.filter(located_id=entity_id)
+            return self.filter(located_id=root_entity)
 
-        entity = Entity.objects.filter(id=entity_id).first()
-        if not entity:
-            return self.none()
-
-        entities = entity.get_descendants(include_self=True, max_depth=max_depth)
-        return self.filter(located__in=entities)
+        descendant_entities = root_entity.get_descendants(include_self=True, max_depth=max_depth)
+        return self.filter(located__in=descendant_entities)
 
 
 class TransductorsManager(models.Manager):

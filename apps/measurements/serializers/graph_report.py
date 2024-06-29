@@ -41,7 +41,7 @@ class UferSerializer(serializers.Serializer):
 
 
 @extend_schema_serializer(examples=[energy_report_example])
-class ReportSerializer(serializers.Serializer):
+class ReportSummarySerializer(serializers.Serializer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.add_dynamic_fields()
@@ -51,6 +51,35 @@ class ReportSerializer(serializers.Serializer):
         if fields:
             for field in fields:
                 self.fields[field] = serializers.FloatField()
+
+
+@extend_schema_serializer(examples=[energy_report_example])
+class ReportDetailSerializer(serializers.Serializer):
+    transductor = serializers.IntegerField()
+    total_measurements = serializers.IntegerField()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.add_dynamic_fields()
+
+    def add_dynamic_fields(self):
+        fields = self.context.get("fields", [])
+        if fields:
+            for field in fields:
+                self.fields[field] = serializers.FloatField()
+
+    def to_representation(self, instance):
+        transductor = (
+            Transductor.objects.filter(pk=instance["transductor"])
+            .values("located__acronym", "located__name", "ip_address")
+            .first()
+        )
+        rep = {
+            "located": f"{transductor['located__acronym']} - {transductor['located__name']}",
+            "ip_address": transductor["ip_address"],
+        }
+        rep.update(super().to_representation(instance))
+        return rep
 
 
 @extend_schema_serializer(examples=[daily_profile_hourly_example])
