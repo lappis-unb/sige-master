@@ -149,7 +149,7 @@ class UferQuerySerializer(BaseQuerySerializer):
     )
 
     class Meta:
-        required_parameters = ["entity"]
+        required_parameters = ["entity", "start_date", "end_date"]
         model_allowed_fields = ["power_factor_a", "power_factor_b", "power_factor_c"]
 
     def validate(self, attrs):
@@ -167,30 +167,29 @@ class ReportQuerySerializer(BaseQuerySerializer):
     transductor = serializers.IntegerField(min_value=1, **field_params("transductor"))
     entity = serializers.IntegerField(min_value=1, **field_params("entity"))
     inc_desc = serializers.BooleanField(**field_params("inc_desc"))
+    only_day = serializers.BooleanField(required=False, **field_params("only_day"))
     depth = serializers.IntegerField(min_value=0, **field_params("depth"))
+    detail = serializers.BooleanField(**field_params("detail_report"))
 
     class Meta:
-        required_parameters = ["entity"]
+        required_parameters = ["entity", "start_date", "end_date"]
         model_allowed_fields = [
             "active_consumption",
             "active_generated",
             "reactive_inductive",
             "reactive_capacitive",
         ]
+        model_default_fields = [
+            "active_consumption",
+            "active_generated",
+        ]
 
     def validate(self, attrs):
         attrs = super().validate(attrs)
         if not attrs.get("fields"):
-            attrs["fields"] = self.Meta.model_allowed_fields
+            attrs["fields"] = self.Meta.model_default_fields
 
-        if attrs.get("start_date") and (attrs.get("end_date") - attrs.get("start_date")).days > 30:
-            raise serializers.ValidationError("The maximum period allowed is 30 days.")
+        if attrs.get("start_date") and (attrs.get("end_date") - attrs.get("start_date")).days > 31:
+            raise serializers.ValidationError("The maximum period allowed is 31 days.")
 
         return attrs
-
-    def validate_period(self, value):
-        value = super().validate_period(value)
-
-        if value > pd.Timedelta("30 days"):
-            raise serializers.ValidationError("The maximum period allowed is 30 days.")
-        return value
