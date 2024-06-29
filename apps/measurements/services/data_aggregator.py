@@ -36,3 +36,34 @@ class ReportDataAggregator:
             annotations[f"{field}_peak"] = Sum(field, filter=filter_conditions)
             annotations[f"{field}_off_peak"] = Sum(field, filter=~filter_conditions)
         return annotations
+
+
+class UferDataAggregator:
+    def __init__(self) -> None:
+        self.setup()
+
+    def setup(self):
+        self.base_aggregations = {
+            "start_date": Min("collection_date"),
+            "end_date": Max("collection_date"),
+            "total_measurements": Count("id"),
+        }
+
+    def perform_aggregation(self, queryset, fields, threshold):
+        filter_conditions = {field: self.get_filter_condition(field, threshold) for field in fields}
+        annotations = self.prepare_annotations(fields, filter_conditions, self.base_aggregations)
+
+        return queryset.values("transductor").annotate(**annotations)
+
+    def get_filter_condition(self, field, threshold) -> dict:
+        th_decimal = threshold / 100
+        return Q(**{f"{field}__gte": th_decimal}) | Q(**{f"{field}__lte": -th_decimal})
+
+    def prepare_annotations(self, fields, filter_conditions, aggregations):
+        annotations = dict(aggregations)
+
+        for field in fields:
+            field_condition = filter_conditions[field]
+            annotations[f"{field}_len_total"] = Count("id")
+            annotations[f"{field}_len_quality"] = Count(Case(When(field_condition, then=1)))
+        return annotations
