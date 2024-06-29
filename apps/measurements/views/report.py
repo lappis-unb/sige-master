@@ -34,6 +34,7 @@ class ReportViewSet(ListModelMixin, GenericViewSet):
     filterset_class = CumulativeMeasurementFilter
 
     def get_queryset(self, *args, **kwargs):
+        # queryset = super().get_queryset()
         validated_params = getattr(self, "validated_params", None)
         try:
             fields = validated_params.get("fields", [])
@@ -144,59 +145,55 @@ class UferViewSet(ListModelMixin, GenericViewSet):
         self.validated_params = self._validate_params(request, raise_exception=True)
         fields = self.validated_params.get("fields")
         threshold_percent = self.validated_params.get("th_percent")
-        queryset = self.get_queryset()
-        if self.validated_params.get("transductor"):
-            transductors = Transductor.objects.filter(pk=self.validated_params.get("transductor"))
-            measurements_qs = queryset
-        else:
-            transductors = Transductor.objects.entity(
-                id=self.validated_params.get("entity"),
-                inc_desc=self.validated_params.get("inc_desc"),
-                depth=self.validated_params.get("max_depth"),
-            )
-            measurements_qs = queryset.filter(transductor__in=transductors)
 
-        aggregated_qs = self._aggregate_data(measurements_qs, fields, threshold_percent)
-        processed_data = [self.calculate_percent(data, fields) for data in aggregated_qs]
-        serializer = self.get_serializer(data=processed_data, many=True, context={"fields": fields})
-        serializer.is_valid(raise_exception=True)
+        root_entity = self._get_entity()
+        transductors_entity = Transductor.objects.entity(
+            entity=root_entity,
+            inc_desc=self.validated_params.get("inc_desc"),
+            depth=self.validated_params.get("max_depth"),
+        )
 
-        if not serializer.data:
+        queryset = self._get_filtered_queryset(transductors_entity)
+        if not queryset:
             return Response({"detail": "No data found."}, status=status.HTTP_204_NO_CONTENT)
 
-        response_data = self._build_response_data(aggregated_qs, serializer.data, transductors, threshold_percent)
+        response_data = self._aggregate_data(queryset, fields, threshold_percent)
+        serializer = self.get_serializer(data=response_data, many=True, context={"fields": fields})
+        serializer.is_valid(raise_exception=True)
+
+        response_data = self._build_response_data(queryset, serializer.data, root_entity, threshold_percent)
         return Response(response_data, status=status.HTTP_200_OK)
 
+    def _get_entity(self):
+        entity_id = self.validated_params.get("entity")
+        try:
+            return Entity.objects.get(pk=entity_id)
+        except Entity.DoesNotExist:
+            raise ValidationError({"error": f"Entity with id {entity_id} not found"})
+
+    def _get_filtered_queryset(self, transductors):
+        transductor = self.validated_params.get("transductor")
+
+        if transductor is None:
+            return self.get_queryset().filter(transductor__in=transductors)
+        if transductors.filter(pk=transductor).exists():
+            return self.get_queryset().filter(transductor=transductor)
+        else:
+            raise ValidationError({"error": f"Transductor id: {transductor} not found in the Entity or Descendants"})
+
     def _aggregate_data(self, queryset, fields, threshold):
-        filter_conditions = self._get_filter_conditions(fields, threshold)
-        annotations = self._get_annotations(fields, filter_conditions)
-        return queryset.values("transductor").annotate(**annotations).order_by("transductor")
+        aggregator = UferDataAggregator()
+        aggregated_data = aggregator.perform_aggregation(queryset, fields, threshold)
 
-    def _get_filter_conditions(self, fields, threshold):
-        th_decimal = threshold / 100
-        conditions = Q()
-        for field in fields:
-            conditions |= Q(**{f"{field}__gte": th_decimal}) | Q(**{f"{field}__lte": -th_decimal})
-        return conditions
+        return [self.process_data(data, fields) for data in aggregated_data]
 
-    def _get_annotations(self, fields, filter_conditions):
-        annotations = {
-            "start_date": Min("collection_date"),
-            "end_date": Max("collection_date"),
-            "total_measurements": Count("id"),
-        }
-        for field in fields:
-            annotations[f"{field}_len_total"] = Count(field)
-            annotations[f"{field}_len_quality"] = Count(Case(When(filter_conditions, then=1)))
-        return annotations
-
-    def calculate_percent(self, transductor_data, fields):
+    def process_data(self, transductor_data, fields):
         data = transductor_data.copy()
         for field in fields:
             len_total = data[f"{field}_len_total"]
             len_quality = data[f"{field}_len_quality"]
             quality_rate = len_quality / len_total if len_total else 0.0
-            data[f"pf_phase_{field[-1]}"] = round(quality_rate * 100, 2)
+            data[f"pf_phase_{field[-1]}"] = round(quality_rate * 120, 2)
         return data
 
     def _validate_params(self, request, raise_exception=True):
@@ -204,17 +201,10 @@ class UferViewSet(ListModelMixin, GenericViewSet):
         params_serializer.is_valid(raise_exception=raise_exception)
         return params_serializer.validated_data
 
-    def _build_response_data(self, aggregated_qs, data, transductors, threshold):
-        entity = Entity.objects.filter(pk=self.validated_params.get("entity")).values("acronym", "name").first()
-        total_measurements = sum(data["total_measurements"] for data in aggregated_qs)
-
+    def _build_response_data(self, queryset, data, entity, threshold):
         return {
-            "Organization": f"{entity['acronym']} - {entity['name']}",
-            "period": {
-                "start_date": aggregated_qs[0].get("start_date"),
-                "end_date": aggregated_qs[0].get("end_date"),
-            },
-            "total_measurements": total_measurements,
+            "Entity": f"{entity.acronym} - {entity.name}",
+            "total_measurements": queryset.count(),
             "info": f"Results in (%) above the threshold {threshold}%.",
             "results": data,
         }
