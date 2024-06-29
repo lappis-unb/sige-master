@@ -75,6 +75,7 @@ class CumulativeMeasurementQuerySerializer(BaseQuerySerializer):
 class InstantGraphQuerySerializer(InstantMeasurementQuerySerializer):
     lttb = serializers.BooleanField(required=False, **field_params("lttb"))
     threshold = serializers.IntegerField(min_value=2, required=False, **field_params("threshold"))
+    only_day = serializers.BooleanField(required=False, **field_params("only_day"))
 
     class Meta:
         required_parameters = ["transductor", "fields"]
@@ -104,6 +105,7 @@ class DailyProfileQuerySerializer(CumulativeMeasurementQuerySerializer):
 class CumulativeGraphQuerySerializer(CumulativeMeasurementQuerySerializer):
     freq = serializers.CharField(required=False, **field_params("freq"))
     agg = serializers.CharField(required=False, **field_params("agg"))
+    only_day = serializers.BooleanField(required=False, **field_params("only_day"))
 
     class Meta:
         required_parameters = ["transductor", "fields"]
