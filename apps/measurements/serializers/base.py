@@ -107,6 +107,7 @@ class CumulativeMeasurementSerializer(serializers.ModelSerializer):
             "active_generated",
             "reactive_inductive",
             "reactive_capacitive",
+            "is_calculated",
             "collection_date",
         ]
 

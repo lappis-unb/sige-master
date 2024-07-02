@@ -1,4 +1,4 @@
-FROM python:3.11.2-slim-bullseye
+FROM python:3.11.9-slim-bookworm
 
 # Prevents Python from writing pyc files to disc
 ENV PYTHONDONTWRITEBYTECODE 1  
@@ -8,7 +8,7 @@ ENV PYTHONUNBUFFERED 1
 RUN apt-get update && apt-get install -y --no-install-recommends \
     cron \
     tzdata \
-    postgresql-client \
+    postgresql-client-15 \
     gettext \
     iputils-ping \
     net-tools \

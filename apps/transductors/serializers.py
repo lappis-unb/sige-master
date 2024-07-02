@@ -60,7 +60,7 @@ class TransductorModelSerializer(serializers.ModelSerializer):
                 MemoryMap.create_from_csv(
                     transductor_model,
                     csv_data,
-                    validated_data["max_length"],
+                    validated_data["max_block_size"],
                 )
                 return transductor_model
         except (IntegrityError, ValidationError) as e:
@@ -102,7 +102,7 @@ class TransductorCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         initial_status = validated_data.pop("status")
-        notes = f"Status set to {initial_status.get_status_display()} upon creation."
+        notes = f"Transductor created with status: {Status(initial_status).label}"
         geo_location_data = validated_data.pop("geo_location")
 
         try:
@@ -125,7 +125,6 @@ class TransductorDetailSerializer(serializers.ModelSerializer):
     located = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
     uptime = serializers.DecimalField(max_digits=10, decimal_places=2)
-    # organization = serializers.CharField(source="located.parent.name")
 
     class Meta:
         model = Transductor
@@ -135,7 +134,6 @@ class TransductorDetailSerializer(serializers.ModelSerializer):
             "serial_number",
             "ip_address",
             "port",
-            # "organization",
             "located",
             "installation_date",
             "firmware_version",

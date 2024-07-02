@@ -28,8 +28,13 @@ __pycache__/
 
 # Database and backup files
 *.sqlite3
+*.sql
+*.db
+*.sql
+*.gz
 .dump-db.json
 postgres-data/
+backups/
 
 # Distribution / Packaging
 *.egg-info/
