@@ -7,7 +7,8 @@ from .base import (
 from .graph_report import (
     DailyProfileSerializer,
     GraphDataSerializer,
-    ReportSerializer,
+    ReportDetailSerializer,
+    ReportSummarySerializer,
     UferSerializer,
 )
 from .query_params import (

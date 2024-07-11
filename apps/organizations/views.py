@@ -1,30 +1,37 @@
 from rest_framework import viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 from apps.organizations.models import Entity, Organization
 from apps.organizations.serializers import (
     EntityCreateSerializer,
     EntityDetailSerializer,
-    EntityListSerializer,
+    EntityTreeListSerializer,
     OrganizationCreateSerializer,
 )
 
 
 class EntityViewSet(viewsets.ModelViewSet):
     queryset = Entity.objects.all()
-    serializer_class = EntityListSerializer
 
     def get_queryset(self):
-        return Entity.objects.filter(parent=None)
+        if self.action == "list":
+            return self.queryset.filter(parent__isnull=True)
+        return self.queryset
 
     def get_serializer_class(self, *args, **kwargs):
-        if self.action == "create":
+        if self.action in ["create", "update", "partial_update"]:
             return EntityCreateSerializer
         if self.action == "list":
-            return EntityListSerializer
-        elif self.action in ["retrieve", "update", "partial_update"]:
-            return EntityDetailSerializer
+            return EntityTreeListSerializer
         else:
-            return EntityListSerializer
+            return EntityDetailSerializer
+
+    @action(detail=True, methods=["get"])
+    def descendants(self, request, pk=None):
+        root_entity = self.get_object()
+        serializer = EntityTreeListSerializer(root_entity)
+        return Response(serializer.data)
 
 
 class OrganizationViewSet(viewsets.ModelViewSet):

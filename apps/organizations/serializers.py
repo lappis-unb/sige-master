@@ -2,6 +2,10 @@ import logging
 
 from rest_framework import serializers
 
+from apps.locations.serializers import (
+    AddressDetailSerializer,
+    BasicGeographicLocationSerializer,
+)
 from apps.organizations.models import Entity, Organization
 
 logger = logging.getLogger("apps")
@@ -53,42 +57,30 @@ class OrganizationCreateSerializer(serializers.ModelSerializer):
         return organization
 
 
-# complete this serializer
-
-
-class EntityListSerializer(serializers.ModelSerializer):
-    # hierarchy = serializers.SerializerMethodField()
+class EntityTreeListSerializer(serializers.ModelSerializer):
     children = serializers.SerializerMethodField()
-    # parent = serializers.SerializerMethodField()
     entity_type = serializers.CharField(source="get_entity_type_display", read_only=True)
 
     class Meta:
         model = Entity
         fields = [
             "id",
-            # "parent",
+            "entity_type",
             "name",
             "acronym",
-            "entity_type",
-            # "hierarchy",
+            "parent",
             "children",
         ]
 
-    # def get_hierarchy(self, obj):
-    #     return obj.get_hierarchy()
-
-    # def get_parent(self, obj):
-    #     return obj.parent.name if obj.parent else ""
-
     def get_children(self, obj):
-        return EntityListSerializer(obj.children.all(), many=True).data
+        return EntityTreeListSerializer(obj.children.all(), many=True).data
 
 
 class EntityDetailSerializer(serializers.ModelSerializer):
-    # address = AddressSerializer(allow_null=True, required=False)
-    # geo_location = GeographicLocationSerializer(allow_null=True, required=False)
-    # entity_type = serializers.SerializerMethodField()
-    # parent = serializers.PrimaryKeyRelatedField(queryset=Entity.objects.all(), required=False)
+    address = AddressDetailSerializer()
+    geo_location = BasicGeographicLocationSerializer()
+    entity_type = serializers.SerializerMethodField()
+    parent = serializers.SerializerMethodField()
 
     class Meta:
         model = Entity
@@ -103,24 +95,8 @@ class EntityDetailSerializer(serializers.ModelSerializer):
             "parent",
         ]
 
-    # def get_entity_type(self, obj):
-    #     return obj.get_entity_type_display()
+    def get_parent(self, obj):
+        return f"{obj.parent.acronym} - {obj.parent.name}" if obj.parent else ""
 
-
-class EntityDescendantsSerializer(serializers.ModelSerializer):
-    all_descendants = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Entity
-        fields = [
-            "id",
-            "name",
-            "acronym",
-            "description",
-            "entity_type",
-            "parent",
-            "all_descendants",
-        ]
-
-    def get_all_descendants(self, obj):
-        return EntityListSerializer(obj.get_all_descendants(), many=True).data
+    def get_entity_type(self, obj):
+        return obj.get_entity_type_display()
