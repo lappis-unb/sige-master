@@ -94,7 +94,7 @@ class Transductor(models.Model):
         if self.current_status.status == Status.ACTIVE:
             uptime = timezone.now() - self.current_status.start_time
             return uptime.total_seconds() / 60
-        return None
+        return 0
 
     class Meta:
         ordering = ("model", "ip_address")
@@ -156,7 +156,7 @@ class StatusHistory(models.Model):
     def save(self, *args, **kwargs):
         with transaction.atomic():
             if self.pk:
-                logger.info(f"Closing status {self.transductor}")
+                logger.info(f"Closing status {self.transductor} - {self.get_status_display()}")
             elif self.manage_status_transition():
                 logger.info(f"Creating new status {self.transductor} - {self.get_status_display()}")
             else:
@@ -166,7 +166,7 @@ class StatusHistory(models.Model):
     def manage_status_transition(self):
         current_status = self.get_open_status()
         if current_status and current_status.status == self.status:
-            logger.info(f"{self.transductor} - Status already in {Status(self.status).name}.")
+            logger.warning(f"{self.transductor} - Status already in {Status(self.status).name}. Skipping save!.")
             return False
         if current_status:
             current_status.close_status()

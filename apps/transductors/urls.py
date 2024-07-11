@@ -10,8 +10,8 @@ from apps.transductors.views import (
 app_name = "transductors"
 
 router = DefaultRouter() if settings.DEBUG else SimpleRouter()
-router.register(r'energy-transductors', TransductorViewSet, basename='transductor')
-router.register(r'transductors-model', TransductorModelViewSet, basename="model")
-router.register(r'transductors-status', TransductorStatusViewSet, basename="status")
+router.register(r"transductors", TransductorViewSet, basename="transductor")
+router.register(r"transductor-models", TransductorModelViewSet, basename="model")
+router.register(r"transductor-status", TransductorStatusViewSet, basename="status")
 
 urlpatterns = router.urls

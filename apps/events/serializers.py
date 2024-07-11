@@ -1,56 +1,42 @@
 from rest_framework import serializers
 
 from apps.events.models import (
-    CategoryEvent,
-    CompareOperator,
     CumulativeMeasurementTrigger,
     Event,
-    EventType,
     InstantMeasurementTrigger,
-    SeverityEvent,
     Trigger,
 )
 
 
-class EventTypeSerializer(serializers.ModelSerializer):
-    severity = serializers.ChoiceField(choices=SeverityEvent.choices)
-    category = serializers.ChoiceField(choices=CategoryEvent.choices)
-
-    class Meta:
-        model = EventType
-        fields = (
-            "id",
-            "name",
-            "code",
-            "severity",
-            "category",
-        )
-
-
 class TriggerSerializer(serializers.ModelSerializer):
+    severity = serializers.SerializerMethodField()
+    category = serializers.SerializerMethodField()
+
     class Meta:
         model = Trigger
         fields = (
             "id",
             "name",
-            "event_type",
+            "severity",
+            "category",
             "is_active",
-            "notes",
             "created_at",
-            "updated_at",
         )
+
+    def get_severity(self, obj):
+        return obj.get_severity_display()
+
+    def get_category(self, obj):
+        return obj.get_category_display()
 
 
 class InstantMeasurementTriggerSerializer(TriggerSerializer):
-    operator = serializers.ChoiceField(choices=CompareOperator.choices)
-
     class Meta:
         model = InstantMeasurementTrigger
         fields = TriggerSerializer.Meta.fields + (
             "field_name",
-            "operator",
-            "active_threshold",
-            "deactivate_threshold",
+            "lower_threshold",
+            "upper_threshold",
         )
         read_only_fields = ["id", "created_at", "updated_at"]
 
@@ -61,47 +47,63 @@ class CumulativeMeasurementTriggerSerializer(TriggerSerializer):
         fields = TriggerSerializer.Meta.fields + (
             "field_name",
             "dynamic_metric",
-            "adjustment_factor",
+            "lower_threshold_percent",
+            "upper_threshold_percent",
             "period_days",
         )
 
 
 class EventSerializer(serializers.ModelSerializer):
     field_name = serializers.SerializerMethodField()
-    measurement_type = serializers.SerializerMethodField()
-    upper_limit = serializers.SerializerMethodField()
-    lower_limit = serializers.SerializerMethodField()
-    operator = serializers.SerializerMethodField()
+    lower_threshold = serializers.SerializerMethodField()
+    upper_threshold = serializers.SerializerMethodField()
+    category = serializers.SerializerMethodField()
+    severity = serializers.SerializerMethodField()
 
     class Meta:
         model = Event
         fields = [
             "id",
-            "is_active",
+            "trigger",
+            "name",
+            "severity",
+            "category",
+            "transductor",
+            "field_name",
+            "lower_threshold",
+            "upper_threshold",
             "created_at",
             "ended_at",
-            "transductor",
-            "event_type",
-            "measurement_trigger",
-            "field_name",
-            "measurement_type",
-            "upper_limit",
-            "lower_limit",
-            "operator",
+            "is_active",
         ]
         read_only_fields = ["id", "created_at", "ended_at"]
 
     def get_field_name(self, obj):
-        return obj.measurement_trigger.field_name
+        if hasattr(obj.trigger, "instantmeasurementtrigger"):
+            return obj.trigger.instantmeasurementtrigger.field_name
+        elif hasattr(obj.trigger, "cumulativemeasurementtrigger"):
+            return obj.trigger.cumulativemeasurementtrigger.field_name
+        else:
+            return None
 
-    def get_measurement_type(self, obj):
-        return obj.measurement_trigger.get_measurement_type_display()
+    def get_lower_threshold(self, obj):
+        if hasattr(obj.trigger, "instantmeasurementtrigger"):
+            return obj.trigger.instantmeasurementtrigger.lower_threshold
+        elif hasattr(obj.trigger, "cumulativemeasurementtrigger"):
+            return obj.trigger.cumulativemeasurementtrigger.lower_threshold_percent
+        else:
+            return None
 
-    def get_upper_limit(self, obj):
-        return obj.measurement_trigger.upper_limit
+    def get_upper_threshold(self, obj):
+        if hasattr(obj.trigger, "instantmeasurementtrigger"):
+            return obj.trigger.instantmeasurementtrigger.upper_threshold
+        elif hasattr(obj.trigger, "cumulativemeasurementtrigger"):
+            return obj.trigger.cumulativemeasurementtrigger.upper_threshold_percent
+        else:
+            return None
 
-    def get_lower_limit(self, obj):
-        return obj.measurement_trigger.lower_limit
+    def get_severity(self, obj):
+        return obj.trigger.get_severity_display()
 
-    def get_operator(self, obj):
-        return obj.measurement_trigger.get_operator_display()
+    def get_category(self, obj):
+        return obj.trigger.get_category_display()

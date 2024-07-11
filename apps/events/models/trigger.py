@@ -1,24 +1,41 @@
 import logging
 from datetime import timedelta
 
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Avg, Max, Min
 from django.utils import timezone
-from django.utils.functional import lazy
 from django.utils.translation import gettext_lazy as _
 
-from apps.events.models import EventType
 from apps.measurements.models import CumulativeMeasurement
+from apps.transductors.models import Status, Transductor
 from apps.utils.helpers import get_dynamic_fields
 
 logger = logging.getLogger("apps")
 
 
+class CategoryTrigger(models.IntegerChoices):
+    VOLTAGE = 1, _("Voltage")
+    CONNECTION = 2, _("Connection")
+    CONSUMPTION = 3, _("Consumption")
+    GENERATION = 4, _("Generation")
+    MEASUREMENT = 5, _("Measurement")
+    OTHER = 6, _("Other")
+
+
+class SeverityTrigger(models.IntegerChoices):
+    LOW = 1, _("Low")
+    MEDIUM = 2, _("Medium")
+    HIGH = 3, _("High")
+    CRITICAL = 4, _("Critical")
+
+
 class Trigger(models.Model):
     name = models.CharField(max_length=255)
     is_active = models.BooleanField(default=True)
-    event_type = models.ForeignKey(EventType, on_delete=models.CASCADE)
-    notes = models.TextField(blank=True)
+    severity = models.IntegerField(choices=SeverityTrigger.choices)
+    category = models.IntegerField(choices=CategoryTrigger.choices)
+    notification_message = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -26,32 +43,58 @@ class Trigger(models.Model):
         return f"{self.name}"
 
 
-class CompareOperator(models.TextChoices):
-    GT = "gt", _("> (Greater Than)")
-    GTE = "gte", _(">= (Greater Than or Equal)")
-    LT = "lt", _("< (Less Than)")
-    LTE = "lte", _("<= (Less Than or Equal)")
-    EXACT = "exact", _("== (Equal)")
-    NE = "ne", _("!= (Not Equal)")
+class TransductorStatusTrigger(Trigger):
+    transductors = models.ManyToManyField(Transductor, related_name="status_triggers")
+    target_status = models.IntegerField(choices=Status.choices)
+    threshold_time = models.DurationField(default=timedelta(hours=1))
+
+    class Meta:
+        verbose_name = _("Transductor Status Trigger")
+        verbose_name_plural = _("Transductor Status Triggers")
+
+    def __str__(self):
+        return f"{self.name} - {self.target_status}"
 
 
 class InstantMeasurementTrigger(Trigger):
-    operator = models.CharField(max_length=5, choices=CompareOperator.choices)
-    active_threshold = models.FloatField(blank=True, null=True)
-    deactivate_threshold = models.FloatField(blank=True, null=True)
-    field_name = models.CharField(
-        max_length=64,
-        blank=False,
-        null=False,
-        choices=lazy(get_dynamic_fields, list)("measurements", "InstantMeasurement"),
-    )
+    lower_threshold = models.FloatField(blank=True, null=True)
+    upper_threshold = models.FloatField(blank=True, null=True)
+    field_name = models.CharField(max_length=64, blank=False, null=False)
+
+    @classmethod
+    def init_choices(cls):
+        cls._meta.get_field("field_name").choices = get_dynamic_fields("measurements", "InstantMeasurement")
 
     class Meta:
         verbose_name = _("Instant Measurement Trigger")
         verbose_name_plural = _("Instant Measurement Triggers")
 
     def __str__(self):
-        return f"{self.name}"
+        return f"{self.name} - {self.field_name}"
+
+    def clean(self) -> None:
+        lower_threshold = self.lower_threshold if self.lower_threshold is not None else float("-inf")
+        upper_threshold = self.upper_threshold if self.upper_threshold is not None else float("inf")
+
+        if lower_threshold >= upper_threshold:
+            logger.error("lower_threshold must be less than upper_threshold")
+            raise ValidationError("lower_threshold must be less than upper_threshold")
+
+        overlapping = InstantMeasurementTrigger.objects.filter(
+            field_name=self.field_name,
+            lower_threshold__lte=self.upper_threshold,
+            upper_threshold__gte=self.lower_threshold,
+        ).exclude(pk=self.pk)
+
+        list_overlapping = overlapping.values_list("lower_threshold", "upper_threshold")
+        dict_overlapping = {f"{lower} <= value < {upper}" for lower, upper in list_overlapping}
+        if overlapping.exists():
+            logger.error(f"Overlapping triggers found: {dict_overlapping}")
+            raise ValidationError(f"Overlapping triggers found: {dict_overlapping}")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
 
 
 class DynamicMetric(models.TextChoices):
@@ -62,33 +105,36 @@ class DynamicMetric(models.TextChoices):
 
 class CumulativeMeasurementTrigger(Trigger):
     dynamic_metric = models.CharField(max_length=32, choices=DynamicMetric.choices)
-    adjustment_factor = models.FloatField(default=0)
+    lower_threshold_percent = models.FloatField(default=0)
+    upper_threshold_percent = models.FloatField(default=0)
     period_days = models.PositiveIntegerField(default=7)
-    field_name = models.CharField(
-        max_length=64,
-        blank=False,
-        null=False,
-        choices=lazy(get_dynamic_fields, list)("measurements", "CumulativeMeasurement"),
-    )
+    field_name = models.CharField(max_length=64, blank=False, null=False)
+
+    @classmethod
+    def init_choices(cls):
+        cls._meta.get_field("field_name").choices = get_dynamic_fields("measurements", "CumulativeMeasurement")
 
     class Meta:
         verbose_name = _("Cumulative Measurement Trigger")
         verbose_name_plural = _("Cumulative Measurement Triggers")
 
     def __str__(self):
-        return f"{self.name}"
+        return f"{self.name} - {self.field_name}"
 
-    @property
-    def active_threshold(self, transductor, target_hour):
-        base_threshold = self.get_threshold(transductor, target_hour)
-        return base_threshold * (1 + self.adjustment_factor)
+    def calculate_threshold(self, base_value, threshold_percent):
+        return float(base_value) * threshold_percent
 
-    @property
-    def deactivate_threshold(self, transductor, target_hour):
-        base_threshold = self.get_threshold(transductor, target_hour)
-        return base_threshold * (1 - self.adjustment_factor)
+    def get_upper_threshold(self, transductor, collection_date):
+        base_value = self.calculate_metric(transductor, collection_date)
+        return self.calculate_threshold(base_value, self.upper_threshold_percent)
 
-    def get_threshold(self, transductor, target_hour):
+    def get_lower_threshold(self, transductor, collection_date):
+        base_value = self.calculate_metric(transductor, collection_date)
+        return self.calculate_threshold(base_value, self.lower_threshold_percent)
+
+    def calculate_metric(self, transductor, collection_date):
+        local_collection_date = collection_date.astimezone(timezone.get_current_timezone())
+        target_hour = local_collection_date.hour
         measurement_queryset = self.fetch_measurement_data(transductor, target_hour)
 
         if not measurement_queryset.exists():
@@ -96,28 +142,37 @@ class CumulativeMeasurementTrigger(Trigger):
             return None
 
         if self.dynamic_metric == DynamicMetric.HOURLY_AVG:
-            return measurement_queryset.aggregate(Avg("value"))["value__avg"]
+            return measurement_queryset.aggregate(Avg(self.field_name))[f"{self.field_name}__avg"]
         elif self.dynamic_metric == DynamicMetric.HOURLY_MAX:
-            return measurement_queryset.aggregate(Max("value"))["value__max"]
+            return measurement_queryset.aggregate(Max(self.field_name))[f"{self.field_name}__max"]
         elif self.dynamic_metric == DynamicMetric.HOURLY_MIN:
-            return measurement_queryset.aggregate(Min("value"))["value__min"]
+            return measurement_queryset.aggregate(Min(self.field_name))[f"{self.field_name}_min"]
         elif self.dynamic_metric is None:
             return measurement_queryset.last()
 
     def fetch_measurement_data(self, transductor, target_hour):
         return CumulativeMeasurement.objects.filter(
             transductor=transductor,
-            collection_time__gte=timezone.now() - timedelta(days=self.period_days),
-            collection_time__hour=target_hour,
+            collection_date__gte=timezone.now() - timedelta(days=self.period_days),
+            collection_date__hour=target_hour,
         ).only(self.field_name)
 
-    def clean(self) -> None:
-        if self.adjustment_factor < 0 or self.adjustment_factor > 1:
-            logger.warning("Adjustment factor must be between 0 and 1")
-            raise ValueError("Adjustment factor must be between 0 and 1")
+    def clean(self):
+        if not (0 <= self.lower_threshold_percent <= 1):
+            logger.error("lower_threshold_percent must be between 0 and 1")
+            raise ValidationError("lower_threshold_percent must be between 0 and 1")
+
+        if not (0 <= self.upper_threshold_percent <= 1):
+            logger.error("upper_threshold_percent must be between 0 and 1")
+            raise ValidationError("upper_threshold_percent must be between 0 and 1")
 
         if self.period_days < 1:
-            raise ValueError("Period days must be at least 1")
+            logger.error("Period days must be at least 1")
+            raise ValidationError("Period days must be at least 1")
+
+        if self.lower_threshold_percent >= self.upper_threshold_percent:
+            logger.error("lower_threshold_percent must be less than upper_threshold_percent")
+            raise ValidationError("lower_threshold_percent must be less than upper_threshold_percent")
 
     def save(self, *args, **kwargs):
         self.full_clean()

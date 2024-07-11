@@ -1,4 +1,5 @@
-* * * * * export $(cat /root/env | xargs) && python /sige-master/manage.py check_trans            >> /sige-master/logs/cron_output.log 2>&1
+* * * * * export $(cat /root/env | xargs) && python /sige-master/manage.py check_trans >> /sige-master/logs/cron_output.log 2>&1
 * * * * * sleep 15 && export $(cat /root/env | xargs) && python /sige-master/manage.py collect_data minutely  >> /sige-master/logs/cron_output.log 2>&1
 0,15,30,45 * * * * sleep 30 && export $(cat /root/env | xargs) && python /sige-master/manage.py collect_data quarterly >> /sige-master/logs/cron_output.log 2>&1
+*/5 * * * * export $(cat /root/env | xargs) && python /sige-master/manage.py check_triggers >> /sige-master/logs/cron_output.log 2>&1
 0 0 * * * export $(cat /root/env | xargs) && python /sige-master/manage.py backup_db >> /sige-master/logs/cron_output.log 2>&1
