@@ -25,6 +25,10 @@ LICENSE"
 *.pyo
 *.pyd
 *.sqlite3
+*.db
+*.sql
+*.dump
+*.gz
 
 # Diretórios a serem ignorados
 **/__pycache__
@@ -34,6 +38,7 @@ LICENSE"
 **.egg-info/
 **.egg
 archive/
+backups/
 draft/
 docs/
 drawio/

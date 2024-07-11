@@ -125,7 +125,6 @@ class TransductorViewSet(viewsets.ModelViewSet):
         response_data = calculate_aggregation_events(queryset, transductor)
         return Response(response_data, status=status.HTTP_200_OK)
 
-
 class TransductorStatusViewSet(viewsets.ModelViewSet):
     queryset = StatusHistory.objects.all()
     # permission_classes = [CurrentADMINUserOnly]
