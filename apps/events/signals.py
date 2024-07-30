@@ -71,10 +71,6 @@ def handle_status_history(sender, instance, created, **kwargs):
         return
 
     logger.debug("Status history created")
-    active_triggers = TransductorStatusTrigger.objects.filter(is_active=True)
-    if not active_triggers.exists():
-        logger.debug("No active triggers found for Status history")
-        return
 
     previous_instance = (
         StatusHistory.objects.filter(transductor=instance.transductor)  #
@@ -82,6 +78,15 @@ def handle_status_history(sender, instance, created, **kwargs):
         .order_by("-id")
         .first()
     )
+
+    if previous_instance is None:
+        logger.debug("First status history for transductor, skipping triggers")
+        return
+
+    active_triggers = TransductorStatusTrigger.objects.filter(is_active=True)
+    if not active_triggers.exists():
+        logger.debug("No active triggers found for Status history")
+        return
 
     for trigger in active_triggers:
         logger.debug(f"Trigger target status: {trigger.get_target_status_display()}")
