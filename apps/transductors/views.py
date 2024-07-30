@@ -59,6 +59,7 @@ class TransductorViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @action(methods=["get"], detail=True, url_path="status-history")
     def status_history(self, request, pk=None):
@@ -124,7 +125,7 @@ class TransductorViewSet(viewsets.ModelViewSet):
 
         response_data = calculate_aggregation_events(queryset, transductor)
         return Response(response_data, status=status.HTTP_200_OK)
-    
+
 
 class TransductorStatusViewSet(viewsets.ModelViewSet):
     queryset = StatusHistory.objects.all()
