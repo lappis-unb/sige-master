@@ -1,0 +1,62 @@
+
+services:
+    sige-db:
+        container_name: sige-db
+        restart: unless-stopped
+        image: postgres:15.2-bullseye
+        env_file:
+            - ./.envs/.env.prod
+        expose:
+            - "5432"
+        environment:
+            - TZ=America/Sao_Paulo
+        volumes:
+            - sige-prod-pgdata:/var/lib/postgresql/data
+        healthcheck:
+            test: ['CMD-SHELL', 'pg_isready -U postgres']
+            interval: 5m
+            timeout: 30s
+            retries: 3
+            start_period: 1m
+        networks:
+            - api-network
+
+    sige-api:
+        container_name: sige-api
+        restart: unless-stopped
+        image: ${BI_PATH:-sige-api:latest}
+        env_file:
+            - ./.envs/.env.prod
+        build:
+            context: .
+            dockerfile: Dockerfile
+            args:
+                - DJANGO_ENV=production
+        command: ['sh', 'scripts/start-prod.sh']
+        expose:
+            - "8001"
+        ports:
+            - 8001:8001
+        networks:
+            - api-network
+            - proxy-network
+        volumes:
+          - static_volume:/sige-master/staticfiles
+          - media_volume:/sige-master/mediafiles
+        depends_on:
+            - sige-db
+
+volumes:
+    static_volume: {}
+    media_volume: {}
+    sige-prod-pgdata:
+        name: sige-prod-pgdata
+
+networks:
+    api-network:
+        name: api-network
+        driver: bridge
+    proxy-network:
+        name: proxy-network
+        driver: bridge
+        # external: true

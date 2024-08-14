@@ -1,8 +1,6 @@
 FROM python:3.11.9-slim-bookworm
 
-# Prevents Python from writing pyc files to disc
 ENV PYTHONDONTWRITEBYTECODE 1  
-# Prevents Python from buffering stdout and stderr
 ENV PYTHONUNBUFFERED 1
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -20,10 +18,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     apt-get clean -y && \
     rm -rf /var/lib/apt/lists/*
 
-WORKDIR /sige-master
+ARG DJANGO_ENV
+ENV DJANGO_ENV=${DJANGO_ENV}
+RUN echo "Build environment: ${DJANGO_ENV}"
+
 COPY requirements requirements
-RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements/development.txt
-COPY . /sige-master
+RUN pip install --upgrade pip && \
+pip install --no-cache-dir -r requirements/${DJANGO_ENV}.txt
+
+WORKDIR /sige-master
+COPY ./ ./
 
 # ----------------------------< locale and timezone >-------------------------------------
 RUN sed -i 's/# pt_BR.UTF-8 UTF-8/pt_BR.UTF-8 UTF-8/' /etc/locale.gen &&\
@@ -58,5 +62,3 @@ RUN chmod -R 755 /etc/cron.d/sige-cron && \
 
 RUN chmod -R +x /sige-master/scripts
 ENV PATH="/scripts:${PATH}"
-
-CMD ["start-dev.sh"]

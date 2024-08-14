@@ -14,7 +14,6 @@ SITE_NAME = "MEPA - Monitoramento de Energia em Plataforma Aberta"
 ADMIN_URL = env("DJANGO_ADMIN_URL", default="admin/")
 DOMAIN = env("DOMAIN_NAME")
 
-
 DEBUG = env.bool("DJANGO_DEBUG", True)
 SECRET_KEY = env("DJANGO_SECRET", default="django-insecure-#123!@#$%^&*()_+")
 CSRF_TRUSTED_ORIGINS = ["http://localhost:8001"]
@@ -23,7 +22,6 @@ ALLOWED_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0"]
 
 # TARIFF ENERGY SETTINGS (Taxa de energia em R$/kWh)
 # ------------------------------------------------------------------------------------------------
-
 TARIFF_PEAK = env.float("TARIFF_PEAK", default=1.20)
 TARIFF_OFF_PEAK = env.float("TARIFF_PEAK", default=0.70)
 
@@ -44,7 +42,6 @@ DATABASES = {
 
 # SIMPLE JWT SETTINGS
 # ---------------------------------------------------------------------------------------------------------------------
-
 SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ("Bearer",),
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=1),
