@@ -32,6 +32,7 @@ __pycache__/
 *.db
 *.sql
 *.gz
+*.dump
 .dump-db.json
 postgres-data/
 backups/
@@ -44,8 +45,6 @@ backups/
 # **/migrations/*.py
 **/migrations/*.pyc
 **/migrations/*/__pycache__/
-media/
-node_modules/
 archive/
 draft/
 docs/
@@ -66,7 +65,10 @@ var/
 wheels/
 fixtures/
 logs/
+static/
 staticfiles/
+media/
+mediafiles/
 MANIFEST
 
 # Unit test / coverage reports
@@ -87,6 +89,3 @@ cover/
 # PyBuilder
 .pybuilder/
 target/
-
-# Database Dum
-*.json

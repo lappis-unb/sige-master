@@ -126,6 +126,15 @@ APPEND_SLASH = True
 LOGIN_REDIRECT_URL = "/"
 
 
+# STATIC FILES & MEDIA
+# ------------------------------------------------------------------------------------------------
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_ROOT.mkdir(parents=True, exist_ok=True)
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "mediafiles"
+MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
 
 
 # TIME SETTINGS
