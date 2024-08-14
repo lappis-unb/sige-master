@@ -1,14 +1,17 @@
 version: '3.9'
 services:
-    master-db:
-        container_name: master-db
+    sige-db:
+        container_name: sige-db
         restart: unless-stopped
         image: postgres:15.2-bullseye
-        env_file: dev-env
+        env_file:
+            - ./.envs/.env.dev
+        expose:
+            - "5432"
         environment:
             - TZ=America/Sao_Paulo
         volumes:
-            - pg-data:/var/lib/postgresql/data
+            - sige-dev-pgdata:/var/lib/postgresql/data
         healthcheck:
             test: ['CMD-SHELL', 'pg_isready -U postgres']
             interval: 5m
@@ -16,34 +19,39 @@ services:
             retries: 3
             start_period: 1m
         networks:
-            - master-network
+            - api-network
 
-    master-api:
-        container_name: master-api
+    sige-api:
+        container_name: sige-api
         restart: unless-stopped
-        image: ${BI_PATH:-master-api:latest}
+        image: ${BI_PATH:-sige-api:latest}
+        env_file:
+            - ./.envs/.env.dev
         build:
             context: .
             dockerfile: Dockerfile
-        env_file: dev-env
         command: ['sh', 'scripts/start-dev.sh']
+        expose:
+            - "8001"
         ports:
             - 8001:8001
         networks:
-            - sige-network
-            - master-network
+            - api-network
+            - proxy-network
         volumes:
             - .:/sige-master
         depends_on:
-            - master-db
+            - sige-db
 
 volumes:
-    pg-data:
-        name: master-pgdata
+    sige-dev-pgdata:
+        name: sige-dev-pgdata
 
 networks:
-    master-network:
-        name: master-network
-    sige-network:
+    api-network:
+        name: api-network
         driver: bridge
-        name: sige-network
+    proxy-network:
+        name: proxy-network
+        driver: bridge
+        # external: true
